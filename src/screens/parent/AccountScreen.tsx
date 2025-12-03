@@ -210,7 +210,7 @@ const AccountScreen: React.FC = () => {
               icon="💬"
               title="Messages"
               subtitle="Chat with trainers and support"
-              onPress={() => navigation.navigate('Messages')}
+              onPress={() => navigation.navigate('Messages', {})}
             />
           </View>
         </View>

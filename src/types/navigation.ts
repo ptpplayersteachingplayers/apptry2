@@ -25,9 +25,9 @@ export type AuthStackParamList = {
  */
 export type ParentTabParamList = {
   Home: undefined;
-  CampsClinics: { filter?: string };
-  PrivateTraining: { trainerId?: number; market?: string };
-  Schedule: { date?: string };
+  CampsClinics: { filter?: string } | undefined;
+  PrivateTraining: { trainerId?: number; market?: string } | undefined;
+  Schedule: { date?: string } | undefined;
   Account: undefined;
 };
 
@@ -36,9 +36,9 @@ export type ParentTabParamList = {
  */
 export type TrainerTabParamList = {
   TrainerDashboard: undefined;
-  TrainerSchedule: { date?: string };
+  TrainerSchedule: { date?: string } | undefined;
   TrainerStudents: undefined;
-  TrainerMessages: { conversationId?: number };
+  TrainerMessages: { conversationId?: number } | undefined;
   TrainerProfile: undefined;
 };
 

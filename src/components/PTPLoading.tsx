@@ -12,6 +12,7 @@ import {
   Animated,
   Easing,
   ViewStyle,
+  DimensionValue,
 } from 'react-native';
 import { PTPText } from './PTPText';
 import { colors } from '../theme/colors';
@@ -74,7 +75,7 @@ export const PTPLoadingOverlay: React.FC<PTPLoadingProps> = ({ message }) => {
  * PTPSkeleton - Skeleton loader for content placeholders
  */
 interface PTPSkeletonProps {
-  width?: number | string;
+  width?: DimensionValue;
   height?: number;
   borderRadius?: number;
   style?: ViewStyle;

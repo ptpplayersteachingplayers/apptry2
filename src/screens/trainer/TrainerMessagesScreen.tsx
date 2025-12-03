@@ -8,14 +8,17 @@ import React, { useEffect, useState } from 'react';
 import { View, StyleSheet, FlatList, TouchableOpacity, RefreshControl } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
-import { Conversation } from '../../types';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { Conversation, TrainerStackParamList } from '../../types';
 import { getConversations } from '../../api/messages';
 import { PTPText, PTPListSkeleton, NoMessagesEmptyState } from '../../components';
 import { colors } from '../../theme/colors';
 import { spacing, borderRadius, shadows } from '../../theme/spacing';
 
+type TrainerMessagesNavigationProp = NativeStackNavigationProp<TrainerStackParamList>;
+
 const TrainerMessagesScreen: React.FC = () => {
-  const navigation = useNavigation();
+  const navigation = useNavigation<TrainerMessagesNavigationProp>();
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -56,7 +59,7 @@ const TrainerMessagesScreen: React.FC = () => {
     return (
       <TouchableOpacity
         style={styles.conversationCard}
-        onPress={() => navigation.navigate('ConversationDetail' as never, { conversationId: item.id } as never)}
+        onPress={() => navigation.navigate('ConversationDetail', { conversationId: item.id })}
       >
         <View style={styles.avatar}>
           <PTPText color="white" weight="semiBold">{parent.name[0]}</PTPText>

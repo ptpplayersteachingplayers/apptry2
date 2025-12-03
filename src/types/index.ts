@@ -12,4 +12,11 @@ export * from './order';
 export * from './event';
 
 // Navigation types
-export type { RootStackParamList, ParentTabParamList, TrainerTabParamList } from './navigation';
+export type {
+  RootStackParamList,
+  ParentStackParamList,
+  ParentTabParamList,
+  TrainerStackParamList,
+  TrainerTabParamList,
+  AuthStackParamList,
+} from './navigation';

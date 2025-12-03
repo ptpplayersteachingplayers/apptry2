@@ -98,7 +98,7 @@ export const PTPInput: React.FC<PTPInputProps> = ({
       <View style={inputContainerStyle}>
         {leftIcon && <View style={styles.leftIcon}>{leftIcon}</View>}
         <TextInput
-          style={[styles.input, leftIcon && styles.inputWithLeftIcon, style]}
+          style={[styles.input, leftIcon ? styles.inputWithLeftIcon : undefined, style]}
           placeholderTextColor={colors.gray400}
           onFocus={handleFocus}
           onBlur={handleBlur}
