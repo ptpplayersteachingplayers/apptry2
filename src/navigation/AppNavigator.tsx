@@ -1,0 +1,219 @@
+/**
+ * App Navigator
+ *
+ * Root navigator that handles:
+ * - Auth state routing (logged in vs logged out)
+ * - Role-based routing (parent vs trainer)
+ * - Deep linking configuration
+ */
+
+import React from 'react';
+import { NavigationContainer, LinkingOptions } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import * as Linking from 'expo-linking';
+import { RootStackParamList } from '../types/navigation';
+import { colors } from '../theme/colors';
+import { fontFamily } from '../theme/typography';
+import { useAuth } from '../hooks/useAuth';
+import { PTPLoading } from '../components/PTPLoading';
+
+// Navigators
+import AuthNavigator from './AuthNavigator';
+import ParentTabNavigator from './ParentTabNavigator';
+import TrainerTabNavigator from './TrainerTabNavigator';
+
+// Modal/Detail Screens (shared across tabs)
+import ProgramDetailScreen from '../screens/parent/ProgramDetailScreen';
+import TrainerDetailScreen from '../screens/parent/TrainerDetailScreen';
+import CheckoutScreen from '../screens/parent/CheckoutScreen';
+import MessagesScreen from '../screens/parent/MessagesScreen';
+import ConversationDetailScreen from '../screens/parent/ConversationDetailScreen';
+
+const Stack = createNativeStackNavigator();
+
+// Deep linking configuration
+const prefix = Linking.createURL('/');
+
+const linking: LinkingOptions<RootStackParamList> = {
+  prefixes: [prefix, 'ptp://'],
+  config: {
+    screens: {
+      Auth: {
+        screens: {
+          Welcome: 'welcome',
+          Login: 'login',
+          SignUp: 'signup',
+        },
+      },
+      Parent: {
+        screens: {
+          ParentTabs: {
+            screens: {
+              Home: 'home',
+              CampsClinics: 'camps',
+              PrivateTraining: 'training',
+              Schedule: 'schedule',
+              Account: 'account',
+            },
+          },
+          ProgramDetail: 'program/:programId',
+          TrainerDetail: 'trainer/:trainerId',
+          Checkout: 'checkout',
+        },
+      },
+      Trainer: {
+        screens: {
+          TrainerTabs: {
+            screens: {
+              TrainerDashboard: 'dashboard',
+              TrainerSchedule: 'trainer-schedule',
+              TrainerStudents: 'students',
+              TrainerMessages: 'trainer-messages',
+              TrainerProfile: 'profile',
+            },
+          },
+        },
+      },
+    },
+  },
+};
+
+/**
+ * ParentStackNavigator - Stack for parent users with nested tabs
+ */
+const ParentStackNavigator: React.FC = () => {
+  return (
+    <Stack.Navigator
+      screenOptions={{
+        headerShown: false,
+        contentStyle: { backgroundColor: colors.offWhite },
+      }}
+    >
+      <Stack.Screen name="ParentTabs" component={ParentTabNavigator} />
+      <Stack.Screen
+        name="ProgramDetail"
+        component={ProgramDetailScreen}
+        options={{
+          presentation: 'card',
+          headerShown: true,
+          headerTitle: '',
+          headerTransparent: true,
+          headerTintColor: colors.white,
+          headerBackTitle: 'Back',
+        }}
+      />
+      <Stack.Screen
+        name="TrainerDetail"
+        component={TrainerDetailScreen}
+        options={{
+          presentation: 'card',
+          headerShown: true,
+          headerTitle: '',
+          headerTransparent: true,
+          headerTintColor: colors.white,
+          headerBackTitle: 'Back',
+        }}
+      />
+      <Stack.Screen
+        name="Checkout"
+        component={CheckoutScreen}
+        options={{
+          presentation: 'modal',
+          headerShown: true,
+          headerTitle: 'Checkout',
+          headerTintColor: colors.inkBlack,
+          headerStyle: { backgroundColor: colors.offWhite },
+          headerTitleStyle: { fontFamily: fontFamily.semiBold },
+        }}
+      />
+      <Stack.Screen
+        name="Messages"
+        component={MessagesScreen}
+        options={{
+          headerShown: true,
+          headerTitle: 'Messages',
+          headerTintColor: colors.inkBlack,
+          headerStyle: { backgroundColor: colors.offWhite },
+          headerTitleStyle: { fontFamily: fontFamily.semiBold },
+        }}
+      />
+      <Stack.Screen
+        name="ConversationDetail"
+        component={ConversationDetailScreen}
+        options={{
+          headerShown: true,
+          headerTitle: 'Conversation',
+          headerTintColor: colors.inkBlack,
+          headerStyle: { backgroundColor: colors.offWhite },
+          headerTitleStyle: { fontFamily: fontFamily.semiBold },
+          headerBackTitle: 'Back',
+        }}
+      />
+    </Stack.Navigator>
+  );
+};
+
+/**
+ * TrainerStackNavigator - Stack for trainer users with nested tabs
+ */
+const TrainerStackNavigator: React.FC = () => {
+  return (
+    <Stack.Navigator
+      screenOptions={{
+        headerShown: false,
+        contentStyle: { backgroundColor: colors.offWhite },
+      }}
+    >
+      <Stack.Screen name="TrainerTabs" component={TrainerTabNavigator} />
+      <Stack.Screen
+        name="ConversationDetail"
+        component={ConversationDetailScreen}
+        options={{
+          headerShown: true,
+          headerTitle: 'Conversation',
+          headerTintColor: colors.inkBlack,
+          headerStyle: { backgroundColor: colors.offWhite },
+          headerTitleStyle: { fontFamily: fontFamily.semiBold },
+          headerBackTitle: 'Back',
+        }}
+      />
+    </Stack.Navigator>
+  );
+};
+
+/**
+ * AppNavigator - Root navigation component
+ */
+export const AppNavigator: React.FC = () => {
+  const { isLoading, isAuthenticated, isOnboarded, user } = useAuth();
+
+  // Show loading screen while checking auth state
+  if (isLoading) {
+    return <PTPLoading message="Loading..." />;
+  }
+
+  // Determine which navigator to show
+  const isTrainer = user?.role === 'ptp_trainer';
+
+  return (
+    <NavigationContainer linking={linking}>
+      <Stack.Navigator screenOptions={{ headerShown: false }}>
+        {!isAuthenticated ? (
+          // Not logged in - show auth flow
+          <Stack.Screen name="Auth" component={AuthNavigator} />
+        ) : !isOnboarded && !isTrainer ? (
+          // Logged in but not onboarded (parents only) - show onboarding
+          <Stack.Screen name="Auth" component={AuthNavigator} />
+        ) : isTrainer ? (
+          // Logged in as trainer
+          <Stack.Screen name="Trainer" component={TrainerStackNavigator} />
+        ) : (
+          // Logged in as parent
+          <Stack.Screen name="Parent" component={ParentStackNavigator} />
+        )}
+      </Stack.Navigator>
+    </NavigationContainer>
+  );
+};
+
+export default AppNavigator;

@@ -1,0 +1,64 @@
+{
+  "expo": {
+    "name": "PTP Soccer",
+    "slug": "ptp-soccer",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "scheme": "ptp",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#0E0F11"
+    },
+    "assetBundlePatterns": ["**/*"],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.ptpsoccer.app",
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "PTP Soccer uses your location to find camps and clinics near you.",
+        "NSCameraUsageDescription": "PTP Soccer uses your camera to upload photos and videos.",
+        "NSPhotoLibraryUsageDescription": "PTP Soccer accesses your photo library to upload images."
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#0E0F11"
+      },
+      "package": "com.ptpsoccer.app",
+      "permissions": [
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION",
+        "CAMERA",
+        "READ_EXTERNAL_STORAGE"
+      ]
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      "expo-font",
+      "expo-secure-store",
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/notification-icon.png",
+          "color": "#FCB900"
+        }
+      ],
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "PTP Soccer uses your location to find camps and clinics near you."
+        }
+      ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "your-project-id"
+      }
+    }
+  }
+}
