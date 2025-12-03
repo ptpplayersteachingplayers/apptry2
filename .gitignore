@@ -66,3 +66,6 @@ coverage/
 
 # Typescript
 *.tsbuildinfo
+
+# Build artifacts
+*.zip
