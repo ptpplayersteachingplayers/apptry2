@@ -69,3 +69,5 @@ coverage/
 
 # Build artifacts
 *.zip
+# Keep plugin zip for easy download
+!wordpress-plugin/ptp-mobile-api.zip
