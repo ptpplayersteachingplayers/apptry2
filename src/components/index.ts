@@ -19,6 +19,9 @@ export { PTPTag } from './PTPTag';
 // Inputs
 export { PTPInput, PTPPasswordInput, PTPSearchInput } from './PTPInput';
 
+// Search Bar
+export { PTPSearchBar } from './PTPSearchBar';
+
 // Section Headers
 export { PTPSectionHeader } from './PTPSectionHeader';
 
@@ -31,6 +34,18 @@ export {
   PTPListSkeleton,
 } from './PTPLoading';
 
+// Skeleton Loaders
+export {
+  Skeleton,
+  ProgramCardSkeleton,
+  TrainerCardSkeleton,
+  SessionCardSkeleton,
+  MessageItemSkeleton,
+  ListSkeleton,
+  HomeScreenSkeleton,
+  DetailScreenSkeleton,
+} from './PTPSkeleton';
+
 // Empty States
 export {
   PTPEmptyState,
@@ -42,3 +57,22 @@ export {
 
 // Hero Sections
 export { PTPHero, PTPHeroCard, PTPScreenHero } from './PTPHero';
+
+// Images
+export { PTPImage, PTPAvatar, PTPHeroImage, PTPGallery } from './PTPImage';
+
+// Animated Components
+export {
+  AnimatedPressable,
+  FadeInView,
+  StaggeredItem,
+  ShakeView,
+  PulseView,
+  SlideUpView,
+  AnimatedCounter,
+  AnimatedProgress,
+  animations,
+} from './PTPAnimated';
+
+// Error Boundary
+export { PTPErrorBoundary, ErrorFallback } from './PTPErrorBoundary';

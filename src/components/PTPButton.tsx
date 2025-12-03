@@ -2,26 +2,35 @@
  * PTPButton Component
  *
  * Branded button component with multiple variants.
+ * Includes haptic feedback and animated press state.
  * Ensures minimum touch target of 44x44 points.
  */
 
-import React from 'react';
+import React, { useCallback, memo } from 'react';
 import {
-  TouchableOpacity,
-  TouchableOpacityProps,
+  Pressable,
+  PressableProps,
   StyleSheet,
   ActivityIndicator,
   View,
   ViewStyle,
 } from 'react-native';
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withSpring,
+} from 'react-native-reanimated';
+import * as Haptics from 'expo-haptics';
 import { PTPText } from './PTPText';
 import { colors } from '../theme/colors';
 import { spacing, borderRadius } from '../theme/spacing';
 
+const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
+
 type ButtonVariant = 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger';
 type ButtonSize = 'small' | 'medium' | 'large';
 
-interface PTPButtonProps extends Omit<TouchableOpacityProps, 'style'> {
+interface PTPButtonProps extends Omit<PressableProps, 'style'> {
   /**
    * Button text
    */
@@ -55,6 +64,10 @@ interface PTPButtonProps extends Omit<TouchableOpacityProps, 'style'> {
    */
   rightIcon?: React.ReactNode;
   /**
+   * Enable haptic feedback
+   */
+  haptic?: boolean;
+  /**
    * Custom style
    */
   style?: ViewStyle;
@@ -68,7 +81,7 @@ interface PTPButtonProps extends Omit<TouchableOpacityProps, 'style'> {
  * <PTPButton title="Cancel" variant="outline" onPress={handleCancel} />
  * <PTPButton title="Loading..." loading />
  */
-export const PTPButton: React.FC<PTPButtonProps> = ({
+export const PTPButton: React.FC<PTPButtonProps> = memo(({
   title,
   variant = 'primary',
   size = 'medium',
@@ -77,12 +90,33 @@ export const PTPButton: React.FC<PTPButtonProps> = ({
   fullWidth = false,
   leftIcon,
   rightIcon,
+  haptic = true,
   style,
   onPress,
   accessibilityLabel,
   ...props
 }) => {
   const isDisabled = disabled || loading;
+  const scale = useSharedValue(1);
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: scale.value }],
+  }));
+
+  const handlePressIn = useCallback(() => {
+    scale.value = withSpring(0.97, { damping: 15, stiffness: 400 });
+  }, []);
+
+  const handlePressOut = useCallback(() => {
+    scale.value = withSpring(1, { damping: 15, stiffness: 400 });
+  }, []);
+
+  const handlePress = useCallback((event: any) => {
+    if (haptic) {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    }
+    onPress?.(event);
+  }, [haptic, onPress]);
 
   const buttonStyle = [
     styles.base,
@@ -97,11 +131,12 @@ export const PTPButton: React.FC<PTPButtonProps> = ({
   const textVariant = size === 'small' ? 'buttonSmall' : size === 'large' ? 'buttonLarge' : 'buttonMedium';
 
   return (
-    <TouchableOpacity
-      style={buttonStyle}
-      onPress={onPress}
+    <AnimatedPressable
+      style={[buttonStyle, animatedStyle]}
+      onPress={handlePress}
+      onPressIn={handlePressIn}
+      onPressOut={handlePressOut}
       disabled={isDisabled}
-      activeOpacity={0.8}
       accessibilityLabel={accessibilityLabel || title}
       accessibilityRole="button"
       accessibilityState={{ disabled: isDisabled }}
@@ -118,9 +153,11 @@ export const PTPButton: React.FC<PTPButtonProps> = ({
           {rightIcon && <View style={styles.iconRight}>{rightIcon}</View>}
         </View>
       )}
-    </TouchableOpacity>
+    </AnimatedPressable>
   );
-};
+});
+
+PTPButton.displayName = 'PTPButton';
 
 const getTextColor = (variant: ButtonVariant, disabled: boolean): string => {
   if (disabled) return colors.gray400;

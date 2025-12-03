@@ -2,82 +2,95 @@
  * Home Screen (Parent)
  *
  * Main landing screen with hero, featured programs, and quick actions.
+ * Uses React Query for data fetching and caching.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, memo } from 'react';
 import {
   View,
   StyleSheet,
   ScrollView,
   RefreshControl,
-  TouchableOpacity,
-  Image,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { ParentStackParamList } from '../../types/navigation';
-import { Program } from '../../types';
-import { getPrograms, getFeaturedPrograms } from '../../api/programs';
-import { useAuth, useParentUser } from '../../hooks/useAuth';
+import {
+  useFeaturedPrograms,
+  usePrograms,
+  useParentUser,
+  useRefresh,
+  useHaptics,
+  usePrefetchProgram,
+} from '../../hooks';
 import {
   PTPText,
   PTPButton,
   PTPSectionHeader,
   PTPHero,
-  PTPProgramCard,
   PTPHeroCard,
-  PTPListSkeleton,
+  HomeScreenSkeleton,
+  PTPImage,
+  AnimatedPressable,
+  FadeInView,
+  StaggeredItem,
 } from '../../components';
 import { colors } from '../../theme/colors';
 import { spacing, borderRadius } from '../../theme/spacing';
 import { featureImages, cardBackgrounds } from '../../assets/media';
-import { LOGO_URL } from '../../assets/logo';
 
 type HomeScreenNavigationProp = NativeStackNavigationProp<ParentStackParamList>;
 
 /**
  * HomeScreen - Parent home with featured programs
+ * Uses React Query for data fetching with automatic caching and background refresh
  */
-const HomeScreen: React.FC = () => {
+const HomeScreen: React.FC = memo(() => {
   const navigation = useNavigation<HomeScreenNavigationProp>();
   const parentUser = useParentUser();
+  const { selection } = useHaptics();
+  const prefetchProgram = usePrefetchProgram();
 
-  const [featuredPrograms, setFeaturedPrograms] = useState<Program[]>([]);
-  const [winterClinics, setWinterClinics] = useState<Program[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isRefreshing, setIsRefreshing] = useState(false);
+  // React Query hooks for data fetching
+  const {
+    data: featuredPrograms = [],
+    isLoading: featuredLoading,
+    refetch: refetchFeatured,
+  } = useFeaturedPrograms();
+
+  const {
+    data: clinicsData,
+    isLoading: clinicsLoading,
+    refetch: refetchClinics,
+  } = usePrograms({ type: 'clinic' });
+
+  const winterClinics = clinicsData?.programs?.slice(0, 3) || [];
+  const isLoading = featuredLoading || clinicsLoading;
 
   const firstName = parentUser?.firstName || 'there';
 
-  useEffect(() => {
-    loadData();
-  }, []);
+  // Pull-to-refresh with haptic feedback
+  const { refreshing, onRefresh } = useRefresh({
+    onRefresh: async () => {
+      await Promise.all([refetchFeatured(), refetchClinics()]);
+    },
+  });
 
-  const loadData = async () => {
-    try {
-      const [featured, clinics] = await Promise.all([
-        getFeaturedPrograms(),
-        getPrograms({ type: 'clinic' }, 1, 3),
-      ]);
-      setFeaturedPrograms(featured);
-      setWinterClinics(clinics.programs);
-    } catch (error) {
-      console.error('Error loading home data:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleRefresh = async () => {
-    setIsRefreshing(true);
-    await loadData();
-    setIsRefreshing(false);
-  };
-
-  const navigateToProgram = (programId: number) => {
+  // Navigate to program with prefetching
+  const navigateToProgram = useCallback((programId: number) => {
+    selection();
     navigation.navigate('ProgramDetail', { programId });
-  };
+  }, [navigation, selection]);
+
+  // Prefetch program on hover/touch start
+  const handleProgramPressIn = useCallback((programId: number) => {
+    prefetchProgram(programId);
+  }, [prefetchProgram]);
+
+  // Show skeleton while loading
+  if (isLoading) {
+    return <HomeScreenSkeleton />;
+  }
 
   return (
     <View style={styles.container}>
@@ -87,193 +100,205 @@ const HomeScreen: React.FC = () => {
         showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl
-            refreshing={isRefreshing}
-            onRefresh={handleRefresh}
-            tintColor={colors.primary}
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor={colors.primary.DEFAULT}
           />
         }
       >
         {/* Hero Section */}
-        <PTPHero
-          imageUrl={featureImages.homeHero}
-          showLogo
-          height={320}
-        >
-          <PTPText variant="heroTitle" color="white" style={styles.heroTitle}>
-            Hey {firstName}! 👋
-          </PTPText>
-          <PTPText variant="heroSubtitle" color="gray300">
-            Train with NCAA mentors. No lines. All reps.
-          </PTPText>
-        </PTPHero>
+        <FadeInView>
+          <PTPHero
+            imageUrl={featureImages.homeHero}
+            showLogo
+            height={320}
+          >
+            <PTPText variant="heroTitle" color="white" style={styles.heroTitle}>
+              Hey {firstName}!
+            </PTPText>
+            <PTPText variant="heroSubtitle" color="gray300">
+              Train with NCAA mentors. No lines. All reps.
+            </PTPText>
+          </PTPHero>
+        </FadeInView>
 
         {/* Quick Actions */}
-        <View style={styles.section}>
-          <View style={styles.quickActions}>
-            <TouchableOpacity
-              style={styles.quickAction}
-              onPress={() => navigation.navigate('ParentTabs', { screen: 'CampsClinics' })}
-              accessibilityLabel="Find camps and clinics"
-            >
-              <View style={styles.quickActionIcon}>
-                <PTPText style={{ fontSize: 28 }}>⚽</PTPText>
-              </View>
-              <PTPText variant="label">Camps & Clinics</PTPText>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={styles.quickAction}
-              onPress={() => navigation.navigate('ParentTabs', { screen: 'PrivateTraining' })}
-              accessibilityLabel="Find private training"
-            >
-              <View style={styles.quickActionIcon}>
-                <PTPText style={{ fontSize: 28 }}>🎯</PTPText>
-              </View>
-              <PTPText variant="label">Private Training</PTPText>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={styles.quickAction}
-              onPress={() => navigation.navigate('ParentTabs', { screen: 'Schedule' })}
-              accessibilityLabel="View your schedule"
-            >
-              <View style={styles.quickActionIcon}>
-                <PTPText style={{ fontSize: 28 }}>📅</PTPText>
-              </View>
-              <PTPText variant="label">My Schedule</PTPText>
-            </TouchableOpacity>
-          </View>
-        </View>
-
-        {/* Featured Programs */}
-        {isLoading ? (
+        <FadeInView delay={100}>
           <View style={styles.section}>
-            <PTPListSkeleton count={2} />
-          </View>
-        ) : (
-          <>
-            {/* Winter Clinics Section */}
-            <View style={styles.section}>
-              <PTPSectionHeader
-                title="Winter Clinics"
-                subtitle="Beat the off-season"
-                actionText="See All"
-                onAction={() => navigation.navigate('ParentTabs', { screen: 'CampsClinics', params: { filter: 'clinic' } })}
-              />
-              <ScrollView
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                contentContainerStyle={styles.horizontalScroll}
+            <View style={styles.quickActions}>
+              <AnimatedPressable
+                style={styles.quickAction}
+                onPress={() => {
+                  selection();
+                  navigation.navigate('ParentTabs', { screen: 'CampsClinics' });
+                }}
               >
-                {winterClinics.map((program, index) => (
+                <View style={styles.quickActionIcon}>
+                  <PTPText style={{ fontSize: 28 }}>⚽</PTPText>
+                </View>
+                <PTPText variant="label">Camps & Clinics</PTPText>
+              </AnimatedPressable>
+
+              <AnimatedPressable
+                style={styles.quickAction}
+                onPress={() => {
+                  selection();
+                  navigation.navigate('ParentTabs', { screen: 'PrivateTraining' });
+                }}
+              >
+                <View style={styles.quickActionIcon}>
+                  <PTPText style={{ fontSize: 28 }}>🎯</PTPText>
+                </View>
+                <PTPText variant="label">Private Training</PTPText>
+              </AnimatedPressable>
+
+              <AnimatedPressable
+                style={styles.quickAction}
+                onPress={() => {
+                  selection();
+                  navigation.navigate('ParentTabs', { screen: 'Schedule' });
+                }}
+              >
+                <View style={styles.quickActionIcon}>
+                  <PTPText style={{ fontSize: 28 }}>📅</PTPText>
+                </View>
+                <PTPText variant="label">My Schedule</PTPText>
+              </AnimatedPressable>
+            </View>
+          </View>
+        </FadeInView>
+
+        {/* Winter Clinics Section */}
+        <FadeInView delay={200}>
+          <View style={styles.section}>
+            <PTPSectionHeader
+              title="Winter Clinics"
+              subtitle="Beat the off-season"
+              actionText="See All"
+              onAction={() => navigation.navigate('ParentTabs', { screen: 'CampsClinics', params: { filter: 'clinic' } })}
+            />
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.horizontalScroll}
+            >
+              {winterClinics.map((program, index) => (
+                <StaggeredItem key={program.id} index={index}>
                   <PTPHeroCard
-                    key={program.id}
                     imageUrl={program.mainImageUrl || cardBackgrounds.winterClinics[index % 3]}
                     title={program.title}
                     subtitle={`${program.date} • ${program.city}, ${program.state}`}
                     onPress={() => navigateToProgram(program.id)}
                     style={styles.horizontalCard}
                   />
-                ))}
-              </ScrollView>
-            </View>
+                </StaggeredItem>
+              ))}
+            </ScrollView>
+          </View>
+        </FadeInView>
 
-            {/* Summer Camps Promo */}
-            <View style={styles.section}>
-              <PTPSectionHeader
-                title="Summer Camps"
-                subtitle="Registration opens soon!"
-              />
-              <PTPHeroCard
-                imageUrl={featureImages.summerCamp}
-                title="PTP Summer Soccer Camp"
-                subtitle="Full week of training, games, and fun"
-                height={180}
-                onPress={() => navigation.navigate('ParentTabs', { screen: 'CampsClinics', params: { filter: 'camp' } })}
-              />
-            </View>
+        {/* Summer Camps Promo */}
+        <FadeInView delay={300}>
+          <View style={styles.section}>
+            <PTPSectionHeader
+              title="Summer Camps"
+              subtitle="Registration opens soon!"
+            />
+            <PTPHeroCard
+              imageUrl={featureImages.summerCamp}
+              title="PTP Summer Soccer Camp"
+              subtitle="Full week of training, games, and fun"
+              height={180}
+              onPress={() => navigation.navigate('ParentTabs', { screen: 'CampsClinics', params: { filter: 'camp' } })}
+            />
+          </View>
+        </FadeInView>
 
-            {/* Private Training Promo */}
-            <View style={styles.section}>
-              <PTPSectionHeader
-                title="Private Training"
-                subtitle="1-on-1 with NCAA mentors"
-              />
-              <TouchableOpacity
-                style={styles.trainingPromo}
-                onPress={() => navigation.navigate('ParentTabs', { screen: 'PrivateTraining' })}
-                accessibilityLabel="Explore private training"
-              >
-                <View style={styles.trainingPromoContent}>
-                  <PTPText variant="sectionTitle">Personalized Training</PTPText>
-                  <PTPText variant="body" color="gray500" style={styles.trainingPromoText}>
-                    Work 1-on-1 with college athletes who know what it takes to level up.
-                  </PTPText>
-                  <View style={styles.trainingFeatures}>
-                    <View style={styles.trainingFeature}>
-                      <PTPText color="primary">✓</PTPText>
-                      <PTPText variant="bodySmall">Customized drills</PTPText>
-                    </View>
-                    <View style={styles.trainingFeature}>
-                      <PTPText color="primary">✓</PTPText>
-                      <PTPText variant="bodySmall">Flexible scheduling</PTPText>
-                    </View>
-                    <View style={styles.trainingFeature}>
-                      <PTPText color="primary">✓</PTPText>
-                      <PTPText variant="bodySmall">Progress tracking</PTPText>
-                    </View>
+        {/* Private Training Promo */}
+        <FadeInView delay={400}>
+          <View style={styles.section}>
+            <PTPSectionHeader
+              title="Private Training"
+              subtitle="1-on-1 with NCAA mentors"
+            />
+            <AnimatedPressable
+              style={styles.trainingPromo}
+              onPress={() => navigation.navigate('ParentTabs', { screen: 'PrivateTraining' })}
+            >
+              <View style={styles.trainingPromoContent}>
+                <PTPText variant="sectionTitle">Personalized Training</PTPText>
+                <PTPText variant="body" color="gray500" style={styles.trainingPromoText}>
+                  Work 1-on-1 with college athletes who know what it takes to level up.
+                </PTPText>
+                <View style={styles.trainingFeatures}>
+                  <View style={styles.trainingFeature}>
+                    <PTPText color="primary">✓</PTPText>
+                    <PTPText variant="bodySmall">Customized drills</PTPText>
                   </View>
-                  <PTPButton
-                    title="Find a Trainer"
-                    variant="primary"
-                    size="medium"
-                    onPress={() => navigation.navigate('ParentTabs', { screen: 'PrivateTraining' })}
-                    style={styles.trainingButton}
-                  />
+                  <View style={styles.trainingFeature}>
+                    <PTPText color="primary">✓</PTPText>
+                    <PTPText variant="bodySmall">Flexible scheduling</PTPText>
+                  </View>
+                  <View style={styles.trainingFeature}>
+                    <PTPText color="primary">✓</PTPText>
+                    <PTPText variant="bodySmall">Progress tracking</PTPText>
+                  </View>
                 </View>
-                <Image
-                  source={{ uri: featureImages.oneOnOne }}
-                  style={styles.trainingPromoImage}
-                  resizeMode="cover"
+                <PTPButton
+                  title="Find a Trainer"
+                  variant="primary"
+                  size="medium"
+                  onPress={() => navigation.navigate('ParentTabs', { screen: 'PrivateTraining' })}
+                  style={styles.trainingButton}
                 />
-              </TouchableOpacity>
-            </View>
+              </View>
+              <PTPImage
+                source={featureImages.oneOnOne}
+                width={120}
+                height={200}
+                contentFit="cover"
+              />
+            </AnimatedPressable>
+          </View>
+        </FadeInView>
 
-            {/* Trust Section */}
-            <View style={styles.trustSection}>
-              <PTPText variant="sectionTitle" center>
-                Why PTP?
-              </PTPText>
-              <View style={styles.trustBadges}>
-                <View style={styles.trustBadge}>
-                  <PTPText style={styles.trustIcon}>🎓</PTPText>
-                  <PTPText variant="label" center>NCAA Mentors</PTPText>
-                  <PTPText variant="caption" color="gray500" center>
-                    Real role models
-                  </PTPText>
-                </View>
-                <View style={styles.trustBadge}>
-                  <PTPText style={styles.trustIcon}>✓</PTPText>
-                  <PTPText variant="label" center>Background Checked</PTPText>
-                  <PTPText variant="caption" color="gray500" center>
-                    Safety first
-                  </PTPText>
-                </View>
-                <View style={styles.trustBadge}>
-                  <PTPText style={styles.trustIcon}>🛡️</PTPText>
-                  <PTPText variant="label" center>Fully Insured</PTPText>
-                  <PTPText variant="caption" color="gray500" center>
-                    Peace of mind
-                  </PTPText>
-                </View>
+        {/* Trust Section */}
+        <FadeInView delay={500}>
+          <View style={styles.trustSection}>
+            <PTPText variant="sectionTitle" center>
+              Why PTP?
+            </PTPText>
+            <View style={styles.trustBadges}>
+              <View style={styles.trustBadge}>
+                <PTPText style={styles.trustIcon}>🎓</PTPText>
+                <PTPText variant="label" center>NCAA Mentors</PTPText>
+                <PTPText variant="caption" color="gray500" center>
+                  Real role models
+                </PTPText>
+              </View>
+              <View style={styles.trustBadge}>
+                <PTPText style={styles.trustIcon}>✓</PTPText>
+                <PTPText variant="label" center>Background Checked</PTPText>
+                <PTPText variant="caption" color="gray500" center>
+                  Safety first
+                </PTPText>
+              </View>
+              <View style={styles.trustBadge}>
+                <PTPText style={styles.trustIcon}>🛡️</PTPText>
+                <PTPText variant="label" center>Fully Insured</PTPText>
+                <PTPText variant="caption" color="gray500" center>
+                  Peace of mind
+                </PTPText>
               </View>
             </View>
-          </>
-        )}
+          </View>
+        </FadeInView>
       </ScrollView>
     </View>
   );
-};
+});
+
+HomeScreen.displayName = 'HomeScreen';
 
 const styles = StyleSheet.create({
   container: {
@@ -352,10 +377,6 @@ const styles = StyleSheet.create({
   },
   trainingButton: {
     alignSelf: 'flex-start',
-  },
-  trainingPromoImage: {
-    width: 120,
-    height: '100%',
   },
   trustSection: {
     paddingHorizontal: spacing[4],
