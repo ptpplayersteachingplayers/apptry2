@@ -18,8 +18,6 @@ Notifications.setNotificationHandler({
     shouldShowAlert: true,
     shouldPlaySound: true,
     shouldSetBadge: true,
-    shouldShowBanner: true,
-    shouldShowList: true,
   }),
 });
 
@@ -41,8 +39,8 @@ export const useNotifications = (): UseNotificationsResult => {
   const [notification, setNotification] = useState<Notifications.Notification | null>(null);
   const [isPermissionGranted, setIsPermissionGranted] = useState(false);
 
-  const notificationListener = useRef<Notifications.EventSubscription | null>(null);
-  const responseListener = useRef<Notifications.EventSubscription | null>(null);
+  const notificationListener = useRef<Notifications.Subscription | null>(null);
+  const responseListener = useRef<Notifications.Subscription | null>(null);
 
   useEffect(() => {
     // Set up notification listeners
@@ -56,10 +54,10 @@ export const useNotifications = (): UseNotificationsResult => {
 
     return () => {
       if (notificationListener.current) {
-        notificationListener.current.remove();
+        Notifications.removeNotificationSubscription(notificationListener.current);
       }
       if (responseListener.current) {
-        responseListener.current.remove();
+        Notifications.removeNotificationSubscription(responseListener.current);
       }
     };
   }, []);
@@ -152,7 +150,7 @@ export const scheduleLocalNotification = async (
       body,
       data,
     },
-    trigger: { type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL, seconds: 2 },
+    trigger: { type: 'timeInterval', seconds: 2, repeats: false } as any,
   });
 };
 
