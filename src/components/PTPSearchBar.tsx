@@ -17,7 +17,6 @@ import Animated, {
 } from 'react-native-reanimated';
 import { colors } from '@theme/colors';
 import { spacing, borderRadius } from '@theme/spacing';
-import { typography } from '@theme/typography';
 import { useDebouncedSearch } from '@hooks/useDebounce';
 import { useHaptics } from '@hooks/useHaptics';
 
@@ -63,8 +62,8 @@ export const PTPSearchBar: React.FC<PTPSearchBarProps> = memo(({
   const isFocused = useSharedValue(0);
   const borderColor = useAnimatedStyle(() => ({
     borderColor: isFocused.value
-      ? colors.primary.DEFAULT
-      : colors.neutral[200],
+      ? colors.primary
+      : colors.gray200,
   }));
 
   // Trigger search when debounced value changes
@@ -114,7 +113,7 @@ export const PTPSearchBar: React.FC<PTPSearchBarProps> = memo(({
         ref={inputRef}
         style={styles.input}
         placeholder={placeholder}
-        placeholderTextColor={colors.neutral[400]}
+        placeholderTextColor={colors.gray400}
         value={currentValue}
         onChangeText={handleChangeText}
         onFocus={handleFocus}
@@ -129,7 +128,7 @@ export const PTPSearchBar: React.FC<PTPSearchBarProps> = memo(({
       {/* Loading or Clear button */}
       {isLoading ? (
         <Animated.View entering={FadeIn} exiting={FadeOut} style={styles.iconContainer}>
-          <ActivityIndicator size="small" color={colors.neutral[400]} />
+          <ActivityIndicator size="small" color={colors.gray400} />
         </Animated.View>
       ) : currentValue.length > 0 ? (
         <Animated.View entering={FadeIn} exiting={FadeOut}>
@@ -163,11 +162,11 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: colors.background.secondary,
+    backgroundColor: colors.white,
     borderRadius: borderRadius.lg,
     borderWidth: 2,
-    borderColor: colors.neutral[200],
-    paddingHorizontal: spacing.md,
+    borderColor: colors.gray200,
+    paddingHorizontal: spacing[4],
     height: 48,
   },
   iconContainer: {
@@ -178,14 +177,14 @@ const styles = StyleSheet.create({
   },
   input: {
     flex: 1,
-    ...typography.textStyles.body,
-    color: colors.text.primary,
-    paddingHorizontal: spacing.sm,
+    fontSize: 16,
+    color: colors.inkBlack,
+    paddingHorizontal: spacing[2],
     paddingVertical: 0,
     ...Platform.select({
       web: {
         outlineStyle: 'none',
-      },
+      } as any,
     }),
   },
   clearButton: {
@@ -204,7 +203,7 @@ const styles = StyleSheet.create({
     height: 12,
     borderRadius: 6,
     borderWidth: 2,
-    borderColor: colors.neutral[400],
+    borderColor: colors.gray400,
     position: 'absolute',
     top: 0,
     left: 0,
@@ -212,7 +211,7 @@ const styles = StyleSheet.create({
   searchIconHandle: {
     width: 6,
     height: 2,
-    backgroundColor: colors.neutral[400],
+    backgroundColor: colors.gray400,
     position: 'absolute',
     bottom: 2,
     right: 0,
@@ -223,14 +222,14 @@ const styles = StyleSheet.create({
     height: 16,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: colors.neutral[300],
+    backgroundColor: colors.gray300,
     borderRadius: 8,
   },
   clearIconLine: {
     position: 'absolute',
     width: 8,
     height: 2,
-    backgroundColor: colors.neutral[600],
+    backgroundColor: colors.gray600,
     borderRadius: 1,
   },
 });

@@ -14,7 +14,6 @@ import {
   ViewStyle,
   Image,
 } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
 import { PTPText } from './PTPText';
 import { colors } from '../theme/colors';
 import { spacing } from '../theme/spacing';

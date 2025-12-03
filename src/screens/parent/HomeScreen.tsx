@@ -2,10 +2,9 @@
  * Home Screen (Parent)
  *
  * Main landing screen with hero, featured programs, and quick actions.
- * Uses React Query for data fetching and caching.
  */
 
-import React, { useCallback, memo } from 'react';
+import React, { useCallback, useState, memo } from 'react';
 import {
   View,
   StyleSheet,
@@ -16,12 +15,9 @@ import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { ParentStackParamList } from '../../types/navigation';
 import {
-  useFeaturedPrograms,
-  usePrograms,
   useParentUser,
   useRefresh,
   useHaptics,
-  usePrefetchProgram,
 } from '../../hooks';
 import {
   PTPText,
@@ -30,7 +26,6 @@ import {
   PTPHero,
   PTPHeroCard,
   HomeScreenSkeleton,
-  PTPImage,
   AnimatedPressable,
   FadeInView,
   StaggeredItem,
@@ -38,54 +33,37 @@ import {
 import { colors } from '../../theme/colors';
 import { spacing, borderRadius } from '../../theme/spacing';
 import { featureImages, cardBackgrounds } from '../../assets/media';
+import { mockPrograms } from '../../mocks/programs';
 
 type HomeScreenNavigationProp = NativeStackNavigationProp<ParentStackParamList>;
 
 /**
  * HomeScreen - Parent home with featured programs
- * Uses React Query for data fetching with automatic caching and background refresh
  */
 const HomeScreen: React.FC = memo(() => {
   const navigation = useNavigation<HomeScreenNavigationProp>();
   const parentUser = useParentUser();
   const { selection } = useHaptics();
-  const prefetchProgram = usePrefetchProgram();
+  const [isLoading, setIsLoading] = useState(false);
 
-  // React Query hooks for data fetching
-  const {
-    data: featuredPrograms = [],
-    isLoading: featuredLoading,
-    refetch: refetchFeatured,
-  } = useFeaturedPrograms();
-
-  const {
-    data: clinicsData,
-    isLoading: clinicsLoading,
-    refetch: refetchClinics,
-  } = usePrograms({ type: 'clinic' });
-
-  const winterClinics = clinicsData?.programs?.slice(0, 3) || [];
-  const isLoading = featuredLoading || clinicsLoading;
+  // Use mock data for clinics
+  const winterClinics = mockPrograms.filter(p => p.type === 'clinic').slice(0, 3);
 
   const firstName = parentUser?.firstName || 'there';
 
   // Pull-to-refresh with haptic feedback
   const { refreshing, onRefresh } = useRefresh({
     onRefresh: async () => {
-      await Promise.all([refetchFeatured(), refetchClinics()]);
+      // Simulate refresh
+      await new Promise(resolve => setTimeout(resolve, 1000));
     },
   });
 
-  // Navigate to program with prefetching
+  // Navigate to program
   const navigateToProgram = useCallback((programId: number) => {
     selection();
     navigation.navigate('ProgramDetail', { programId });
   }, [navigation, selection]);
-
-  // Prefetch program on hover/touch start
-  const handleProgramPressIn = useCallback((programId: number) => {
-    prefetchProgram(programId);
-  }, [prefetchProgram]);
 
   // Show skeleton while loading
   if (isLoading) {
@@ -102,7 +80,7 @@ const HomeScreen: React.FC = memo(() => {
           <RefreshControl
             refreshing={refreshing}
             onRefresh={onRefresh}
-            tintColor={colors.primary.DEFAULT}
+            tintColor={colors.primary}
           />
         }
       >
@@ -252,12 +230,6 @@ const HomeScreen: React.FC = memo(() => {
                   style={styles.trainingButton}
                 />
               </View>
-              <PTPImage
-                source={featureImages.oneOnOne}
-                width={120}
-                height={200}
-                contentFit="cover"
-              />
             </AnimatedPressable>
           </View>
         </FadeInView>

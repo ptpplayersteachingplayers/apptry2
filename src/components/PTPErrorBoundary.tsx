@@ -48,15 +48,15 @@ export class PTPErrorBoundary extends Component<Props, State> {
       return (
         <View style={styles.container}>
           <View style={styles.content}>
-            <PTPText variant="h2" style={styles.title}>
+            <PTPText variant="sectionTitle" style={styles.title}>
               Oops! Something went wrong
             </PTPText>
-            <PTPText variant="body" color="secondary" style={styles.message}>
+            <PTPText variant="body" color="gray500" style={styles.message}>
               We're sorry, but something unexpected happened. Please try again.
             </PTPText>
             {__DEV__ && this.state.error && (
               <View style={styles.errorDetails}>
-                <PTPText variant="caption" color="error">
+                <PTPText variant="caption" style={{ color: colors.error }}>
                   {this.state.error.message}
                 </PTPText>
               </View>
@@ -87,15 +87,15 @@ export const ErrorFallback: React.FC<ErrorFallbackProps> = ({
 }) => (
   <View style={styles.container}>
     <View style={styles.content}>
-      <PTPText variant="h2" style={styles.title}>
+      <PTPText variant="sectionTitle" style={styles.title}>
         Oops! Something went wrong
       </PTPText>
-      <PTPText variant="body" color="secondary" style={styles.message}>
+      <PTPText variant="body" color="gray500" style={styles.message}>
         We're sorry, but something unexpected happened. Please try again.
       </PTPText>
       {__DEV__ && (
         <View style={styles.errorDetails}>
-          <PTPText variant="caption" color="error">
+          <PTPText variant="caption" style={{ color: colors.error }}>
             {error.message}
           </PTPText>
         </View>
@@ -108,10 +108,10 @@ export const ErrorFallback: React.FC<ErrorFallbackProps> = ({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.background.primary,
+    backgroundColor: colors.offWhite,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: spacing.xl,
+    padding: spacing[8],
   },
   content: {
     alignItems: 'center',
@@ -119,17 +119,17 @@ const styles = StyleSheet.create({
   },
   title: {
     textAlign: 'center',
-    marginBottom: spacing.md,
+    marginBottom: spacing[4],
   },
   message: {
     textAlign: 'center',
-    marginBottom: spacing.lg,
+    marginBottom: spacing[6],
   },
   errorDetails: {
-    backgroundColor: colors.status.error + '10',
-    padding: spacing.md,
+    backgroundColor: colors.errorLight,
+    padding: spacing[4],
     borderRadius: 8,
-    marginBottom: spacing.lg,
+    marginBottom: spacing[6],
     width: '100%',
   },
   button: {

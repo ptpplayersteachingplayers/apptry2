@@ -229,7 +229,7 @@ const styles = StyleSheet.create({
     height: '100%',
   },
   errorContainer: {
-    backgroundColor: colors.neutral[100],
+    backgroundColor: colors.gray100,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -237,7 +237,7 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: colors.neutral[200],
+    backgroundColor: colors.gray200,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -245,15 +245,15 @@ const styles = StyleSheet.create({
     width: 20,
     height: 20,
     borderRadius: 10,
-    backgroundColor: colors.neutral[300],
+    backgroundColor: colors.gray300,
   },
   avatarFallback: {
-    backgroundColor: colors.primary.DEFAULT,
+    backgroundColor: colors.primary,
     justifyContent: 'center',
     alignItems: 'center',
   },
   avatarText: {
-    color: colors.text.inverse,
+    color: colors.white,
     fontWeight: '600',
   },
   heroOverlay: {

@@ -41,7 +41,7 @@ export const Skeleton: React.FC<SkeletonProps> = ({
     <Animated.View
       style={[
         styles.skeleton,
-        { width, height, borderRadius: radius },
+        { width: width as any, height, borderRadius: radius },
         animatedStyle,
         style,
       ]}
@@ -177,78 +177,78 @@ export const DetailScreenSkeleton: React.FC = () => (
 
 const styles = StyleSheet.create({
   skeleton: {
-    backgroundColor: colors.neutral[200],
+    backgroundColor: colors.gray200,
   },
   container: {
     flex: 1,
-    backgroundColor: colors.background.primary,
+    backgroundColor: colors.offWhite,
   },
   section: {
-    padding: spacing.lg,
+    padding: spacing[6],
   },
   programCard: {
-    backgroundColor: colors.background.secondary,
+    backgroundColor: colors.white,
     borderRadius: borderRadius.lg,
-    marginBottom: spacing.md,
+    marginBottom: spacing[4],
     overflow: 'hidden',
   },
   programCardContent: {
-    padding: spacing.md,
+    padding: spacing[4],
   },
   trainerCard: {
     flexDirection: 'row',
-    backgroundColor: colors.background.secondary,
+    backgroundColor: colors.white,
     borderRadius: borderRadius.lg,
-    padding: spacing.md,
-    marginBottom: spacing.md,
+    padding: spacing[4],
+    marginBottom: spacing[4],
   },
   trainerCardContent: {
     flex: 1,
-    marginLeft: spacing.md,
+    marginLeft: spacing[4],
   },
   sessionCard: {
-    backgroundColor: colors.background.secondary,
+    backgroundColor: colors.white,
     borderRadius: borderRadius.lg,
-    padding: spacing.md,
-    marginBottom: spacing.md,
+    padding: spacing[4],
+    marginBottom: spacing[4],
   },
   sessionCardContent: {
     flex: 1,
-    marginLeft: spacing.md,
+    marginLeft: spacing[4],
   },
   messageItem: {
     flexDirection: 'row',
-    padding: spacing.md,
+    padding: spacing[4],
     borderBottomWidth: 1,
-    borderBottomColor: colors.neutral[100],
+    borderBottomColor: colors.gray100,
   },
   messageContent: {
     flex: 1,
-    marginLeft: spacing.md,
+    marginLeft: spacing[4],
     justifyContent: 'center',
   },
   listContainer: {
-    padding: spacing.lg,
+    padding: spacing[6],
   },
   quickActions: {
     flexDirection: 'row',
     justifyContent: 'space-between',
   },
   detailContent: {
-    padding: spacing.lg,
+    padding: spacing[6],
   },
   row: {
     flexDirection: 'row',
     alignItems: 'center',
   },
   marginBottom: {
-    marginBottom: spacing.sm,
+    marginBottom: spacing[2],
   },
   marginTopMd: {
-    marginTop: spacing.md,
+    marginTop: spacing[4],
   },
   marginLeft: {
-    marginLeft: spacing.sm,
+    marginLeft: spacing[2],
   },
 });
 

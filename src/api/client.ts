@@ -141,8 +141,9 @@ const extractErrorMessage = (error: AxiosError): string => {
   }
 
   // WooCommerce error format
-  if (data?.data?.message && typeof data.data.message === 'string') {
-    return data.data.message as string;
+  const nestedData = data?.data as Record<string, unknown> | undefined;
+  if (nestedData?.message && typeof nestedData.message === 'string') {
+    return nestedData.message;
   }
 
   // Fallback messages based on status
