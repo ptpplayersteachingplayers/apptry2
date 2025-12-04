@@ -1,7 +1,6 @@
-import React, { useState, memo } from 'react';
-import { View, StyleSheet, ViewStyle } from 'react-native';
-import { Image, ImageProps, ImageContentFit } from 'expo-image';
-import Animated, { FadeIn } from 'react-native-reanimated';
+import React, { useState, memo, useRef, useEffect } from 'react';
+import { View, StyleSheet, ViewStyle, Animated, Text } from 'react-native';
+import { Image, ImageContentFit } from 'expo-image';
 import { colors } from '@theme/colors';
 import { Skeleton } from './PTPSkeleton';
 
@@ -108,6 +107,7 @@ export const PTPAvatar: React.FC<PTPAvatarProps> = memo(({
   style,
 }) => {
   const [hasError, setHasError] = useState(false);
+  const fadeAnim = useRef(new Animated.Value(0)).current;
 
   const uri = typeof source === 'string' ? source : source?.uri;
   const showFallback = !uri || hasError;
@@ -121,6 +121,16 @@ export const PTPAvatar: React.FC<PTPAvatarProps> = memo(({
         .toUpperCase()
         .slice(0, 2)
     : '?';
+
+  useEffect(() => {
+    if (showFallback) {
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 300,
+        useNativeDriver: true,
+      }).start();
+    }
+  }, [showFallback]);
 
   if (showFallback) {
     return (
@@ -136,8 +146,7 @@ export const PTPAvatar: React.FC<PTPAvatarProps> = memo(({
         ]}
       >
         <Animated.Text
-          entering={FadeIn}
-          style={[styles.avatarText, { fontSize: size * 0.4 }]}
+          style={[styles.avatarText, { fontSize: size * 0.4, opacity: fadeAnim }]}
         >
           {initials}
         </Animated.Text>

@@ -6,7 +6,7 @@
  * Ensures minimum touch target of 44x44 points.
  */
 
-import React, { useCallback, memo } from 'react';
+import React, { useCallback, memo, useRef } from 'react';
 import {
   Pressable,
   PressableProps,
@@ -14,18 +14,12 @@ import {
   ActivityIndicator,
   View,
   ViewStyle,
+  Animated,
 } from 'react-native';
-import Animated, {
-  useSharedValue,
-  useAnimatedStyle,
-  withSpring,
-} from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
 import { PTPText } from './PTPText';
 import { colors } from '../theme/colors';
 import { spacing, borderRadius } from '../theme/spacing';
-
-const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 type ButtonVariant = 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger';
 type ButtonSize = 'small' | 'medium' | 'large';
@@ -97,19 +91,21 @@ export const PTPButton: React.FC<PTPButtonProps> = memo(({
   ...props
 }) => {
   const isDisabled = disabled || loading;
-  const scale = useSharedValue(1);
-
-  const animatedStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: scale.value }],
-  }));
+  const scale = useRef(new Animated.Value(1)).current;
 
   const handlePressIn = useCallback(() => {
-    scale.value = withSpring(0.97, { damping: 15, stiffness: 400 });
-  }, []);
+    Animated.spring(scale, {
+      toValue: 0.97,
+      useNativeDriver: true,
+    }).start();
+  }, [scale]);
 
   const handlePressOut = useCallback(() => {
-    scale.value = withSpring(1, { damping: 15, stiffness: 400 });
-  }, []);
+    Animated.spring(scale, {
+      toValue: 1,
+      useNativeDriver: true,
+    }).start();
+  }, [scale]);
 
   const handlePress = useCallback((event: any) => {
     if (haptic) {
@@ -131,8 +127,7 @@ export const PTPButton: React.FC<PTPButtonProps> = memo(({
   const textVariant = size === 'small' ? 'buttonSmall' : size === 'large' ? 'buttonLarge' : 'buttonMedium';
 
   return (
-    <AnimatedPressable
-      style={[buttonStyle, animatedStyle]}
+    <Pressable
       onPress={handlePress}
       onPressIn={handlePressIn}
       onPressOut={handlePressOut}
@@ -142,18 +137,20 @@ export const PTPButton: React.FC<PTPButtonProps> = memo(({
       accessibilityState={{ disabled: isDisabled }}
       {...props}
     >
-      {loading ? (
-        <ActivityIndicator color={textColor} size="small" />
-      ) : (
-        <View style={styles.content}>
-          {leftIcon && <View style={styles.iconLeft}>{leftIcon}</View>}
-          <PTPText variant={textVariant} color={textColor}>
-            {title}
-          </PTPText>
-          {rightIcon && <View style={styles.iconRight}>{rightIcon}</View>}
-        </View>
-      )}
-    </AnimatedPressable>
+      <Animated.View style={[buttonStyle, { transform: [{ scale }] }]}>
+        {loading ? (
+          <ActivityIndicator color={textColor} size="small" />
+        ) : (
+          <View style={styles.content}>
+            {leftIcon && <View style={styles.iconLeft}>{leftIcon}</View>}
+            <PTPText variant={textVariant} color={textColor}>
+              {title}
+            </PTPText>
+            {rightIcon && <View style={styles.iconRight}>{rightIcon}</View>}
+          </View>
+        )}
+      </Animated.View>
+    </Pressable>
   );
 });
 

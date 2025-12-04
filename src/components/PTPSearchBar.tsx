@@ -1,4 +1,4 @@
-import React, { memo, useRef, useEffect } from 'react';
+import React, { memo, useRef, useEffect, useState } from 'react';
 import {
   View,
   TextInput,
@@ -7,14 +7,8 @@ import {
   ActivityIndicator,
   ViewStyle,
   Platform,
+  Animated,
 } from 'react-native';
-import Animated, {
-  useSharedValue,
-  useAnimatedStyle,
-  withTiming,
-  FadeIn,
-  FadeOut,
-} from 'react-native-reanimated';
 import { colors } from '@theme/colors';
 import { spacing, borderRadius } from '@theme/spacing';
 import { useDebouncedSearch } from '@hooks/useDebounce';
@@ -45,6 +39,9 @@ export const PTPSearchBar: React.FC<PTPSearchBarProps> = memo(({
 }) => {
   const inputRef = useRef<TextInput>(null);
   const { selection } = useHaptics();
+  const [isFocused, setIsFocused] = useState(false);
+  const borderColorAnim = useRef(new Animated.Value(0)).current;
+  const fadeAnim = useRef(new Animated.Value(0)).current;
 
   // Use internal debounced search or external value
   const {
@@ -58,20 +55,30 @@ export const PTPSearchBar: React.FC<PTPSearchBarProps> = memo(({
   const currentValue = externalValue !== undefined ? externalValue : searchTerm;
   const isLoading = showLoading || isSearching;
 
-  // Animation for focus state
-  const isFocused = useSharedValue(0);
-  const borderColor = useAnimatedStyle(() => ({
-    borderColor: isFocused.value
-      ? colors.primary
-      : colors.gray200,
-  }));
-
   // Trigger search when debounced value changes
   useEffect(() => {
     if (externalValue === undefined && onSearch) {
       onSearch(debouncedSearchTerm);
     }
   }, [debouncedSearchTerm]);
+
+  // Animate border color on focus
+  useEffect(() => {
+    Animated.timing(borderColorAnim, {
+      toValue: isFocused ? 1 : 0,
+      duration: 200,
+      useNativeDriver: false,
+    }).start();
+  }, [isFocused]);
+
+  // Animate fade for loading/clear
+  useEffect(() => {
+    Animated.timing(fadeAnim, {
+      toValue: isLoading || currentValue.length > 0 ? 1 : 0,
+      duration: 200,
+      useNativeDriver: true,
+    }).start();
+  }, [isLoading, currentValue]);
 
   const handleChangeText = (text: string) => {
     if (externalValue !== undefined) {
@@ -94,15 +101,20 @@ export const PTPSearchBar: React.FC<PTPSearchBarProps> = memo(({
   };
 
   const handleFocus = () => {
-    isFocused.value = withTiming(1, { duration: 200 });
+    setIsFocused(true);
   };
 
   const handleBlur = () => {
-    isFocused.value = withTiming(0, { duration: 200 });
+    setIsFocused(false);
   };
 
+  const borderColor = borderColorAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: [colors.gray200, colors.primary],
+  });
+
   return (
-    <Animated.View style={[styles.container, borderColor, style]}>
+    <Animated.View style={[styles.container, { borderColor }, style]}>
       {/* Search Icon */}
       <View style={styles.iconContainer}>
         <SearchIcon />
@@ -127,11 +139,11 @@ export const PTPSearchBar: React.FC<PTPSearchBarProps> = memo(({
 
       {/* Loading or Clear button */}
       {isLoading ? (
-        <Animated.View entering={FadeIn} exiting={FadeOut} style={styles.iconContainer}>
+        <Animated.View style={[styles.iconContainer, { opacity: fadeAnim }]}>
           <ActivityIndicator size="small" color={colors.gray400} />
         </Animated.View>
       ) : currentValue.length > 0 ? (
-        <Animated.View entering={FadeIn} exiting={FadeOut}>
+        <Animated.View style={{ opacity: fadeAnim }}>
           <TouchableOpacity onPress={handleClear} style={styles.clearButton}>
             <ClearIcon />
           </TouchableOpacity>

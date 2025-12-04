@@ -1,34 +1,28 @@
-import React, { useEffect } from 'react';
-import { ViewStyle, Pressable, StyleSheet } from 'react-native';
-import Animated, {
-  useSharedValue,
-  useAnimatedStyle,
-  withSpring,
-  withTiming,
-  withSequence,
-  withDelay,
-  FadeIn,
-  FadeOut,
-  SlideInRight,
-  SlideInUp,
-  SlideOutRight,
-  ZoomIn,
-  ZoomOut,
-  Layout,
-  Easing,
-  runOnJS,
-} from 'react-native-reanimated';
+/**
+ * PTPAnimated Components
+ *
+ * Animated components using React Native's built-in Animated API
+ * for maximum compatibility with Expo Go.
+ */
 
-// Animation presets
+import React, { useEffect, useRef } from 'react';
+import {
+  ViewStyle,
+  Pressable,
+  Animated,
+  Easing,
+  View,
+} from 'react-native';
+
+// Animation presets (simplified for RN Animated)
 export const animations = {
-  fadeIn: FadeIn.duration(300),
-  fadeOut: FadeOut.duration(200),
-  slideInRight: SlideInRight.duration(300),
-  slideInUp: SlideInUp.duration(300),
-  slideOutRight: SlideOutRight.duration(200),
-  zoomIn: ZoomIn.duration(300),
-  zoomOut: ZoomOut.duration(200),
-  layout: Layout.springify(),
+  fadeIn: { duration: 300 },
+  fadeOut: { duration: 200 },
+  slideInRight: { duration: 300 },
+  slideInUp: { duration: 300 },
+  slideOutRight: { duration: 200 },
+  zoomIn: { duration: 300 },
+  zoomOut: { duration: 200 },
 };
 
 // Animated pressable with scale effect
@@ -47,18 +41,20 @@ export const AnimatedPressable: React.FC<AnimatedPressableProps> = ({
   style,
   scaleValue = 0.97,
 }) => {
-  const scale = useSharedValue(1);
-
-  const animatedStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: scale.value }],
-  }));
+  const scale = useRef(new Animated.Value(1)).current;
 
   const handlePressIn = () => {
-    scale.value = withSpring(scaleValue, { damping: 15, stiffness: 400 });
+    Animated.spring(scale, {
+      toValue: scaleValue,
+      useNativeDriver: true,
+    }).start();
   };
 
   const handlePressOut = () => {
-    scale.value = withSpring(1, { damping: 15, stiffness: 400 });
+    Animated.spring(scale, {
+      toValue: 1,
+      useNativeDriver: true,
+    }).start();
   };
 
   return (
@@ -68,7 +64,9 @@ export const AnimatedPressable: React.FC<AnimatedPressableProps> = ({
       onPressOut={handlePressOut}
       disabled={disabled}
     >
-      <Animated.View style={[style, animatedStyle]}>{children}</Animated.View>
+      <Animated.View style={[style, { transform: [{ scale }] }]}>
+        {children}
+      </Animated.View>
     </Pressable>
   );
 };
@@ -87,23 +85,38 @@ export const FadeInView: React.FC<FadeInViewProps> = ({
   duration = 300,
   style,
 }) => {
-  const opacity = useSharedValue(0);
-  const translateY = useSharedValue(10);
+  const opacity = useRef(new Animated.Value(0)).current;
+  const translateY = useRef(new Animated.Value(10)).current;
 
   useEffect(() => {
-    opacity.value = withDelay(delay, withTiming(1, { duration }));
-    translateY.value = withDelay(
-      delay,
-      withSpring(0, { damping: 20, stiffness: 200 })
-    );
+    Animated.parallel([
+      Animated.timing(opacity, {
+        toValue: 1,
+        duration,
+        delay,
+        useNativeDriver: true,
+      }),
+      Animated.spring(translateY, {
+        toValue: 0,
+        delay,
+        useNativeDriver: true,
+      }),
+    ]).start();
   }, []);
 
-  const animatedStyle = useAnimatedStyle(() => ({
-    opacity: opacity.value,
-    transform: [{ translateY: translateY.value }],
-  }));
-
-  return <Animated.View style={[style, animatedStyle]}>{children}</Animated.View>;
+  return (
+    <Animated.View
+      style={[
+        style,
+        {
+          opacity,
+          transform: [{ translateY }]
+        }
+      ]}
+    >
+      {children}
+    </Animated.View>
+  );
 };
 
 // Staggered list items
@@ -139,25 +152,25 @@ export const ShakeView: React.FC<ShakeViewProps> = ({
   shake,
   style,
 }) => {
-  const translateX = useSharedValue(0);
+  const translateX = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     if (shake) {
-      translateX.value = withSequence(
-        withTiming(-10, { duration: 50 }),
-        withTiming(10, { duration: 50 }),
-        withTiming(-10, { duration: 50 }),
-        withTiming(10, { duration: 50 }),
-        withTiming(0, { duration: 50 })
-      );
+      Animated.sequence([
+        Animated.timing(translateX, { toValue: -10, duration: 50, useNativeDriver: true }),
+        Animated.timing(translateX, { toValue: 10, duration: 50, useNativeDriver: true }),
+        Animated.timing(translateX, { toValue: -10, duration: 50, useNativeDriver: true }),
+        Animated.timing(translateX, { toValue: 10, duration: 50, useNativeDriver: true }),
+        Animated.timing(translateX, { toValue: 0, duration: 50, useNativeDriver: true }),
+      ]).start();
     }
   }, [shake]);
 
-  const animatedStyle = useAnimatedStyle(() => ({
-    transform: [{ translateX: translateX.value }],
-  }));
-
-  return <Animated.View style={[style, animatedStyle]}>{children}</Animated.View>;
+  return (
+    <Animated.View style={[style, { transform: [{ translateX }] }]}>
+      {children}
+    </Animated.View>
+  );
 };
 
 // Pulse animation for loading or attention
@@ -172,32 +185,34 @@ export const PulseView: React.FC<PulseViewProps> = ({
   active = true,
   style,
 }) => {
-  const scale = useSharedValue(1);
+  const scale = useRef(new Animated.Value(1)).current;
+  const animation = useRef<Animated.CompositeAnimation | null>(null);
 
   useEffect(() => {
     if (active) {
-      scale.value = withRepeat(
-        withSequence(
-          withTiming(1.05, { duration: 500 }),
-          withTiming(1, { duration: 500 })
-        ),
-        -1,
-        false
+      animation.current = Animated.loop(
+        Animated.sequence([
+          Animated.timing(scale, { toValue: 1.05, duration: 500, useNativeDriver: true }),
+          Animated.timing(scale, { toValue: 1, duration: 500, useNativeDriver: true }),
+        ])
       );
+      animation.current.start();
     } else {
-      scale.value = withTiming(1);
+      animation.current?.stop();
+      Animated.timing(scale, { toValue: 1, duration: 200, useNativeDriver: true }).start();
     }
+
+    return () => {
+      animation.current?.stop();
+    };
   }, [active]);
 
-  const animatedStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: scale.value }],
-  }));
-
-  return <Animated.View style={[style, animatedStyle]}>{children}</Animated.View>;
+  return (
+    <Animated.View style={[style, { transform: [{ scale }] }]}>
+      {children}
+    </Animated.View>
+  );
 };
-
-// Import withRepeat for PulseView
-import { withRepeat } from 'react-native-reanimated';
 
 // Slide in from bottom (for modals, bottom sheets)
 interface SlideUpViewProps {
@@ -211,27 +226,38 @@ export const SlideUpView: React.FC<SlideUpViewProps> = ({
   visible,
   style,
 }) => {
-  const translateY = useSharedValue(300);
-  const opacity = useSharedValue(0);
+  const translateY = useRef(new Animated.Value(300)).current;
+  const opacity = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     if (visible) {
-      translateY.value = withSpring(0, { damping: 20, stiffness: 200 });
-      opacity.value = withTiming(1, { duration: 200 });
+      Animated.parallel([
+        Animated.spring(translateY, { toValue: 0, useNativeDriver: true }),
+        Animated.timing(opacity, { toValue: 1, duration: 200, useNativeDriver: true }),
+      ]).start();
     } else {
-      translateY.value = withTiming(300, { duration: 200 });
-      opacity.value = withTiming(0, { duration: 200 });
+      Animated.parallel([
+        Animated.timing(translateY, { toValue: 300, duration: 200, useNativeDriver: true }),
+        Animated.timing(opacity, { toValue: 0, duration: 200, useNativeDriver: true }),
+      ]).start();
     }
   }, [visible]);
 
-  const animatedStyle = useAnimatedStyle(() => ({
-    transform: [{ translateY: translateY.value }],
-    opacity: opacity.value,
-  }));
+  if (!visible) return null;
 
-  if (!visible && opacity.value === 0) return null;
-
-  return <Animated.View style={[style, animatedStyle]}>{children}</Animated.View>;
+  return (
+    <Animated.View
+      style={[
+        style,
+        {
+          transform: [{ translateY }],
+          opacity,
+        }
+      ]}
+    >
+      {children}
+    </Animated.View>
+  );
 };
 
 // Counter animation for numbers
@@ -245,30 +271,24 @@ export const AnimatedCounter: React.FC<AnimatedCounterProps> = ({
   value,
   duration = 1000,
 }) => {
-  const animatedValue = useSharedValue(0);
   const [displayValue, setDisplayValue] = React.useState(0);
+  const animatedValue = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
-    animatedValue.value = withTiming(value, {
+    animatedValue.setValue(displayValue);
+    Animated.timing(animatedValue, {
+      toValue: value,
       duration,
       easing: Easing.out(Easing.cubic),
+      useNativeDriver: false,
+    }).start();
+
+    const listener = animatedValue.addListener(({ value: v }) => {
+      setDisplayValue(Math.round(v));
     });
-  }, [value]);
-
-  // Note: In a real app, you'd use a worklet to update this
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setDisplayValue(Math.round(animatedValue.value));
-    }, 16);
-
-    const timeout = setTimeout(() => {
-      clearInterval(interval);
-      setDisplayValue(value);
-    }, duration);
 
     return () => {
-      clearInterval(interval);
-      clearTimeout(timeout);
+      animatedValue.removeListener(listener);
     };
   }, [value, duration]);
 
@@ -291,18 +311,22 @@ export const AnimatedProgress: React.FC<AnimatedProgressProps> = ({
   progressColor = '#FCB900',
   style,
 }) => {
-  const width = useSharedValue(0);
+  const width = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
-    width.value = withSpring(progress, { damping: 20, stiffness: 100 });
+    Animated.spring(width, {
+      toValue: progress,
+      useNativeDriver: false,
+    }).start();
   }, [progress]);
 
-  const animatedStyle = useAnimatedStyle(() => ({
-    width: `${width.value}%`,
-  }));
+  const animatedWidth = width.interpolate({
+    inputRange: [0, 100],
+    outputRange: ['0%', '100%'],
+  });
 
   return (
-    <Animated.View
+    <View
       style={[
         {
           height,
@@ -314,16 +338,14 @@ export const AnimatedProgress: React.FC<AnimatedProgressProps> = ({
       ]}
     >
       <Animated.View
-        style={[
-          {
-            height: '100%',
-            backgroundColor: progressColor,
-            borderRadius: height / 2,
-          },
-          animatedStyle,
-        ]}
+        style={{
+          height: '100%',
+          backgroundColor: progressColor,
+          borderRadius: height / 2,
+          width: animatedWidth,
+        }}
       />
-    </Animated.View>
+    </View>
   );
 };
 
