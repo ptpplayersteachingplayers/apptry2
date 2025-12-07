@@ -262,11 +262,15 @@ const styles = StyleSheet.create({
   },
   trainerCard: {
     backgroundColor: colors.white,
-    borderRadius: borderRadius.lg,
+    borderRadius: 20,
     marginHorizontal: spacing[4],
-    marginBottom: spacing[3],
+    marginBottom: spacing[4],
     overflow: 'hidden',
-    ...shadows.md,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.12,
+    shadowRadius: 16,
+    elevation: 6,
   },
   trainerImage: {
     width: '100%',

@@ -186,9 +186,19 @@ const styles = StyleSheet.create({
   // Variants
   primary: {
     backgroundColor: colors.primary,
+    shadowColor: colors.primary,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 4,
   },
   secondary: {
     backgroundColor: colors.inkBlack,
+    shadowColor: colors.inkBlack,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 4,
   },
   outline: {
     backgroundColor: colors.transparent,

@@ -219,8 +219,13 @@ const styles = StyleSheet.create({
     maxWidth: '80%',
   },
   heroCard: {
-    borderRadius: 16,
+    borderRadius: 20,
     overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.15,
+    shadowRadius: 16,
+    elevation: 6,
   },
   heroCardBackground: {
     flex: 1,

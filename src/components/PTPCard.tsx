@@ -275,7 +275,11 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   cardWithShadow: {
-    ...shadows.md,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.12,
+    shadowRadius: 16,
+    elevation: 6,
   },
   image: {
     width: '100%',

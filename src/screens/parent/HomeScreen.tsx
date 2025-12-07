@@ -237,28 +237,28 @@ const HomeScreen: React.FC = memo(() => {
         {/* Trust Section */}
         <FadeInView delay={500}>
           <View style={styles.trustSection}>
-            <PTPText variant="sectionTitle" center>
+            <PTPText variant="sectionTitle" center color="white">
               Why PTP?
             </PTPText>
             <View style={styles.trustBadges}>
               <View style={styles.trustBadge}>
                 <PTPText style={styles.trustIcon}>🎓</PTPText>
-                <PTPText variant="label" center>NCAA Mentors</PTPText>
-                <PTPText variant="caption" color="gray500" center>
+                <PTPText variant="label" center color="white">NCAA Mentors</PTPText>
+                <PTPText variant="caption" color="gray400" center>
                   Real role models
                 </PTPText>
               </View>
               <View style={styles.trustBadge}>
-                <PTPText style={styles.trustIcon}>✓</PTPText>
-                <PTPText variant="label" center>Background Checked</PTPText>
-                <PTPText variant="caption" color="gray500" center>
+                <PTPText style={[styles.trustIcon, { color: colors.primary }]}>✓</PTPText>
+                <PTPText variant="label" center color="white">Background Checked</PTPText>
+                <PTPText variant="caption" color="gray400" center>
                   Safety first
                 </PTPText>
               </View>
               <View style={styles.trustBadge}>
                 <PTPText style={styles.trustIcon}>🛡️</PTPText>
-                <PTPText variant="label" center>Fully Insured</PTPText>
-                <PTPText variant="caption" color="gray500" center>
+                <PTPText variant="label" center color="white">Fully Insured</PTPText>
+                <PTPText variant="caption" color="gray400" center>
                   Peace of mind
                 </PTPText>
               </View>
@@ -295,27 +295,32 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     backgroundColor: colors.white,
-    borderRadius: borderRadius.lg,
-    padding: spacing[4],
+    borderRadius: 20,
+    padding: spacing[5],
     marginTop: -spacing[10],
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 12,
-    elevation: 4,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.15,
+    shadowRadius: 24,
+    elevation: 8,
   },
   quickAction: {
     alignItems: 'center',
     flex: 1,
   },
   quickActionIcon: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    backgroundColor: colors.gray100,
+    width: 60,
+    height: 60,
+    borderRadius: 16,
+    backgroundColor: colors.primary,
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: spacing[2],
+    shadowColor: colors.primary,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 4,
   },
   horizontalScroll: {
     paddingRight: spacing[4],
@@ -326,9 +331,14 @@ const styles = StyleSheet.create({
   },
   trainingPromo: {
     backgroundColor: colors.white,
-    borderRadius: borderRadius.lg,
+    borderRadius: 20,
     overflow: 'hidden',
     flexDirection: 'row',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.12,
+    shadowRadius: 16,
+    elevation: 6,
   },
   trainingPromoContent: {
     flex: 1,
@@ -354,8 +364,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing[4],
     marginTop: spacing[8],
     paddingTop: spacing[6],
-    borderTopWidth: 1,
-    borderTopColor: colors.gray200,
+    backgroundColor: colors.inkBlack,
+    marginHorizontal: spacing[4],
+    borderRadius: 20,
+    paddingBottom: spacing[6],
   },
   trustBadges: {
     flexDirection: 'row',
@@ -367,8 +379,8 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   trustIcon: {
-    fontSize: 32,
-    marginBottom: spacing[2],
+    fontSize: 36,
+    marginBottom: spacing[3],
   },
 });
 
