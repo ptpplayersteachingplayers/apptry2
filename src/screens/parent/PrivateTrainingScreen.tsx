@@ -4,14 +4,13 @@
  * Browse and filter trainers for private 1-on-1 sessions.
  */
 
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import {
   View,
   StyleSheet,
   FlatList,
   RefreshControl,
   TouchableOpacity,
-  Image,
 } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -25,6 +24,7 @@ import {
   PTPHero,
   PTPListSkeleton,
   PTPEmptyState,
+  PTPImage,
 } from '../../components';
 import { colors } from '../../theme/colors';
 import { spacing, borderRadius, shadows } from '../../theme/spacing';
@@ -66,16 +66,16 @@ const PrivateTrainingScreen: React.FC = () => {
     setIsRefreshing(false);
   };
 
-  const filteredTrainers = trainers.filter((trainer) => {
-    if (!searchQuery) return true;
+  const filteredTrainers = useMemo(() => {
+    if (!searchQuery) return trainers;
     const query = searchQuery.toLowerCase();
-    return (
+    return trainers.filter((trainer) => (
       trainer.firstName.toLowerCase().includes(query) ||
       trainer.lastName.toLowerCase().includes(query) ||
       trainer.collegePro.toLowerCase().includes(query) ||
       trainer.specialties.some((s) => s.toLowerCase().includes(query))
-    );
-  });
+    ));
+  }, [trainers, searchQuery]);
 
   const renderTrainer = useCallback(
     ({ item }: { item: TrainerUser }) => (
@@ -84,10 +84,10 @@ const PrivateTrainingScreen: React.FC = () => {
         onPress={() => navigation.navigate('TrainerDetail', { trainerId: item.id })}
         accessibilityLabel={`View ${item.firstName} ${item.lastName}'s profile`}
       >
-        <Image
-          source={{ uri: item.headshotUrl || featureImages.trainerProfile }}
+        <PTPImage
+          source={item.headshotUrl || featureImages.trainerProfile}
           style={styles.trainerImage}
-          resizeMode="cover"
+          contentFit="cover"
         />
         <View style={styles.trainerInfo}>
           <View style={styles.trainerHeader}>
@@ -214,6 +214,10 @@ const PrivateTrainingScreen: React.FC = () => {
         }
         contentContainerStyle={styles.listContent}
         showsVerticalScrollIndicator={false}
+        maxToRenderPerBatch={8}
+        windowSize={10}
+        removeClippedSubviews={true}
+        initialNumToRender={4}
       />
     </View>
   );

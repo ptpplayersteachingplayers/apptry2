@@ -4,7 +4,7 @@
  * List of conversations with trainers and support.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { View, StyleSheet, FlatList, TouchableOpacity, RefreshControl } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
@@ -41,7 +41,7 @@ const MessagesScreen: React.FC = () => {
     setIsRefreshing(false);
   };
 
-  const formatTime = (dateString: string) => {
+  const formatTime = useCallback((dateString: string) => {
     const date = new Date(dateString);
     const now = new Date();
     const diff = now.getTime() - date.getTime();
@@ -50,13 +50,13 @@ const MessagesScreen: React.FC = () => {
     if (days === 1) return 'Yesterday';
     if (days < 7) return date.toLocaleDateString('en-US', { weekday: 'short' });
     return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-  };
+  }, []);
 
-  const getOtherParticipant = (conv: Conversation) => {
+  const getOtherParticipant = useCallback((conv: Conversation) => {
     return conv.participants.find(p => p.role !== 'parent') || conv.participants[0];
-  };
+  }, []);
 
-  const renderConversation = ({ item }: { item: Conversation }) => {
+  const renderConversation = useCallback(({ item }: { item: Conversation }) => {
     const other = getOtherParticipant(item);
     return (
       <TouchableOpacity
@@ -84,7 +84,7 @@ const MessagesScreen: React.FC = () => {
         )}
       </TouchableOpacity>
     );
-  };
+  }, [navigation, formatTime, getOtherParticipant]);
 
   if (isLoading) {
     return (
@@ -103,6 +103,10 @@ const MessagesScreen: React.FC = () => {
         ListEmptyComponent={<NoMessagesEmptyState />}
         refreshControl={<RefreshControl refreshing={isRefreshing} onRefresh={handleRefresh} tintColor={colors.primary} />}
         contentContainerStyle={styles.listContent}
+        maxToRenderPerBatch={10}
+        windowSize={10}
+        removeClippedSubviews={true}
+        initialNumToRender={10}
       />
     </View>
   );

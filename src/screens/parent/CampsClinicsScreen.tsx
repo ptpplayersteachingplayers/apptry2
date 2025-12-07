@@ -5,7 +5,7 @@
  * This is the center of the PTP flow.
  */
 
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import {
   View,
   StyleSheet,
@@ -72,24 +72,24 @@ const CampsClinicsScreen: React.FC = () => {
     setIsRefreshing(false);
   };
 
-  const filteredPrograms = programs.filter((program) => {
-    if (!searchQuery) return true;
+  const filteredPrograms = useMemo(() => {
+    if (!searchQuery) return programs;
     const query = searchQuery.toLowerCase();
-    return (
+    return programs.filter((program) => (
       program.title.toLowerCase().includes(query) ||
       program.city.toLowerCase().includes(query) ||
       program.location.toLowerCase().includes(query)
-    );
-  });
+    ));
+  }, [programs, searchQuery]);
 
-  const formatDate = (dateString: string) => {
+  const formatDate = useCallback((dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleDateString('en-US', {
       weekday: 'short',
       month: 'short',
       day: 'numeric',
     });
-  };
+  }, []);
 
   const renderProgram = useCallback(
     ({ item }: { item: Program }) => (
@@ -192,6 +192,10 @@ const CampsClinicsScreen: React.FC = () => {
         }
         contentContainerStyle={styles.listContent}
         showsVerticalScrollIndicator={false}
+        maxToRenderPerBatch={10}
+        windowSize={10}
+        removeClippedSubviews={true}
+        initialNumToRender={5}
       />
     </View>
   );
