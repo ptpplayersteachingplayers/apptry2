@@ -57,8 +57,9 @@
     ],
     "extra": {
       "eas": {
-        "projectId": "your-project-id"
+        "projectId": "68d2492c-c447-441d-8bf3-99413f385ed4"
       }
-    }
+    },
+    "owner": "lmartelli"
   }
 }
