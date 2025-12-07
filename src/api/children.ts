@@ -203,7 +203,7 @@ const mockChildren: ChildProfile[] = [
     lastName: 'Johnson',
     dateOfBirth: '2016-08-22',
     ageBand: '6-8',
-    skillLevel: 'recreational',
+    skillLevel: 'rec',
     position: 'forward',
     team: 'Radnor Soccer Club',
     notes: 'Very enthusiastic, loves to score goals',

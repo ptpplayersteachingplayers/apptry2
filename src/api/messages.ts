@@ -106,7 +106,6 @@ export const sendMessage = async (data: SendMessageRequest): Promise<SendMessage
 
   const response = await apiClient.post('/messages/send', {
     conversation_id: data.conversationId,
-    recipient_id: data.recipientId,
     content: data.content,
     attachments: data.attachmentUrls,
   });

@@ -310,6 +310,25 @@ const AccountScreen: React.FC = () => {
           </View>
         </View>
 
+        {/* Legal */}
+        <View style={styles.section}>
+          <PTPText variant="label" color="gray500" style={styles.sectionTitle}>
+            LEGAL
+          </PTPText>
+          <View style={styles.card}>
+            <MenuItem
+              icon="📜"
+              title="Privacy Policy"
+              onPress={() => Linking.openURL('https://ptpsummercamps.com/privacy-policy/')}
+            />
+            <MenuItem
+              icon="📋"
+              title="Terms of Service"
+              onPress={() => Linking.openURL('https://ptpsummercamps.com/terms-of-service/')}
+            />
+          </View>
+        </View>
+
         {/* Logout and Delete */}
         <View style={styles.section}>
           <View style={styles.card}>

@@ -11,6 +11,11 @@ import * as Notifications from 'expo-notifications';
 import * as Device from 'expo-device';
 import Constants from 'expo-constants';
 import { registerPushToken, unregisterPushToken } from '../api/push';
+import {
+  handleNotificationNavigation,
+  NotificationNavigationData,
+  isNavigationReady,
+} from '../services/navigation';
 
 // Configure notification handling
 Notifications.setNotificationHandler({
@@ -139,15 +144,35 @@ export const useNotifications = (): UseNotificationsResult => {
   };
 
   const handleNotificationResponse = (response: Notifications.NotificationResponse) => {
-    const data = response.notification.request.content.data;
+    const data = response.notification.request.content.data as NotificationNavigationData;
 
-    // Handle navigation based on notification type
-    // TODO: Implement navigation based on notification data
     console.log('Notification tapped:', data);
 
-    // Examples:
-    // - screenName: 'ConversationDetail', screenParams: { conversationId: 123 }
-    // - screenName: 'ProgramDetail', screenParams: { programId: 456 }
+    // Handle navigation based on notification type
+    // Expected data format from backend:
+    // - { screen: 'ConversationDetail', params: { conversationId: 123 } }
+    // - { screen: 'ProgramDetail', params: { programId: 456 } }
+    // - { tab: 'Schedule' } - navigate to a specific tab
+    // - { screen: 'Messages' } - navigate to messages screen
+
+    if (!data) {
+      console.log('No navigation data in notification');
+      return;
+    }
+
+    // Wait for navigation to be ready (might take a moment after app opens)
+    const attemptNavigation = (retries = 5) => {
+      if (isNavigationReady()) {
+        handleNotificationNavigation(data);
+      } else if (retries > 0) {
+        // Retry after a short delay
+        setTimeout(() => attemptNavigation(retries - 1), 200);
+      } else {
+        console.warn('Navigation not ready after retries');
+      }
+    };
+
+    attemptNavigation();
   };
 
   return {

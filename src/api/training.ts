@@ -119,13 +119,13 @@ export const getTrainer = async (trainerId: number): Promise<TrainerUser> => {
 const mapWordPressTrainer = (wpTrainer: any): TrainerUser => ({
   id: wpTrainer.id,
   email: wpTrainer.email || '',
-  role: 'trainer',
+  role: 'ptp_trainer',
   firstName: wpTrainer.first_name,
   lastName: wpTrainer.last_name,
   phone: wpTrainer.phone,
   avatarUrl: wpTrainer.avatar_url,
-  preferredLocation: wpTrainer.location ? { city: wpTrainer.location, state: 'PA' as const } : undefined,
   createdAt: wpTrainer.created_at || new Date().toISOString(),
+  updatedAt: wpTrainer.updated_at || new Date().toISOString(),
   // Trainer specific
   collegePro: wpTrainer.education || '',
   position: 'midfielder', // Default, could be from specializations
@@ -139,15 +139,16 @@ const mapWordPressTrainer = (wpTrainer: any): TrainerUser => ({
     city: wpTrainer.location?.split(',')[0] || 'Philadelphia',
     state: 'PA' as const,
     marketSlug: 'main-line',
+    isHomeBase: true,
   }],
   availability: {
-    monday: { available: true, slots: [] },
-    tuesday: { available: true, slots: [] },
-    wednesday: { available: true, slots: [] },
-    thursday: { available: true, slots: [] },
-    friday: { available: true, slots: [] },
-    saturday: { available: true, slots: [] },
-    sunday: { available: false, slots: [] },
+    monday: [],
+    tuesday: [],
+    wednesday: [],
+    thursday: [],
+    friday: [],
+    saturday: [],
+    sunday: [],
   },
   rating: wpTrainer.rating || 5.0,
   reviewCount: wpTrainer.total_reviews || 0,
@@ -222,13 +223,18 @@ export const requestSession = async (data: SessionRequest): Promise<SessionReque
     };
   }
 
+  // Map preferred slots to API format
+  const primarySlot = data.preferredSlots[0];
   const response = await apiClient.post('/training/request', {
     trainer_id: data.trainerId,
     child_id: data.childId,
-    date: data.date,
-    start_time: data.startTime,
-    duration: data.duration,
-    location: data.location,
+    preferred_slots: data.preferredSlots.map(slot => ({
+      date: slot.date,
+      start_time: slot.startTime,
+      end_time: slot.endTime,
+    })),
+    location_preference: data.locationPreference,
+    custom_location: data.customLocation,
     focus: data.focus?.join(', '),
     notes: data.notes,
   });
@@ -293,15 +299,15 @@ export const cancelSession = async (sessionId: number, reason?: string): Promise
 const mapWordPressSession = (wpSession: any): TrainingSession => ({
   id: wpSession.id,
   trainerId: wpSession.trainer?.id,
-  trainer: wpSession.trainer ? {
-    id: wpSession.trainer.id,
-    firstName: wpSession.trainer.name?.split(' ')[0] || '',
-    lastName: wpSession.trainer.name?.split(' ').slice(1).join(' ') || '',
+  trainer: {
+    id: wpSession.trainer?.id || 0,
+    firstName: wpSession.trainer?.name?.split(' ')[0] || 'Unknown',
+    lastName: wpSession.trainer?.name?.split(' ').slice(1).join(' ') || 'Trainer',
     collegePro: '',
     position: 'midfielder',
-    headshotUrl: wpSession.trainer.avatar_url,
+    headshotUrl: wpSession.trainer?.avatar_url,
     rating: 5.0,
-  } : undefined,
+  },
   parentId: wpSession.parent?.id,
   childId: wpSession.child?.id,
   child: wpSession.child ? {
@@ -531,7 +537,7 @@ export const updateTrainerProfile = async (
     first_name: data.firstName,
     last_name: data.lastName,
     phone: data.phone,
-    location: data.preferredLocation?.city,
+    location: data.serviceLocations?.[0]?.city,
     avatar_url: data.avatarUrl,
     bio: data.bio,
     hourly_rate: data.hourlyRate,
