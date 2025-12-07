@@ -101,11 +101,5 @@ export default ({ config }) => {
       },
     },
     owner: 'lmartelli',
-    updates: {
-      fallbackToCacheTimeout: 0,
-    },
-    runtimeVersion: {
-      policy: 'sdkVersion',
-    },
   };
 };
