@@ -88,16 +88,38 @@ export const useNotifications = (): UseNotificationsResult => {
 
       setIsPermissionGranted(true);
 
+      // Get EAS project ID from config
+      const projectId = Constants.expoConfig?.extra?.eas?.projectId;
+
+      if (!projectId) {
+        console.warn(
+          'Push notifications: EAS project ID not configured. ' +
+          'Set EXPO_PUBLIC_PROJECT_ID in your .env file for push notification support.'
+        );
+        // Still return true since permissions were granted - push tokens just won't work
+        return true;
+      }
+
       // Get Expo push token
       const token = await Notifications.getExpoPushTokenAsync({
-        projectId: Constants.expoConfig?.extra?.eas?.projectId,
+        projectId,
       });
+
+      if (!token?.data) {
+        console.error('Failed to get push token');
+        return true; // Permissions granted, but token failed
+      }
 
       setExpoPushToken(token.data);
 
       // Register token with backend
       const platform = Platform.OS as 'ios' | 'android';
-      await registerPushToken(token.data, platform);
+      try {
+        await registerPushToken(token.data, platform);
+      } catch (registerError) {
+        console.error('Failed to register push token with backend:', registerError);
+        // Don't fail the whole flow - token can be registered later
+      }
 
       // Configure Android channel
       if (Platform.OS === 'android') {
@@ -150,7 +172,11 @@ export const scheduleLocalNotification = async (
       body,
       data,
     },
-    trigger: { type: 'timeInterval', seconds: 2, repeats: false } as any,
+    trigger: {
+      type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL,
+      seconds: 2,
+      repeats: false,
+    },
   });
 };
 

@@ -11,15 +11,18 @@ import {
   ScrollView,
   TouchableOpacity,
   Alert,
+  Linking,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import Constants from 'expo-constants';
 import { ParentStackParamList } from '../../types/navigation';
 import { useAuth, useParentUser } from '../../hooks/useAuth';
 import { PTPText, PTPButton } from '../../components';
 import { colors } from '../../theme/colors';
 import { spacing, borderRadius, shadows } from '../../theme/spacing';
+import { deleteAccount } from '../../api/auth';
 
 type AccountNavigationProp = NativeStackNavigationProp<ParentStackParamList>;
 
@@ -101,13 +104,72 @@ const AccountScreen: React.FC = () => {
         {
           text: 'Delete',
           style: 'destructive',
-          onPress: () => {
-            // TODO: Implement account deletion
-            Alert.alert('Contact Support', 'Please contact support@ptpsoccer.com to delete your account.');
+          onPress: async () => {
+            try {
+              await deleteAccount();
+              await logout();
+            } catch (error) {
+              Alert.alert(
+                'Error',
+                'Failed to delete account. Please contact support@ptpsoccer.com for assistance.'
+              );
+            }
           },
         },
       ]
     );
+  };
+
+  const handleEditProfile = () => {
+    navigation.navigate('EditProfile');
+  };
+
+  const handleEditChild = (childId: number) => {
+    navigation.navigate('EditChild', { childId });
+  };
+
+  const handleAddChild = () => {
+    navigation.navigate('EditChild', {}); // No childId means add new
+  };
+
+  const handleOrderHistory = () => {
+    // Navigate to a filtered view or orders screen
+    // For now, show an informational message about orders
+    Alert.alert(
+      'Order History',
+      'Your order history is available on the PTP Soccer website. Would you like to open it?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Open Website',
+          onPress: () => Linking.openURL('https://ptpsummercamps.com/my-account/orders/'),
+        },
+      ]
+    );
+  };
+
+  const handleNotificationSettings = () => {
+    navigation.navigate('NotificationSettings');
+  };
+
+  const handleLocationSettings = () => {
+    // Navigate back to onboarding location screen or dedicated settings
+    Alert.alert(
+      'Location Preferences',
+      'To change your location preferences, please update your profile.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { text: 'Edit Profile', onPress: handleEditProfile },
+      ]
+    );
+  };
+
+  const handleHelp = () => {
+    Linking.openURL('https://ptpsummercamps.com/faq/');
+  };
+
+  const handleContact = () => {
+    Linking.openURL('mailto:support@ptpsoccer.com?subject=PTP%20Soccer%20App%20Support');
   };
 
   return (
@@ -147,9 +209,7 @@ const AccountScreen: React.FC = () => {
                     styles.childItem,
                     index < parentUser.children.length - 1 && styles.childItemBorder,
                   ]}
-                  onPress={() => {
-                    // TODO: Navigate to edit child
-                  }}
+                  onPress={() => handleEditChild(child.id)}
                 >
                   <View style={styles.childAvatar}>
                     <PTPText color="white" weight="semiBold">
@@ -174,9 +234,7 @@ const AccountScreen: React.FC = () => {
             )}
             <TouchableOpacity
               style={styles.addChildButton}
-              onPress={() => {
-                // TODO: Navigate to add child
-              }}
+              onPress={handleAddChild}
             >
               <PTPText variant="label" color="primary">
                 + Add Player
@@ -194,17 +252,13 @@ const AccountScreen: React.FC = () => {
             <MenuItem
               icon="👤"
               title="Edit Profile"
-              onPress={() => {
-                // TODO: Navigate to edit profile
-              }}
+              onPress={handleEditProfile}
             />
             <MenuItem
               icon="🧾"
               title="Order History"
               subtitle="View past purchases"
-              onPress={() => {
-                // TODO: Navigate to orders
-              }}
+              onPress={handleOrderHistory}
             />
             <MenuItem
               icon="💬"
@@ -225,17 +279,13 @@ const AccountScreen: React.FC = () => {
               icon="🔔"
               title="Notifications"
               subtitle="Manage push notifications"
-              onPress={() => {
-                // TODO: Navigate to notification settings
-              }}
+              onPress={handleNotificationSettings}
             />
             <MenuItem
               icon="📍"
               title="Location Preferences"
               subtitle={parentUser?.preferredLocation?.city || 'Not set'}
-              onPress={() => {
-                // TODO: Navigate to location settings
-              }}
+              onPress={handleLocationSettings}
             />
           </View>
         </View>
@@ -249,17 +299,13 @@ const AccountScreen: React.FC = () => {
             <MenuItem
               icon="❓"
               title="Help & FAQ"
-              onPress={() => {
-                // TODO: Open help page
-              }}
+              onPress={handleHelp}
             />
             <MenuItem
               icon="📧"
               title="Contact Us"
               subtitle="support@ptpsoccer.com"
-              onPress={() => {
-                // TODO: Open email
-              }}
+              onPress={handleContact}
             />
           </View>
         </View>
@@ -286,7 +332,7 @@ const AccountScreen: React.FC = () => {
         {/* App Version */}
         <View style={styles.versionInfo}>
           <PTPText variant="caption" color="gray400" center>
-            PTP Soccer v1.0.0
+            PTP Soccer v{Constants.expoConfig?.version || '1.0.0'}
           </PTPText>
         </View>
       </ScrollView>

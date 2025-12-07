@@ -49,11 +49,11 @@ export const PTPImage: React.FC<PTPImageProps> = memo(({
   };
 
   const containerStyle: ViewStyle = {
-    width: width as any,
-    height: height as any,
+    width: typeof width === 'number' ? width : (width as ViewStyle['width']),
+    height: typeof height === 'number' ? height : (height as ViewStyle['height']),
     borderRadius,
     overflow: 'hidden',
-    ...(style as object),
+    ...style,
   };
 
   if (hasError) {
