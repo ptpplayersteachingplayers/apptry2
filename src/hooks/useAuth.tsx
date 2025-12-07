@@ -76,8 +76,17 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   }, []);
 
   const checkAuthState = async () => {
+    // Add small delay to ensure native modules are ready
+    await new Promise(resolve => setTimeout(resolve, 100));
+
     try {
-      const token = await SecureStore.getItemAsync(TOKEN_STORAGE_KEY);
+      let token = null;
+      try {
+        token = await SecureStore.getItemAsync(TOKEN_STORAGE_KEY);
+      } catch (secureStoreError) {
+        console.warn('SecureStore not available:', secureStoreError);
+        // Continue without token - user will need to log in
+      }
 
       if (token) {
         // Verify token by fetching user
