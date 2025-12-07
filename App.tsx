@@ -5,7 +5,8 @@
  * Wraps the app with providers for theme, auth, navigation, and data fetching.
  */
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
+import { View, Text } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -19,7 +20,9 @@ import { PTPErrorBoundary } from './src/components/PTPErrorBoundary';
 import { queryClient } from './src/lib/queryClient';
 
 // Prevent splash screen from auto-hiding
-SplashScreen.preventAutoHideAsync();
+SplashScreen.preventAutoHideAsync().catch(() => {
+  // Ignore errors - splash screen might already be hidden
+});
 
 /**
  * App - Root component
@@ -33,16 +36,28 @@ SplashScreen.preventAutoHideAsync();
  * 6. AuthProvider - Authentication state
  */
 export default function App() {
+  const [isReady, setIsReady] = useState(false);
+
   useEffect(() => {
-    // Hide splash screen after fonts are loaded (handled in PTPThemeProvider)
-    const hideSplash = async () => {
-      // Small delay to ensure everything is loaded
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      await SplashScreen.hideAsync();
+    // Small delay to ensure everything is loaded
+    const prepare = async () => {
+      try {
+        await new Promise((resolve) => setTimeout(resolve, 100));
+        setIsReady(true);
+      } catch (e) {
+        console.warn(e);
+        setIsReady(true);
+      } finally {
+        await SplashScreen.hideAsync().catch(() => {});
+      }
     };
 
-    hideSplash();
+    prepare();
   }, []);
+
+  if (!isReady) {
+    return null;
+  }
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
