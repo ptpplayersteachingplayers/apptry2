@@ -13,6 +13,7 @@ export * from './auth';
 export * from './programs';
 export * from './training';
 export * from './messages';
+export * from './children';
 export * from './events';
 export * from './orders';
 export * from './push';
