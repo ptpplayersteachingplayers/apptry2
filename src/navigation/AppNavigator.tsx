@@ -33,6 +33,13 @@ import EditProfileScreen from '../screens/parent/EditProfileScreen';
 import EditChildScreen from '../screens/parent/EditChildScreen';
 import NotificationSettingsScreen from '../screens/parent/NotificationSettingsScreen';
 
+// Trainer Detail Screens
+import SessionDetailScreen from '../screens/trainer/SessionDetailScreen';
+import StudentDetailScreen from '../screens/trainer/StudentDetailScreen';
+import EditTrainerProfileScreen from '../screens/trainer/EditTrainerProfileScreen';
+import EditAvailabilityScreen from '../screens/trainer/EditAvailabilityScreen';
+import EarningsDetailScreen from '../screens/trainer/EarningsDetailScreen';
+
 const Stack = createNativeStackNavigator();
 
 // Deep linking configuration
@@ -211,6 +218,66 @@ const TrainerStackNavigator: React.FC = () => {
         options={{
           headerShown: true,
           headerTitle: 'Conversation',
+          headerTintColor: colors.inkBlack,
+          headerStyle: { backgroundColor: colors.offWhite },
+          headerTitleStyle: { fontFamily: fontFamily.semiBold },
+          headerBackTitle: 'Back',
+        }}
+      />
+      <Stack.Screen
+        name="SessionDetail"
+        component={SessionDetailScreen}
+        options={{
+          headerShown: true,
+          headerTitle: 'Session Details',
+          headerTintColor: colors.inkBlack,
+          headerStyle: { backgroundColor: colors.offWhite },
+          headerTitleStyle: { fontFamily: fontFamily.semiBold },
+          headerBackTitle: 'Back',
+        }}
+      />
+      <Stack.Screen
+        name="StudentDetail"
+        component={StudentDetailScreen}
+        options={{
+          headerShown: true,
+          headerTitle: 'Student Profile',
+          headerTintColor: colors.inkBlack,
+          headerStyle: { backgroundColor: colors.offWhite },
+          headerTitleStyle: { fontFamily: fontFamily.semiBold },
+          headerBackTitle: 'Back',
+        }}
+      />
+      <Stack.Screen
+        name="EditTrainerProfile"
+        component={EditTrainerProfileScreen}
+        options={{
+          headerShown: true,
+          headerTitle: 'Edit Profile',
+          headerTintColor: colors.inkBlack,
+          headerStyle: { backgroundColor: colors.offWhite },
+          headerTitleStyle: { fontFamily: fontFamily.semiBold },
+          headerBackTitle: 'Back',
+        }}
+      />
+      <Stack.Screen
+        name="EditAvailability"
+        component={EditAvailabilityScreen}
+        options={{
+          headerShown: true,
+          headerTitle: 'Availability',
+          headerTintColor: colors.inkBlack,
+          headerStyle: { backgroundColor: colors.offWhite },
+          headerTitleStyle: { fontFamily: fontFamily.semiBold },
+          headerBackTitle: 'Back',
+        }}
+      />
+      <Stack.Screen
+        name="EarningsDetail"
+        component={EarningsDetailScreen}
+        options={{
+          headerShown: true,
+          headerTitle: 'Earnings',
           headerTintColor: colors.inkBlack,
           headerStyle: { backgroundColor: colors.offWhite },
           headerTitleStyle: { fontFamily: fontFamily.semiBold },
