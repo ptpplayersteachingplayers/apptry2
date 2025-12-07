@@ -26,8 +26,8 @@ const getBundleIdentifier = () => {
 };
 
 export default ({ config }) => {
-  // Get EAS project ID from environment or use placeholder
-  const easProjectId = process.env.EXPO_PUBLIC_PROJECT_ID || process.env.EAS_PROJECT_ID;
+  // EAS Project ID - hardcoded for build reliability
+  const easProjectId = '68d2492c-c447-441d-8bf3-99413f385ed4';
 
   return {
     ...config,
@@ -100,7 +100,7 @@ export default ({ config }) => {
         projectId: easProjectId,
       },
     },
-    owner: 'ptpsoccer',
+    owner: 'lmartelli',
     updates: {
       fallbackToCacheTimeout: 0,
     },
