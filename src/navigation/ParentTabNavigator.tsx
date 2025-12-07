@@ -6,13 +6,13 @@
  */
 
 import React from 'react';
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { Ionicons } from '@expo/vector-icons';
 import { ParentTabParamList } from '../types/navigation';
 import { colors } from '../theme/colors';
 import { fontFamily, fontSize } from '../theme/typography';
 import { spacing, layoutSpacing } from '../theme/spacing';
-import { PTPText } from '../components/PTPText';
 
 // Parent Screens
 import HomeScreen from '../screens/parent/HomeScreen';
@@ -23,23 +23,15 @@ import AccountScreen from '../screens/parent/AccountScreen';
 
 const Tab = createBottomTabNavigator<ParentTabParamList>();
 
-// Tab icons as simple text (replace with proper icons in production)
-const TabIcon: React.FC<{ name: string; focused: boolean }> = ({ name, focused }) => {
-  const icons: { [key: string]: string } = {
-    Home: '🏠',
-    CampsClinics: '⚽',
-    PrivateTraining: '🎯',
-    Schedule: '📅',
-    Account: '👤',
-  };
+// Tab icon configuration
+type IconName = React.ComponentProps<typeof Ionicons>['name'];
 
-  return (
-    <View style={styles.iconContainer}>
-      <PTPText style={[styles.icon, focused && styles.iconFocused]}>
-        {icons[name] || '•'}
-      </PTPText>
-    </View>
-  );
+const TAB_ICONS: { [key: string]: { outline: IconName; filled: IconName } } = {
+  Home: { outline: 'home-outline', filled: 'home' },
+  CampsClinics: { outline: 'football-outline', filled: 'football' },
+  PrivateTraining: { outline: 'fitness-outline', filled: 'fitness' },
+  Schedule: { outline: 'calendar-outline', filled: 'calendar' },
+  Account: { outline: 'person-outline', filled: 'person' },
 };
 
 /**
@@ -50,7 +42,11 @@ export const ParentTabNavigator: React.FC = () => {
     <Tab.Navigator
       screenOptions={({ route }) => ({
         headerShown: false,
-        tabBarIcon: ({ focused }) => <TabIcon name={route.name} focused={focused} />,
+        tabBarIcon: ({ focused, color, size }) => {
+          const icons = TAB_ICONS[route.name] || { outline: 'ellipse-outline', filled: 'ellipse' };
+          const iconName = focused ? icons.filled : icons.outline;
+          return <Ionicons name={iconName} size={size} color={color} />;
+        },
         tabBarActiveTintColor: colors.primary,
         tabBarInactiveTintColor: colors.gray500,
         tabBarStyle: styles.tabBar,
@@ -114,17 +110,6 @@ const styles = StyleSheet.create({
   tabBarLabel: {
     fontFamily: fontFamily.medium,
     fontSize: fontSize.xs,
-  },
-  iconContainer: {
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  icon: {
-    fontSize: 24,
-    opacity: 0.6,
-  },
-  iconFocused: {
-    opacity: 1,
   },
 });
 

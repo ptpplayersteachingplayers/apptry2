@@ -16,6 +16,7 @@ import { colors } from '../theme/colors';
 import { fontFamily } from '../theme/typography';
 import { useAuth } from '../hooks/useAuth';
 import { PTPLoading } from '../components/PTPLoading';
+import { navigationRef } from '../services/navigation';
 
 // Navigators
 import AuthNavigator from './AuthNavigator';
@@ -28,6 +29,16 @@ import TrainerDetailScreen from '../screens/parent/TrainerDetailScreen';
 import CheckoutScreen from '../screens/parent/CheckoutScreen';
 import MessagesScreen from '../screens/parent/MessagesScreen';
 import ConversationDetailScreen from '../screens/parent/ConversationDetailScreen';
+import EditProfileScreen from '../screens/parent/EditProfileScreen';
+import EditChildScreen from '../screens/parent/EditChildScreen';
+import NotificationSettingsScreen from '../screens/parent/NotificationSettingsScreen';
+
+// Trainer Detail Screens
+import SessionDetailScreen from '../screens/trainer/SessionDetailScreen';
+import StudentDetailScreen from '../screens/trainer/StudentDetailScreen';
+import EditTrainerProfileScreen from '../screens/trainer/EditTrainerProfileScreen';
+import EditAvailabilityScreen from '../screens/trainer/EditAvailabilityScreen';
+import EarningsDetailScreen from '../screens/trainer/EarningsDetailScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -149,6 +160,42 @@ const ParentStackNavigator: React.FC = () => {
           headerBackTitle: 'Back',
         }}
       />
+      <Stack.Screen
+        name="EditProfile"
+        component={EditProfileScreen}
+        options={{
+          headerShown: true,
+          headerTitle: 'Edit Profile',
+          headerTintColor: colors.inkBlack,
+          headerStyle: { backgroundColor: colors.offWhite },
+          headerTitleStyle: { fontFamily: fontFamily.semiBold },
+          headerBackTitle: 'Back',
+        }}
+      />
+      <Stack.Screen
+        name="EditChild"
+        component={EditChildScreen}
+        options={{
+          headerShown: true,
+          headerTitle: 'Player Profile',
+          headerTintColor: colors.inkBlack,
+          headerStyle: { backgroundColor: colors.offWhite },
+          headerTitleStyle: { fontFamily: fontFamily.semiBold },
+          headerBackTitle: 'Back',
+        }}
+      />
+      <Stack.Screen
+        name="NotificationSettings"
+        component={NotificationSettingsScreen}
+        options={{
+          headerShown: true,
+          headerTitle: 'Notifications',
+          headerTintColor: colors.inkBlack,
+          headerStyle: { backgroundColor: colors.offWhite },
+          headerTitleStyle: { fontFamily: fontFamily.semiBold },
+          headerBackTitle: 'Back',
+        }}
+      />
     </Stack.Navigator>
   );
 };
@@ -177,6 +224,66 @@ const TrainerStackNavigator: React.FC = () => {
           headerBackTitle: 'Back',
         }}
       />
+      <Stack.Screen
+        name="SessionDetail"
+        component={SessionDetailScreen}
+        options={{
+          headerShown: true,
+          headerTitle: 'Session Details',
+          headerTintColor: colors.inkBlack,
+          headerStyle: { backgroundColor: colors.offWhite },
+          headerTitleStyle: { fontFamily: fontFamily.semiBold },
+          headerBackTitle: 'Back',
+        }}
+      />
+      <Stack.Screen
+        name="StudentDetail"
+        component={StudentDetailScreen}
+        options={{
+          headerShown: true,
+          headerTitle: 'Student Profile',
+          headerTintColor: colors.inkBlack,
+          headerStyle: { backgroundColor: colors.offWhite },
+          headerTitleStyle: { fontFamily: fontFamily.semiBold },
+          headerBackTitle: 'Back',
+        }}
+      />
+      <Stack.Screen
+        name="EditTrainerProfile"
+        component={EditTrainerProfileScreen}
+        options={{
+          headerShown: true,
+          headerTitle: 'Edit Profile',
+          headerTintColor: colors.inkBlack,
+          headerStyle: { backgroundColor: colors.offWhite },
+          headerTitleStyle: { fontFamily: fontFamily.semiBold },
+          headerBackTitle: 'Back',
+        }}
+      />
+      <Stack.Screen
+        name="EditAvailability"
+        component={EditAvailabilityScreen}
+        options={{
+          headerShown: true,
+          headerTitle: 'Availability',
+          headerTintColor: colors.inkBlack,
+          headerStyle: { backgroundColor: colors.offWhite },
+          headerTitleStyle: { fontFamily: fontFamily.semiBold },
+          headerBackTitle: 'Back',
+        }}
+      />
+      <Stack.Screen
+        name="EarningsDetail"
+        component={EarningsDetailScreen}
+        options={{
+          headerShown: true,
+          headerTitle: 'Earnings',
+          headerTintColor: colors.inkBlack,
+          headerStyle: { backgroundColor: colors.offWhite },
+          headerTitleStyle: { fontFamily: fontFamily.semiBold },
+          headerBackTitle: 'Back',
+        }}
+      />
     </Stack.Navigator>
   );
 };
@@ -196,7 +303,7 @@ export const AppNavigator: React.FC = () => {
   const isTrainer = user?.role === 'ptp_trainer';
 
   return (
-    <NavigationContainer linking={linking}>
+    <NavigationContainer ref={navigationRef} linking={linking}>
       <Stack.Navigator screenOptions={{ headerShown: false }}>
         {!isAuthenticated ? (
           // Not logged in - show auth flow

@@ -6,13 +6,13 @@
  */
 
 import React from 'react';
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { Ionicons } from '@expo/vector-icons';
 import { TrainerTabParamList } from '../types/navigation';
 import { colors } from '../theme/colors';
 import { fontFamily, fontSize } from '../theme/typography';
 import { spacing, layoutSpacing } from '../theme/spacing';
-import { PTPText } from '../components/PTPText';
 
 // Trainer Screens
 import TrainerDashboardScreen from '../screens/trainer/TrainerDashboardScreen';
@@ -23,23 +23,15 @@ import TrainerProfileScreen from '../screens/trainer/TrainerProfileScreen';
 
 const Tab = createBottomTabNavigator<TrainerTabParamList>();
 
-// Tab icons as simple text (replace with proper icons in production)
-const TabIcon: React.FC<{ name: string; focused: boolean }> = ({ name, focused }) => {
-  const icons: { [key: string]: string } = {
-    TrainerDashboard: '📊',
-    TrainerSchedule: '📅',
-    TrainerStudents: '👥',
-    TrainerMessages: '💬',
-    TrainerProfile: '⚙️',
-  };
+// Tab icon configuration
+type IconName = React.ComponentProps<typeof Ionicons>['name'];
 
-  return (
-    <View style={styles.iconContainer}>
-      <PTPText style={[styles.icon, focused && styles.iconFocused]}>
-        {icons[name] || '•'}
-      </PTPText>
-    </View>
-  );
+const TAB_ICONS: { [key: string]: { outline: IconName; filled: IconName } } = {
+  TrainerDashboard: { outline: 'stats-chart-outline', filled: 'stats-chart' },
+  TrainerSchedule: { outline: 'calendar-outline', filled: 'calendar' },
+  TrainerStudents: { outline: 'people-outline', filled: 'people' },
+  TrainerMessages: { outline: 'chatbubbles-outline', filled: 'chatbubbles' },
+  TrainerProfile: { outline: 'settings-outline', filled: 'settings' },
 };
 
 /**
@@ -50,7 +42,11 @@ export const TrainerTabNavigator: React.FC = () => {
     <Tab.Navigator
       screenOptions={({ route }) => ({
         headerShown: false,
-        tabBarIcon: ({ focused }) => <TabIcon name={route.name} focused={focused} />,
+        tabBarIcon: ({ focused, color, size }) => {
+          const icons = TAB_ICONS[route.name] || { outline: 'ellipse-outline', filled: 'ellipse' };
+          const iconName = focused ? icons.filled : icons.outline;
+          return <Ionicons name={iconName} size={size} color={color} />;
+        },
         tabBarActiveTintColor: colors.primary,
         tabBarInactiveTintColor: colors.gray500,
         tabBarStyle: styles.tabBar,
@@ -114,17 +110,6 @@ const styles = StyleSheet.create({
   tabBarLabel: {
     fontFamily: fontFamily.medium,
     fontSize: fontSize.xs,
-  },
-  iconContainer: {
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  icon: {
-    fontSize: 24,
-    opacity: 0.6,
-  },
-  iconFocused: {
-    opacity: 1,
   },
 });
 

@@ -4,10 +4,15 @@
  * Handles in-app messaging between parents and trainers.
  * Uses REST polling for v1 (no websockets required).
  *
- * TODO: Implement real-time updates
- * - Consider websockets or Firebase for real-time messaging
- * - Implement read receipts
- * - Add image/video attachment support
+ * Endpoints (WordPress PTP Messages Plugin):
+ * - GET /messages/conversations - Get all conversations
+ * - GET /messages/conversations/:id - Get single conversation
+ * - GET /messages/conversations/:id/messages - Get messages in conversation
+ * - POST /messages/send - Send a message
+ * - POST /messages/conversations/start - Start new conversation
+ * - POST /messages/conversations/:id/read - Mark messages as read
+ * - GET /messages/unread-count - Get unread message count
+ * - DELETE /messages/conversations/:id - Delete/archive conversation
  */
 
 import { apiClient } from './client';
@@ -37,13 +42,34 @@ export const getConversations = async (): Promise<ConversationsResponse> => {
   }
 
   const response = await apiClient.get('/messages/conversations');
-  return response.data;
+  const conversations = (response.data.conversations || []).map(mapWordPressConversation);
+
+  return {
+    conversations,
+    total: conversations.length,
+  };
+};
+
+/**
+ * Get a single conversation
+ *
+ * GET /wp-json/ptp/v1/messages/conversations/:id
+ */
+export const getConversation = async (conversationId: number): Promise<Conversation> => {
+  if (apiConfig.demoMode) {
+    const conv = mockConversations.find((c) => c.id === conversationId);
+    if (!conv) throw new Error('Conversation not found');
+    return conv;
+  }
+
+  const response = await apiClient.get(`/messages/conversations/${conversationId}`);
+  return mapWordPressConversation(response.data);
 };
 
 /**
  * Get messages for a specific conversation
  *
- * GET /wp-json/ptp/v1/messages?conversation_id=...
+ * GET /wp-json/ptp/v1/messages/conversations/:id/messages
  */
 export const getMessages = async (
   conversationId: number,
@@ -55,32 +81,45 @@ export const getMessages = async (
   }
 
   const params = new URLSearchParams();
-  params.append('conversation_id', conversationId.toString());
   params.append('limit', limit.toString());
   if (before) params.append('before', before.toString());
 
-  const response = await apiClient.get(`/messages?${params.toString()}`);
-  return response.data;
+  const response = await apiClient.get(
+    `/messages/conversations/${conversationId}/messages?${params.toString()}`
+  );
+
+  return {
+    messages: (response.data.messages || []).map(mapWordPressMessage),
+    hasMore: response.data.has_more || false,
+  };
 };
 
 /**
  * Send a message
  *
- * POST /wp-json/ptp/v1/messages
+ * POST /wp-json/ptp/v1/messages/send
  */
 export const sendMessage = async (data: SendMessageRequest): Promise<SendMessageResponse> => {
   if (apiConfig.demoMode) {
     return mockSendMessage(data);
   }
 
-  const response = await apiClient.post('/messages', data);
-  return response.data;
+  const response = await apiClient.post('/messages/send', {
+    conversation_id: data.conversationId,
+    content: data.content,
+    attachments: data.attachmentUrls,
+  });
+
+  return {
+    success: response.data.success,
+    message: mapWordPressMessage(response.data.message),
+  };
 };
 
 /**
  * Start a new conversation
  *
- * POST /wp-json/ptp/v1/messages/conversations
+ * POST /wp-json/ptp/v1/messages/conversations/start
  */
 export const startConversation = async (
   data: StartConversationRequest
@@ -89,14 +128,23 @@ export const startConversation = async (
     return mockStartConversation(data);
   }
 
-  const response = await apiClient.post('/messages/conversations', data);
-  return response.data;
+  const response = await apiClient.post('/messages/conversations/start', {
+    participant_id: data.recipientId,
+    related_session_id: data.relatedSessionId,
+    related_program_id: data.relatedProgramId,
+    initial_message: data.initialMessage,
+  });
+
+  return {
+    success: response.data.success,
+    conversation: mapWordPressConversation(response.data.conversation),
+  };
 };
 
 /**
  * Mark messages as read
  *
- * POST /wp-json/ptp/v1/messages/read
+ * POST /wp-json/ptp/v1/messages/conversations/:id/read
  */
 export const markAsRead = async (conversationId: number): Promise<void> => {
   if (apiConfig.demoMode) {
@@ -106,7 +154,7 @@ export const markAsRead = async (conversationId: number): Promise<void> => {
     return;
   }
 
-  await apiClient.post('/messages/read', { conversation_id: conversationId });
+  await apiClient.post(`/messages/conversations/${conversationId}/read`);
 };
 
 /**
@@ -120,8 +168,68 @@ export const getUnreadCount = async (): Promise<number> => {
   }
 
   const response = await apiClient.get('/messages/unread-count');
-  return response.data.count;
+  return response.data.unread_count || 0;
 };
+
+/**
+ * Delete/archive a conversation
+ *
+ * DELETE /wp-json/ptp/v1/messages/conversations/:id
+ */
+export const deleteConversation = async (conversationId: number): Promise<{ success: boolean }> => {
+  if (apiConfig.demoMode) {
+    const index = mockConversations.findIndex((c) => c.id === conversationId);
+    if (index !== -1) mockConversations.splice(index, 1);
+    return { success: true };
+  }
+
+  const response = await apiClient.delete(`/messages/conversations/${conversationId}`);
+  return response.data;
+};
+
+/**
+ * Map WordPress conversation response to app Conversation type
+ */
+const mapWordPressConversation = (wpConv: any): Conversation => ({
+  id: wpConv.id,
+  participantIds: wpConv.participant ? [wpConv.participant.id] : [],
+  participants: wpConv.participant ? [{
+    id: wpConv.participant.id,
+    name: wpConv.participant.name,
+    role: wpConv.participant.role,
+    avatarUrl: wpConv.participant.avatar_url,
+  }] : [],
+  lastMessage: wpConv.last_message ? {
+    content: wpConv.last_message,
+    senderName: wpConv.participant?.name || '',
+    senderType: wpConv.participant?.role || 'parent',
+    createdAt: wpConv.last_message_at || wpConv.updated_at,
+  } : undefined,
+  unreadCount: wpConv.unread_count || 0,
+  relatedSessionId: wpConv.related_session_id,
+  relatedProgramId: wpConv.related_program_id,
+  status: 'active',
+  createdAt: wpConv.created_at,
+  updatedAt: wpConv.updated_at,
+});
+
+/**
+ * Map WordPress message response to app Message type
+ */
+const mapWordPressMessage = (wpMsg: any): Message => ({
+  id: wpMsg.id,
+  conversationId: wpMsg.conversation_id,
+  senderId: wpMsg.sender?.id || 0,
+  senderType: wpMsg.sender_type,
+  senderName: wpMsg.sender?.name || '',
+  senderAvatarUrl: wpMsg.sender?.avatar_url,
+  content: wpMsg.content,
+  attachmentUrls: wpMsg.attachments || [],
+  status: wpMsg.status || 'sent',
+  readAt: wpMsg.read_at,
+  createdAt: wpMsg.created_at,
+  updatedAt: wpMsg.created_at,
+});
 
 // ============================================================
 // MOCK DATA FOR DEMO MODE

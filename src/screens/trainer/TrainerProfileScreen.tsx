@@ -5,14 +5,21 @@
  */
 
 import React from 'react';
-import { View, StyleSheet, ScrollView, TouchableOpacity, Alert, Image } from 'react-native';
+import { View, StyleSheet, ScrollView, TouchableOpacity, Alert, Image, Linking } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import Constants from 'expo-constants';
+import { TrainerStackParamList } from '../../types/navigation';
 import { useAuth, useTrainerUser } from '../../hooks/useAuth';
 import { PTPText, PTPButton, PTPTag } from '../../components';
 import { colors } from '../../theme/colors';
 import { spacing, borderRadius, shadows } from '../../theme/spacing';
 
+type ProfileNavigationProp = NativeStackNavigationProp<TrainerStackParamList>;
+
 const TrainerProfileScreen: React.FC = () => {
+  const navigation = useNavigation<ProfileNavigationProp>();
   const { logout } = useAuth();
   const trainerUser = useTrainerUser();
 
@@ -64,20 +71,31 @@ const TrainerProfileScreen: React.FC = () => {
         <View style={styles.section}>
           <PTPText variant="sectionTitle" style={styles.sectionTitle}>Settings</PTPText>
           <View style={styles.menuCard}>
-            <TouchableOpacity style={styles.menuItem}>
+            <TouchableOpacity style={styles.menuItem} onPress={() => navigation.navigate('EditTrainerProfile')}>
               <PTPText>Edit Profile</PTPText>
               <PTPText color="gray400">→</PTPText>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.menuItem}>
+            <TouchableOpacity style={styles.menuItem} onPress={() => navigation.navigate('EditAvailability')}>
               <PTPText>Update Availability</PTPText>
               <PTPText color="gray400">→</PTPText>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.menuItem}>
-              <PTPText>Change Hourly Rate</PTPText>
+            <TouchableOpacity style={styles.menuItem} onPress={() => navigation.navigate('EarningsDetail')}>
+              <PTPText>Earnings & Payouts</PTPText>
               <PTPText color="gray400">→</PTPText>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.menuItem}>
-              <PTPText>Notification Settings</PTPText>
+          </View>
+        </View>
+
+        {/* Legal */}
+        <View style={styles.section}>
+          <PTPText variant="sectionTitle" style={styles.sectionTitle}>Legal</PTPText>
+          <View style={styles.menuCard}>
+            <TouchableOpacity style={styles.menuItem} onPress={() => Linking.openURL('https://ptpsummercamps.com/privacy-policy/')}>
+              <PTPText>Privacy Policy</PTPText>
+              <PTPText color="gray400">→</PTPText>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.menuItem} onPress={() => Linking.openURL('https://ptpsummercamps.com/terms-of-service/')}>
+              <PTPText>Terms of Service</PTPText>
               <PTPText color="gray400">→</PTPText>
             </TouchableOpacity>
           </View>
@@ -85,7 +103,7 @@ const TrainerProfileScreen: React.FC = () => {
 
         <View style={styles.section}>
           <View style={styles.menuCard}>
-            <TouchableOpacity style={styles.menuItem}>
+            <TouchableOpacity style={styles.menuItem} onPress={() => Linking.openURL('https://ptpsummercamps.com/faq/')}>
               <PTPText>Help & Support</PTPText>
               <PTPText color="gray400">→</PTPText>
             </TouchableOpacity>
@@ -96,7 +114,7 @@ const TrainerProfileScreen: React.FC = () => {
         </View>
 
         <View style={styles.version}>
-          <PTPText variant="caption" color="gray400" center>PTP Soccer v1.0.0</PTPText>
+          <PTPText variant="caption" color="gray400" center>PTP Soccer v{Constants.expoConfig?.version || '1.0.0'}</PTPText>
         </View>
       </ScrollView>
     </SafeAreaView>

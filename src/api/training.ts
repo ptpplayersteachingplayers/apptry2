@@ -4,10 +4,14 @@
  * Handles private training sessions and trainer data.
  * Private training is the follow-up product discovered through camps/clinics.
  *
- * TODO: Wire in real data
- * - Connect trainer profiles to WordPress users with 'ptp_trainer' role
- * - Implement real session request flow with notifications
- * - Add Stripe/WooCommerce payment handling for sessions
+ * Endpoints (WordPress PTP Training Plugin):
+ * - GET /trainers - List trainers with filtering
+ * - GET /trainers/:id - Get trainer details
+ * - GET /trainers/:id/availability - Get trainer availability slots
+ * - POST /training/request - Request a new training session
+ * - GET /training/my-sessions - Get user's training sessions
+ * - GET /training/sessions/:id - Get session details
+ * - POST /training/sessions/:id/cancel - Cancel a session
  */
 
 import { apiClient } from './client';
@@ -58,7 +62,7 @@ const getPastTimestamp = (daysAgo: number): string => {
 /**
  * Get list of trainers/mentors
  *
- * GET /wp-json/ptp/v1/training/mentors
+ * GET /wp-json/ptp/v1/trainers
  */
 export const getTrainers = async (
   filters?: TrainerFilters,
@@ -73,19 +77,30 @@ export const getTrainers = async (
   params.append('page', page.toString());
   params.append('per_page', perPage.toString());
 
-  if (filters?.state) params.append('state', filters.state);
-  if (filters?.city) params.append('city', filters.city);
-  if (filters?.marketSlug) params.append('market', filters.marketSlug);
-  if (filters?.specialty) params.append('specialty', filters.specialty);
+  if (filters?.state) params.append('location', filters.state);
+  if (filters?.city) params.append('location', filters.city);
+  if (filters?.marketSlug) params.append('location', filters.marketSlug);
+  if (filters?.specialty) params.append('specialization', filters.specialty);
+  if (filters?.priceMax) params.append('max_price', filters.priceMax.toString());
+  if (filters?.rating) params.append('min_rating', filters.rating.toString());
 
-  const response = await apiClient.get(`/training/mentors?${params.toString()}`);
-  return response.data;
+  const response = await apiClient.get(`/trainers?${params.toString()}`);
+
+  // Map WordPress response to our format
+  const { trainers, total, total_pages } = response.data;
+  return {
+    trainers: trainers.map(mapWordPressTrainer),
+    total,
+    page,
+    perPage,
+    hasMore: page < total_pages,
+  };
 };
 
 /**
  * Get a single trainer by ID
  *
- * GET /wp-json/ptp/v1/training/mentors/:id
+ * GET /wp-json/ptp/v1/trainers/:id
  */
 export const getTrainer = async (trainerId: number): Promise<TrainerUser> => {
   if (apiConfig.demoMode) {
@@ -94,48 +109,109 @@ export const getTrainer = async (trainerId: number): Promise<TrainerUser> => {
     return trainer;
   }
 
-  const response = await apiClient.get(`/training/mentors/${trainerId}`);
-  return response.data;
+  const response = await apiClient.get(`/trainers/${trainerId}`);
+  return mapWordPressTrainer(response.data);
 };
 
 /**
+ * Map WordPress trainer response to app TrainerUser type
+ */
+const mapWordPressTrainer = (wpTrainer: any): TrainerUser => ({
+  id: wpTrainer.id,
+  email: wpTrainer.email || '',
+  role: 'ptp_trainer',
+  firstName: wpTrainer.first_name,
+  lastName: wpTrainer.last_name,
+  phone: wpTrainer.phone,
+  avatarUrl: wpTrainer.avatar_url,
+  createdAt: wpTrainer.created_at || new Date().toISOString(),
+  updatedAt: wpTrainer.updated_at || new Date().toISOString(),
+  // Trainer specific
+  collegePro: wpTrainer.education || '',
+  position: 'midfielder', // Default, could be from specializations
+  bio: wpTrainer.bio || '',
+  teachingStyle: wpTrainer.teaching_style,
+  specialties: wpTrainer.specializations || [],
+  hourlyRate: wpTrainer.hourly_rate || 80,
+  serviceLocations: [{
+    id: 1,
+    name: wpTrainer.location || 'TBD',
+    city: wpTrainer.location?.split(',')[0] || 'Philadelphia',
+    state: 'PA' as const,
+    marketSlug: 'main-line',
+    isHomeBase: true,
+  }],
+  availability: {
+    monday: [],
+    tuesday: [],
+    wednesday: [],
+    thursday: [],
+    friday: [],
+    saturday: [],
+    sunday: [],
+  },
+  rating: wpTrainer.rating || 5.0,
+  reviewCount: wpTrainer.total_reviews || 0,
+  isVerified: true,
+  isBackgroundChecked: true,
+  headshotUrl: wpTrainer.avatar_url,
+  galleryUrls: wpTrainer.gallery || [],
+});
+
+/**
  * Get trainer reviews
+ * Reviews are included in the trainer detail response from WordPress
  *
- * GET /wp-json/ptp/v1/training/mentors/:id/reviews
+ * GET /wp-json/ptp/v1/trainers/:id (includes reviews)
  */
 export const getTrainerReviews = async (trainerId: number): Promise<TrainerReview[]> => {
   if (apiConfig.demoMode) {
     return getMockReviews(trainerId);
   }
 
-  const response = await apiClient.get(`/training/mentors/${trainerId}/reviews`);
-  return response.data;
+  const response = await apiClient.get(`/trainers/${trainerId}`);
+  return (response.data.reviews || []).map((r: any) => ({
+    id: r.id,
+    parentName: r.reviewer_name,
+    rating: r.rating,
+    comment: r.comment,
+    date: r.date,
+    sessionId: r.session_id,
+  }));
 };
 
 /**
- * Get trainer availability
+ * Get trainer availability for a specific date
  *
- * GET /wp-json/ptp/v1/training/mentors/:id/availability
+ * GET /wp-json/ptp/v1/trainers/:id/availability
  */
 export const getTrainerAvailability = async (
   trainerId: number,
   dateFrom: string,
-  dateTo: string
+  _dateTo: string
 ): Promise<TrainerAvailabilitySlot[]> => {
   if (apiConfig.demoMode) {
-    return getMockAvailability(trainerId, dateFrom, dateTo);
+    return getMockAvailability(trainerId, dateFrom, _dateTo);
   }
 
-  const response = await apiClient.get(
-    `/training/mentors/${trainerId}/availability?from=${dateFrom}&to=${dateTo}`
-  );
-  return response.data;
+  const response = await apiClient.get(`/trainers/${trainerId}/availability?date=${dateFrom}`);
+  const { available_slots, date } = response.data;
+
+  return available_slots.map((slot: any, index: number) => ({
+    id: index + 1,
+    trainerId,
+    date,
+    startTime: slot.start_time,
+    endTime: slot.end_time,
+    isAvailable: true,
+    price: 80, // Would come from trainer profile
+  }));
 };
 
 /**
  * Request a training session
  *
- * POST /wp-json/ptp/v1/training/session-request
+ * POST /wp-json/ptp/v1/training/request
  */
 export const requestSession = async (data: SessionRequest): Promise<SessionRequestResponse> => {
   if (apiConfig.demoMode) {
@@ -147,27 +223,163 @@ export const requestSession = async (data: SessionRequest): Promise<SessionReque
     };
   }
 
-  const response = await apiClient.post('/training/session-request', data);
-  return response.data;
+  // Map preferred slots to API format
+  const primarySlot = data.preferredSlots[0];
+  const response = await apiClient.post('/training/request', {
+    trainer_id: data.trainerId,
+    child_id: data.childId,
+    preferred_slots: data.preferredSlots.map(slot => ({
+      date: slot.date,
+      start_time: slot.startTime,
+      end_time: slot.endTime,
+    })),
+    location_preference: data.locationPreference,
+    custom_location: data.customLocation,
+    focus: data.focus?.join(', '),
+    notes: data.notes,
+  });
+
+  return {
+    success: response.data.success,
+    requestId: response.data.session_id,
+    message: response.data.message,
+  };
 };
 
 /**
  * Get user's training sessions (for parents)
  *
- * GET /wp-json/ptp/v1/me/sessions
+ * GET /wp-json/ptp/v1/training/my-sessions
  */
-export const getMySessions = async (): Promise<TrainingSession[]> => {
+export const getMySessions = async (status?: 'all' | 'upcoming' | 'past' | 'pending'): Promise<TrainingSession[]> => {
   if (apiConfig.demoMode) {
     return mockSessions;
   }
 
-  const response = await apiClient.get('/me/sessions');
+  const params = status ? `?status=${status}` : '';
+  const response = await apiClient.get(`/training/my-sessions${params}`);
+
+  return (response.data.sessions || []).map(mapWordPressSession);
+};
+
+/**
+ * Get a single session by ID
+ *
+ * GET /wp-json/ptp/v1/training/sessions/:id
+ */
+export const getSession = async (sessionId: number): Promise<TrainingSession> => {
+  if (apiConfig.demoMode) {
+    const session = mockSessions.find((s) => s.id === sessionId);
+    if (!session) throw new Error('Session not found');
+    return session;
+  }
+
+  const response = await apiClient.get(`/training/sessions/${sessionId}`);
+  return mapWordPressSession(response.data);
+};
+
+/**
+ * Cancel a training session
+ *
+ * POST /wp-json/ptp/v1/training/sessions/:id/cancel
+ */
+export const cancelSession = async (sessionId: number, reason?: string): Promise<{ success: boolean; message: string }> => {
+  if (apiConfig.demoMode) {
+    await new Promise((resolve) => setTimeout(resolve, 300));
+    return { success: true, message: 'Session cancelled' };
+  }
+
+  const response = await apiClient.post(`/training/sessions/${sessionId}/cancel`, { reason });
   return response.data;
 };
+
+/**
+ * Map WordPress session response to app TrainingSession type
+ */
+const mapWordPressSession = (wpSession: any): TrainingSession => ({
+  id: wpSession.id,
+  trainerId: wpSession.trainer?.id,
+  trainer: {
+    id: wpSession.trainer?.id || 0,
+    firstName: wpSession.trainer?.name?.split(' ')[0] || 'Unknown',
+    lastName: wpSession.trainer?.name?.split(' ').slice(1).join(' ') || 'Trainer',
+    collegePro: '',
+    position: 'midfielder',
+    headshotUrl: wpSession.trainer?.avatar_url,
+    rating: 5.0,
+  },
+  parentId: wpSession.parent?.id,
+  childId: wpSession.child?.id,
+  child: wpSession.child ? {
+    id: wpSession.child.id,
+    firstName: wpSession.child.name?.split(' ')[0] || wpSession.child.first_name || '',
+    ageBand: wpSession.child.age_band,
+    skillLevel: wpSession.child.skill_level,
+    position: wpSession.child.position,
+  } : undefined,
+  date: wpSession.date,
+  startTime: wpSession.start_time,
+  endTime: wpSession.end_time,
+  duration: 60,
+  location: wpSession.location,
+  city: wpSession.location?.split(',')[0] || '',
+  state: 'PA',
+  focus: wpSession.focus?.split(', ') || [],
+  notes: wpSession.player_notes,
+  playerNotes: wpSession.player_notes,
+  status: wpSession.status,
+  price: wpSession.price,
+  isPaid: wpSession.is_paid,
+  createdAt: wpSession.created_at,
+  updatedAt: wpSession.updated_at,
+});
 
 // ============================================================
 // TRAINER-SPECIFIC ENDPOINTS
 // ============================================================
+
+/**
+ * Get trainer dashboard data
+ *
+ * GET /wp-json/ptp/v1/trainer/dashboard
+ */
+export const getTrainerDashboard = async (): Promise<{
+  todaysSessions: TrainingSession[];
+  pendingRequests: number;
+  weeklySessions: number;
+  monthlyEarnings: number;
+  totalStudents: number;
+  nextSession: TrainingSession | null;
+  rating: number;
+  totalReviews: number;
+}> => {
+  if (apiConfig.demoMode) {
+    return {
+      todaysSessions: mockTrainerSessions.filter(s => s.date === getRelativeDate(0)),
+      pendingRequests: mockTrainerSessions.filter(s => s.status === 'pending').length,
+      weeklySessions: mockTrainerSessions.length,
+      monthlyEarnings: mockEarnings.thisMonth,
+      totalStudents: 5,
+      nextSession: mockTrainerSessions[0] || null,
+      rating: 4.9,
+      totalReviews: 12,
+    };
+  }
+
+  const response = await apiClient.get('/trainer/dashboard');
+  const data = response.data;
+
+  return {
+    todaysSessions: (data.todays_sessions || []).map(mapWordPressSession),
+    pendingRequests: data.pending_requests,
+    weeklySessions: data.weekly_sessions,
+    monthlyEarnings: data.monthly_earnings,
+    totalStudents: data.total_students,
+    nextSession: data.next_session ? mapWordPressSession(data.next_session) : null,
+    rating: data.rating,
+    totalReviews: data.total_reviews,
+  };
+};
 
 /**
  * Get trainer's own sessions
@@ -175,7 +387,8 @@ export const getMySessions = async (): Promise<TrainingSession[]> => {
  * GET /wp-json/ptp/v1/trainer/sessions
  */
 export const getTrainerSessions = async (
-  status?: SessionStatus
+  status?: SessionStatus,
+  date?: string
 ): Promise<TrainingSession[]> => {
   if (apiConfig.demoMode) {
     let sessions = mockTrainerSessions;
@@ -185,36 +398,82 @@ export const getTrainerSessions = async (
     return sessions;
   }
 
-  const params = status ? `?status=${status}` : '';
-  const response = await apiClient.get(`/trainer/sessions${params}`);
+  const params = new URLSearchParams();
+  if (status) params.append('status', status);
+  if (date) params.append('date', date);
+
+  const queryString = params.toString();
+  const response = await apiClient.get(`/trainer/sessions${queryString ? '?' + queryString : ''}`);
+  return (response.data.sessions || []).map(mapWordPressSession);
+};
+
+/**
+ * Respond to a session request (accept/decline)
+ *
+ * POST /wp-json/ptp/v1/trainer/sessions/:id/respond
+ */
+export const respondToSessionRequest = async (
+  sessionId: number,
+  action: 'accept' | 'decline',
+  message?: string
+): Promise<{ success: boolean; status: string; message: string }> => {
+  if (apiConfig.demoMode) {
+    const session = mockTrainerSessions.find((s) => s.id === sessionId);
+    if (session) {
+      session.status = action === 'accept' ? 'confirmed' : 'cancelled';
+    }
+    return {
+      success: true,
+      status: action === 'accept' ? 'confirmed' : 'declined',
+      message: `Session request ${action === 'accept' ? 'accepted' : 'declined'}`,
+    };
+  }
+
+  const response = await apiClient.post(`/trainer/sessions/${sessionId}/respond`, {
+    action,
+    message,
+  });
   return response.data;
 };
 
 /**
- * Update session status
+ * Complete a session
  *
- * POST /wp-json/ptp/v1/trainer/sessions/update-status
+ * POST /wp-json/ptp/v1/trainer/sessions/:id/complete
+ */
+export const completeSession = async (
+  sessionId: number,
+  notes?: string
+): Promise<{ success: boolean; message: string }> => {
+  if (apiConfig.demoMode) {
+    const session = mockTrainerSessions.find((s) => s.id === sessionId);
+    if (session) {
+      session.status = 'completed';
+      if (notes) session.trainerNotes = notes;
+    }
+    return { success: true, message: 'Session marked as completed' };
+  }
+
+  const response = await apiClient.post(`/trainer/sessions/${sessionId}/complete`, { notes });
+  return response.data;
+};
+
+/**
+ * Update session status (legacy - use respondToSessionRequest or completeSession)
  */
 export const updateSessionStatus = async (
   sessionId: number,
   status: SessionStatus,
   notes?: string
 ): Promise<TrainingSession> => {
-  if (apiConfig.demoMode) {
-    const session = mockTrainerSessions.find((s) => s.id === sessionId);
-    if (session) {
-      session.status = status;
-      if (notes) session.trainerNotes = notes;
-    }
-    return session!;
+  if (status === 'confirmed' || status === 'cancelled') {
+    await respondToSessionRequest(sessionId, status === 'confirmed' ? 'accept' : 'decline', notes);
+  } else if (status === 'completed') {
+    await completeSession(sessionId, notes);
   }
 
-  const response = await apiClient.post('/trainer/sessions/update-status', {
-    session_id: sessionId,
-    status,
-    notes,
-  });
-  return response.data;
+  // Return the updated session
+  return getSession(sessionId);
 };
 
 /**
@@ -222,27 +481,83 @@ export const updateSessionStatus = async (
  *
  * GET /wp-json/ptp/v1/trainer/earnings
  */
-export const getTrainerEarnings = async (): Promise<TrainerEarnings> => {
+export const getTrainerEarnings = async (
+  period: 'week' | 'month' | 'year' | 'all' = 'month'
+): Promise<TrainerEarnings> => {
   if (apiConfig.demoMode) {
     return mockEarnings;
   }
 
-  const response = await apiClient.get('/trainer/earnings');
-  return response.data;
+  const response = await apiClient.get(`/trainer/earnings?period=${period}`);
+  const data = response.data;
+
+  return {
+    totalEarnings: data.total_earnings,
+    thisMonth: data.total_earnings,
+    thisWeek: period === 'week' ? data.total_earnings : 0,
+    pendingPayout: data.pending_earnings,
+    lastPayoutDate: getRelativeDate(-15),
+    lastPayoutAmount: data.paid_earnings,
+  };
 };
 
 /**
- * Get trainer stats
+ * Get trainer stats (from dashboard)
  *
- * GET /wp-json/ptp/v1/trainer/stats
+ * GET /wp-json/ptp/v1/trainer/dashboard
  */
 export const getTrainerStats = async (): Promise<TrainerStats> => {
   if (apiConfig.demoMode) {
     return mockStats;
   }
 
-  const response = await apiClient.get('/trainer/stats');
+  const dashboard = await getTrainerDashboard();
+  return {
+    totalSessions: dashboard.weeklySessions * 4, // Approximate
+    thisWeekSessions: dashboard.weeklySessions,
+    thisMonthSessions: dashboard.weeklySessions * 4,
+    completionRate: 96,
+    averageRating: dashboard.rating,
+  };
+};
+
+/**
+ * Update trainer profile
+ *
+ * PUT /wp-json/ptp/v1/trainer/profile
+ */
+export const updateTrainerProfile = async (
+  data: Partial<TrainerUser>
+): Promise<{ success: boolean; message: string }> => {
+  if (apiConfig.demoMode) {
+    return { success: true, message: 'Profile updated' };
+  }
+
+  const response = await apiClient.put('/trainer/profile', {
+    first_name: data.firstName,
+    last_name: data.lastName,
+    phone: data.phone,
+    location: data.serviceLocations?.[0]?.city,
+    avatar_url: data.avatarUrl,
+    bio: data.bio,
+    hourly_rate: data.hourlyRate,
+    specializations: data.specialties,
+  });
   return response.data;
+};
+
+/**
+ * Get trainer's students
+ *
+ * GET /wp-json/ptp/v1/trainer/students
+ */
+export const getTrainerStudents = async (): Promise<any[]> => {
+  if (apiConfig.demoMode) {
+    return [];
+  }
+
+  const response = await apiClient.get('/trainer/students');
+  return response.data.students || [];
 };
 
 /**

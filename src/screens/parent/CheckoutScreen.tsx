@@ -5,34 +5,38 @@
  */
 
 import React, { useState, useRef } from 'react';
-import { View, StyleSheet, ActivityIndicator } from 'react-native';
+import { View, StyleSheet, ActivityIndicator, Alert } from 'react-native';
 import { WebView } from 'react-native-webview';
-import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
+import { useNavigation, useRoute, RouteProp, CommonActions } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { ParentStackParamList } from '../../types/navigation';
 import { getCheckoutUrl } from '../../api/orders';
 import { PTPText, PTPButton } from '../../components';
 import { colors } from '../../theme/colors';
-import { spacing } from '../../theme/spacing';
+import { spacing, borderRadius } from '../../theme/spacing';
 
 type CheckoutRouteProp = RouteProp<ParentStackParamList, 'Checkout'>;
+type CheckoutNavigationProp = NativeStackNavigationProp<ParentStackParamList>;
 
 /**
  * CheckoutScreen - WooCommerce checkout in WebView
  *
- * TODO: Wire in real WooCommerce checkout
- * - Handle checkout success via deep link (ptp://checkout/success)
- * - Pass user token for auto-login
- * - Sync order back to app after completion
+ * Handles:
+ * - WooCommerce checkout flow in WebView
+ * - Detection of successful order completion
+ * - Navigation to Schedule after success
  */
 const CheckoutScreen: React.FC = () => {
-  const navigation = useNavigation();
+  const navigation = useNavigation<CheckoutNavigationProp>();
   const route = useRoute<CheckoutRouteProp>();
   const { productId } = route.params;
 
   const [isLoading, setIsLoading] = useState(true);
   const [checkoutUrl, setCheckoutUrl] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [isSuccess, setIsSuccess] = useState(false);
   const webViewRef = useRef<WebView>(null);
+  const hasHandledSuccess = useRef(false);
 
   React.useEffect(() => {
     loadCheckoutUrl();
@@ -47,11 +51,50 @@ const CheckoutScreen: React.FC = () => {
     }
   };
 
+  const handleCheckoutSuccess = () => {
+    // Prevent handling success multiple times
+    if (hasHandledSuccess.current) return;
+    hasHandledSuccess.current = true;
+
+    setIsSuccess(true);
+  };
+
+  const handleGoToSchedule = () => {
+    // Navigate to Schedule tab to see the new booking
+    navigation.dispatch(
+      CommonActions.reset({
+        index: 0,
+        routes: [
+          {
+            name: 'ParentTabs',
+            state: {
+              index: 3, // Schedule tab
+              routes: [
+                { name: 'Home' },
+                { name: 'CampsClinics' },
+                { name: 'PrivateTraining' },
+                { name: 'Schedule' },
+                { name: 'Account' },
+              ],
+            },
+          },
+        ],
+      })
+    );
+  };
+
+  const handleContinueBrowsing = () => {
+    navigation.goBack();
+  };
+
   const handleNavigationChange = (navState: { url: string }) => {
-    // Check for checkout success
-    if (navState.url.includes('order-received') || navState.url.includes('ptp://checkout/success')) {
-      navigation.goBack();
-      // TODO: Show success message and refresh events
+    // Check for checkout success - WooCommerce redirects to order-received page
+    if (
+      navState.url.includes('order-received') ||
+      navState.url.includes('checkout/order-received') ||
+      navState.url.includes('ptp://checkout/success')
+    ) {
+      handleCheckoutSuccess();
     }
   };
 
@@ -61,6 +104,37 @@ const CheckoutScreen: React.FC = () => {
         <PTPText variant="sectionTitle">Checkout Error</PTPText>
         <PTPText variant="body" color="gray500" style={styles.errorText}>{error}</PTPText>
         <PTPButton title="Try Again" onPress={loadCheckoutUrl} />
+      </View>
+    );
+  }
+
+  // Success screen
+  if (isSuccess) {
+    return (
+      <View style={styles.successContainer}>
+        <View style={styles.successIcon}>
+          <PTPText style={styles.successEmoji}>✓</PTPText>
+        </View>
+        <PTPText variant="sectionTitle" style={styles.successTitle}>
+          Booking Confirmed!
+        </PTPText>
+        <PTPText variant="body" color="gray500" center style={styles.successText}>
+          Your registration is complete. You&apos;ll receive a confirmation email shortly.
+        </PTPText>
+        <View style={styles.successButtons}>
+          <PTPButton
+            title="View My Schedule"
+            onPress={handleGoToSchedule}
+            fullWidth
+          />
+          <PTPButton
+            title="Continue Browsing"
+            variant="outline"
+            onPress={handleContinueBrowsing}
+            fullWidth
+            style={styles.secondaryButton}
+          />
+        </View>
       </View>
     );
   }
@@ -94,12 +168,67 @@ const CheckoutScreen: React.FC = () => {
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.white },
-  webview: { flex: 1 },
-  loadingOverlay: { ...StyleSheet.absoluteFillObject, backgroundColor: colors.white, justifyContent: 'center', alignItems: 'center', zIndex: 1 },
-  loadingText: { marginTop: spacing[4] },
-  errorContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: spacing[4] },
-  errorText: { marginVertical: spacing[4], textAlign: 'center' },
+  container: {
+    flex: 1,
+    backgroundColor: colors.white,
+  },
+  webview: {
+    flex: 1,
+  },
+  loadingOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: colors.white,
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 1,
+  },
+  loadingText: {
+    marginTop: spacing[4],
+  },
+  errorContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: spacing[4],
+  },
+  errorText: {
+    marginVertical: spacing[4],
+    textAlign: 'center',
+  },
+  successContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: spacing[6],
+    backgroundColor: colors.white,
+  },
+  successIcon: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: colors.success,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: spacing[6],
+  },
+  successEmoji: {
+    fontSize: 40,
+    color: colors.white,
+    fontWeight: '700',
+  },
+  successTitle: {
+    marginBottom: spacing[3],
+    textAlign: 'center',
+  },
+  successText: {
+    marginBottom: spacing[8],
+  },
+  successButtons: {
+    width: '100%',
+  },
+  secondaryButton: {
+    marginTop: spacing[3],
+  },
 });
 
 export default CheckoutScreen;
