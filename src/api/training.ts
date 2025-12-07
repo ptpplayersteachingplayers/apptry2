@@ -28,6 +28,33 @@ import {
 } from '../types';
 import { heroImages } from '../assets/media';
 
+// ============================================================
+// DATE HELPERS FOR DYNAMIC MOCK DATA
+// ============================================================
+
+/**
+ * Get a date relative to today
+ */
+const getRelativeDate = (daysFromNow: number): string => {
+  const date = new Date();
+  date.setDate(date.getDate() + daysFromNow);
+  return date.toISOString().split('T')[0];
+};
+
+/**
+ * Get current timestamp for mock data
+ */
+const getCurrentTimestamp = (): string => new Date().toISOString();
+
+/**
+ * Get past timestamp for mock data
+ */
+const getPastTimestamp = (daysAgo: number): string => {
+  const date = new Date();
+  date.setDate(date.getDate() - daysAgo);
+  return date.toISOString();
+};
+
 /**
  * Get list of trainers/mentors
  *
@@ -402,8 +429,9 @@ const getMockTrainers = async (
     );
   }
   if (filters?.specialty) {
+    const specialty = filters.specialty;
     filtered = filtered.filter((t) =>
-      t.specialties.includes(filters.specialty as any)
+      t.specialties.includes(specialty)
     );
   }
 
@@ -478,7 +506,10 @@ const getMockAvailability = (
   return slots;
 };
 
-const mockSessions: TrainingSession[] = [
+/**
+ * Generate mock sessions with dynamic dates
+ */
+const generateMockSessions = (): TrainingSession[] => [
   {
     id: 1,
     trainerId: 101,
@@ -493,7 +524,7 @@ const mockSessions: TrainingSession[] = [
     },
     parentId: 1,
     childId: 1,
-    date: '2024-12-05',
+    date: getRelativeDate(3), // 3 days from now
     startTime: '16:00',
     endTime: '17:00',
     duration: 60,
@@ -504,12 +535,17 @@ const mockSessions: TrainingSession[] = [
     status: 'confirmed',
     price: 80,
     isPaid: true,
-    createdAt: '2024-11-20T10:00:00Z',
-    updatedAt: '2024-11-22T14:00:00Z',
+    createdAt: getPastTimestamp(7),
+    updatedAt: getPastTimestamp(5),
   },
 ];
 
-const mockTrainerSessions: TrainingSession[] = [
+const mockSessions: TrainingSession[] = generateMockSessions();
+
+/**
+ * Generate mock trainer sessions with dynamic dates
+ */
+const generateMockTrainerSessions = (): TrainingSession[] => [
   {
     id: 1,
     trainerId: 101,
@@ -530,7 +566,7 @@ const mockTrainerSessions: TrainingSession[] = [
       skillLevel: 'travel',
       position: 'midfielder',
     },
-    date: '2024-12-05',
+    date: getRelativeDate(3), // 3 days from now
     startTime: '16:00',
     endTime: '17:00',
     duration: 60,
@@ -542,8 +578,8 @@ const mockTrainerSessions: TrainingSession[] = [
     status: 'confirmed',
     price: 80,
     isPaid: true,
-    createdAt: '2024-11-20T10:00:00Z',
-    updatedAt: '2024-11-22T14:00:00Z',
+    createdAt: getPastTimestamp(7),
+    updatedAt: getPastTimestamp(5),
   },
   {
     id: 2,
@@ -565,7 +601,7 @@ const mockTrainerSessions: TrainingSession[] = [
       skillLevel: 'elite',
       position: 'forward',
     },
-    date: '2024-12-06',
+    date: getRelativeDate(4), // 4 days from now
     startTime: '17:00',
     endTime: '18:00',
     duration: 60,
@@ -576,17 +612,19 @@ const mockTrainerSessions: TrainingSession[] = [
     status: 'pending',
     price: 80,
     isPaid: false,
-    createdAt: '2024-11-25T10:00:00Z',
-    updatedAt: '2024-11-25T10:00:00Z',
+    createdAt: getPastTimestamp(2),
+    updatedAt: getPastTimestamp(2),
   },
 ];
+
+const mockTrainerSessions: TrainingSession[] = generateMockTrainerSessions();
 
 const mockEarnings: TrainerEarnings = {
   totalEarnings: 4560,
   thisMonth: 640,
   thisWeek: 160,
   pendingPayout: 240,
-  lastPayoutDate: '2024-11-15',
+  lastPayoutDate: getRelativeDate(-15), // 15 days ago
   lastPayoutAmount: 480,
 };
 

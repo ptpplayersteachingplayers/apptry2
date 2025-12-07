@@ -5,7 +5,7 @@
  * Private training is the follow-up product after camps/clinics.
  */
 
-import { AgeBand, ChildProfile, TrainerUser, USState } from './user';
+import { AgeBand, ChildProfile, TrainerUser, TrainerSpecialty, USState } from './user';
 
 // Training session status
 export type SessionStatus =
@@ -133,7 +133,7 @@ export interface TrainerFilters {
   city?: string;
   marketSlug?: string;
   ageBand?: AgeBand;
-  specialty?: TrainingFocus;
+  specialty?: TrainerSpecialty;
   priceMin?: number;
   priceMax?: number;
   rating?: number;
