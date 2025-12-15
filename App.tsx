@@ -14,6 +14,7 @@ import * as SplashScreen from 'expo-splash-screen';
 
 import { PTPThemeProvider } from './src/theme';
 import { AuthProvider } from './src/hooks/useAuth';
+import { NotificationProvider } from './src/providers';
 import { AppNavigator } from './src/navigation';
 import { PTPErrorBoundary } from './src/components/PTPErrorBoundary';
 import { queryClient } from './src/lib/queryClient';
@@ -31,6 +32,7 @@ SplashScreen.preventAutoHideAsync();
  * 4. PTPErrorBoundary - Catch and display errors gracefully
  * 5. PTPThemeProvider - Theme and fonts
  * 6. AuthProvider - Authentication state
+ * 7. NotificationProvider - Push notification management
  */
 export default function App() {
   useEffect(() => {
@@ -51,8 +53,10 @@ export default function App() {
           <PTPErrorBoundary>
             <PTPThemeProvider>
               <AuthProvider>
-                <StatusBar style="light" />
-                <AppNavigator />
+                <NotificationProvider>
+                  <StatusBar style="light" />
+                  <AppNavigator />
+                </NotificationProvider>
               </AuthProvider>
             </PTPThemeProvider>
           </PTPErrorBoundary>

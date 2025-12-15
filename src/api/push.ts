@@ -117,3 +117,113 @@ export interface NotificationPayload {
     programId?: number;
   };
 }
+
+/**
+ * Stored notification item
+ */
+export interface NotificationItem {
+  id: number;
+  title: string;
+  message: string;
+  type: NotificationType | 'general';
+  data: Record<string, unknown> | null;
+  isRead: boolean;
+  createdAt: string;
+}
+
+/**
+ * Notifications list response
+ */
+export interface NotificationsResponse {
+  notifications: NotificationItem[];
+  total: number;
+  page: number;
+  perPage: number;
+  totalPages: number;
+}
+
+/**
+ * Get notifications list
+ *
+ * GET /wp-json/ptp/v1/push/notifications
+ */
+export const getNotifications = async (
+  page: number = 1,
+  perPage: number = 20
+): Promise<NotificationsResponse> => {
+  if (apiConfig.demoMode) {
+    return {
+      notifications: [
+        {
+          id: 1,
+          title: 'Session Reminder',
+          message: 'Your training session with Coach John is in 1 hour',
+          type: 'session_reminder',
+          data: { sessionId: 123 },
+          isRead: false,
+          createdAt: new Date().toISOString(),
+        },
+        {
+          id: 2,
+          title: 'New Message',
+          message: 'Coach Sarah sent you a message',
+          type: 'new_message',
+          data: { conversationId: 456 },
+          isRead: true,
+          createdAt: new Date(Date.now() - 86400000).toISOString(),
+        },
+      ],
+      total: 2,
+      page: 1,
+      perPage: 20,
+      totalPages: 1,
+    };
+  }
+
+  const response = await apiClient.get('/push/notifications', {
+    params: { page, per_page: perPage },
+  });
+  return response.data;
+};
+
+/**
+ * Mark notification as read
+ *
+ * POST /wp-json/ptp/v1/push/notifications/:id/read
+ */
+export const markNotificationAsRead = async (notificationId: number): Promise<void> => {
+  if (apiConfig.demoMode) {
+    console.log('Demo mode: Notification marked as read', { notificationId });
+    return;
+  }
+
+  await apiClient.post(`/push/notifications/${notificationId}/read`);
+};
+
+/**
+ * Mark all notifications as read
+ *
+ * POST /wp-json/ptp/v1/push/notifications/read-all
+ */
+export const markAllNotificationsAsRead = async (): Promise<void> => {
+  if (apiConfig.demoMode) {
+    console.log('Demo mode: All notifications marked as read');
+    return;
+  }
+
+  await apiClient.post('/push/notifications/read-all');
+};
+
+/**
+ * Get unread notification count
+ *
+ * GET /wp-json/ptp/v1/push/unread-count
+ */
+export const getUnreadNotificationCount = async (): Promise<number> => {
+  if (apiConfig.demoMode) {
+    return 2;
+  }
+
+  const response = await apiClient.get('/push/unread-count');
+  return response.data.count;
+};
