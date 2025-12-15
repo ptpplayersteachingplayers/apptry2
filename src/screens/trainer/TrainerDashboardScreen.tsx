@@ -8,6 +8,7 @@ import React, { useEffect, useState } from 'react';
 import { View, StyleSheet, ScrollView, RefreshControl, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
+import { Ionicons } from '@expo/vector-icons';
 import { useTrainerUser } from '../../hooks/useAuth';
 import { getTrainerSessions, getTrainerStats, getTrainerEarnings } from '../../api/training';
 import { TrainingSession, TrainerStats, TrainerEarnings } from '../../types';
@@ -70,7 +71,7 @@ const TrainerDashboardScreen: React.FC = () => {
       >
         {/* Header */}
         <View style={styles.header}>
-          <PTPText variant="heroTitle">Hey {trainerUser?.firstName}! 👋</PTPText>
+          <PTPText variant="heroTitle">Hey {trainerUser?.firstName}!</PTPText>
           <PTPText variant="body" color="gray500">Here's your day at a glance.</PTPText>
         </View>
 
@@ -142,15 +143,15 @@ const TrainerDashboardScreen: React.FC = () => {
         {/* Quick Actions */}
         <View style={styles.actionsRow}>
           <TouchableOpacity style={styles.actionButton} onPress={() => navigation.navigate('TrainerSchedule' as never)}>
-            <PTPText style={{ fontSize: 24 }}>📅</PTPText>
+            <Ionicons name="calendar-outline" size={24} color={colors.inkBlack} />
             <PTPText variant="label">Schedule</PTPText>
           </TouchableOpacity>
           <TouchableOpacity style={styles.actionButton} onPress={() => navigation.navigate('TrainerMessages' as never)}>
-            <PTPText style={{ fontSize: 24 }}>💬</PTPText>
+            <Ionicons name="chatbubbles-outline" size={24} color={colors.inkBlack} />
             <PTPText variant="label">Messages</PTPText>
           </TouchableOpacity>
           <TouchableOpacity style={styles.actionButton} onPress={() => navigation.navigate('TrainerStudents' as never)}>
-            <PTPText style={{ fontSize: 24 }}>👥</PTPText>
+            <Ionicons name="people-outline" size={24} color={colors.inkBlack} />
             <PTPText variant="label">Students</PTPText>
           </TouchableOpacity>
         </View>

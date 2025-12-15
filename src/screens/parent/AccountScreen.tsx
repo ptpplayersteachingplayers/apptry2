@@ -16,9 +16,11 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { Ionicons } from '@expo/vector-icons';
 import Constants from 'expo-constants';
 import { ParentStackParamList } from '../../types/navigation';
 import { useAuth, useParentUser } from '../../hooks/useAuth';
+import { useNotificationContext } from '../../providers';
 import { PTPText, PTPButton } from '../../components';
 import { colors } from '../../theme/colors';
 import { spacing, borderRadius, shadows } from '../../theme/spacing';
@@ -27,29 +29,35 @@ import { deleteAccount } from '../../api/auth';
 type AccountNavigationProp = NativeStackNavigationProp<ParentStackParamList>;
 
 interface MenuItemProps {
-  icon: string;
+  iconName: keyof typeof Ionicons.glyphMap;
   title: string;
   subtitle?: string;
   onPress: () => void;
   showArrow?: boolean;
   danger?: boolean;
+  badge?: number;
 }
 
 const MenuItem: React.FC<MenuItemProps> = ({
-  icon,
+  iconName,
   title,
   subtitle,
   onPress,
   showArrow = true,
   danger = false,
+  badge,
 }) => (
   <TouchableOpacity
     style={styles.menuItem}
     onPress={onPress}
     accessibilityLabel={title}
   >
-    <View style={styles.menuItemIcon}>
-      <PTPText style={{ fontSize: 20 }}>{icon}</PTPText>
+    <View style={[styles.menuItemIcon, danger && styles.menuItemIconDanger]}>
+      <Ionicons
+        name={iconName}
+        size={20}
+        color={danger ? colors.error : colors.inkBlack}
+      />
     </View>
     <View style={styles.menuItemContent}>
       <PTPText
@@ -64,8 +72,15 @@ const MenuItem: React.FC<MenuItemProps> = ({
         </PTPText>
       )}
     </View>
+    {badge !== undefined && badge > 0 && (
+      <View style={styles.badge}>
+        <PTPText style={styles.badgeText}>
+          {badge > 99 ? '99+' : badge}
+        </PTPText>
+      </View>
+    )}
     {showArrow && (
-      <PTPText color="gray400">→</PTPText>
+      <Ionicons name="chevron-forward" size={18} color={colors.gray400} />
     )}
   </TouchableOpacity>
 );
@@ -77,6 +92,7 @@ const AccountScreen: React.FC = () => {
   const navigation = useNavigation<AccountNavigationProp>();
   const { logout } = useAuth();
   const parentUser = useParentUser();
+  const { unreadCount } = useNotificationContext();
 
   const handleLogout = () => {
     Alert.alert(
@@ -146,6 +162,10 @@ const AccountScreen: React.FC = () => {
         },
       ]
     );
+  };
+
+  const handleNotificationCenter = () => {
+    navigation.navigate('NotificationCenter');
   };
 
   const handleNotificationSettings = () => {
@@ -222,7 +242,7 @@ const AccountScreen: React.FC = () => {
                       {child.ageBand} • {child.skillLevel} • {child.position || 'No position'}
                     </PTPText>
                   </View>
-                  <PTPText color="gray400">→</PTPText>
+                  <Ionicons name="chevron-forward" size={18} color={colors.gray400} />
                 </TouchableOpacity>
               ))
             ) : (
@@ -250,18 +270,18 @@ const AccountScreen: React.FC = () => {
           </PTPText>
           <View style={styles.card}>
             <MenuItem
-              icon="👤"
+              iconName="person-outline"
               title="Edit Profile"
               onPress={handleEditProfile}
             />
             <MenuItem
-              icon="🧾"
+              iconName="receipt-outline"
               title="Order History"
               subtitle="View past purchases"
               onPress={handleOrderHistory}
             />
             <MenuItem
-              icon="💬"
+              iconName="chatbubbles-outline"
               title="Messages"
               subtitle="Chat with trainers and support"
               onPress={() => navigation.navigate('Messages', {})}
@@ -276,13 +296,20 @@ const AccountScreen: React.FC = () => {
           </PTPText>
           <View style={styles.card}>
             <MenuItem
-              icon="🔔"
+              iconName="notifications-outline"
               title="Notifications"
-              subtitle="Manage push notifications"
+              subtitle="View your notifications"
+              onPress={handleNotificationCenter}
+              badge={unreadCount}
+            />
+            <MenuItem
+              iconName="settings-outline"
+              title="Notification Settings"
+              subtitle="Manage push notification preferences"
               onPress={handleNotificationSettings}
             />
             <MenuItem
-              icon="📍"
+              iconName="location-outline"
               title="Location Preferences"
               subtitle={parentUser?.preferredLocation?.city || 'Not set'}
               onPress={handleLocationSettings}
@@ -297,12 +324,12 @@ const AccountScreen: React.FC = () => {
           </PTPText>
           <View style={styles.card}>
             <MenuItem
-              icon="❓"
+              iconName="help-circle-outline"
               title="Help & FAQ"
               onPress={handleHelp}
             />
             <MenuItem
-              icon="📧"
+              iconName="mail-outline"
               title="Contact Us"
               subtitle="support@ptpsoccer.com"
               onPress={handleContact}
@@ -317,12 +344,12 @@ const AccountScreen: React.FC = () => {
           </PTPText>
           <View style={styles.card}>
             <MenuItem
-              icon="📜"
+              iconName="shield-checkmark-outline"
               title="Privacy Policy"
               onPress={() => Linking.openURL('https://ptpsummercamps.com/privacy-policy/')}
             />
             <MenuItem
-              icon="📋"
+              iconName="document-text-outline"
               title="Terms of Service"
               onPress={() => Linking.openURL('https://ptpsummercamps.com/terms-of-service/')}
             />
@@ -333,13 +360,13 @@ const AccountScreen: React.FC = () => {
         <View style={styles.section}>
           <View style={styles.card}>
             <MenuItem
-              icon="🚪"
+              iconName="log-out-outline"
               title="Log Out"
               onPress={handleLogout}
               showArrow={false}
             />
             <MenuItem
-              icon="🗑️"
+              iconName="trash-outline"
               title="Delete Account"
               onPress={handleDeleteAccount}
               showArrow={false}
@@ -422,6 +449,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginRight: spacing[3],
   },
+  menuItemIconDanger: {
+    backgroundColor: colors.errorLight || '#FFEBEE',
+  },
   menuItemContent: {
     flex: 1,
   },
@@ -458,6 +488,21 @@ const styles = StyleSheet.create({
   versionInfo: {
     marginTop: spacing[6],
     padding: spacing[4],
+  },
+  badge: {
+    backgroundColor: colors.error,
+    borderRadius: 10,
+    minWidth: 20,
+    height: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: spacing[1],
+    marginRight: spacing[2],
+  },
+  badgeText: {
+    color: colors.white,
+    fontSize: 11,
+    fontWeight: '700',
   },
 });
 

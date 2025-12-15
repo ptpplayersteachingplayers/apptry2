@@ -15,6 +15,7 @@ import {
 } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { Ionicons } from '@expo/vector-icons';
 import { ParentStackParamList, ParentTabParamList } from '../../types/navigation';
 import { TrainerUser } from '../../types';
 import { getTrainers } from '../../api/training';
@@ -96,7 +97,7 @@ const PrivateTrainingScreen: React.FC = () => {
                 {item.firstName} {item.lastName}
               </PTPText>
               {item.isVerified && (
-                <PTPText color="primary" style={styles.verifiedBadge}>✓</PTPText>
+                <Ionicons name="checkmark-circle" size={16} color={colors.primary} style={styles.verifiedBadge} />
               )}
             </View>
             <View style={styles.trainerPrice}>
@@ -123,8 +124,9 @@ const PrivateTrainingScreen: React.FC = () => {
 
           {item.rating && (
             <View style={styles.trainerRating}>
+              <Ionicons name="star" size={14} color={colors.primary} />
               <PTPText variant="bodySmall" color="primary">
-                ★ {item.rating.toFixed(1)}
+                {item.rating.toFixed(1)}
               </PTPText>
               <PTPText variant="caption" color="gray500">
                 ({item.reviewCount} reviews)
@@ -159,7 +161,7 @@ const PrivateTrainingScreen: React.FC = () => {
         {/* Info banner */}
         <View style={styles.infoBanner}>
           <View style={styles.infoIcon}>
-            <PTPText style={{ fontSize: 20 }}>💡</PTPText>
+            <Ionicons name="information-circle-outline" size={22} color={colors.primary} />
           </View>
           <View style={styles.infoContent}>
             <PTPText variant="bodySmall" weight="semiBold">
@@ -199,7 +201,7 @@ const PrivateTrainingScreen: React.FC = () => {
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
             <PTPEmptyState
-              icon="🎯"
+              iconName="search-outline"
               title="No trainers found"
               description="Try adjusting your search or check back later."
             />
@@ -285,6 +287,7 @@ const styles = StyleSheet.create({
   },
   verifiedBadge: {
     marginLeft: spacing[1],
+    marginTop: 2,
   },
   trainerPrice: {
     flexDirection: 'row',

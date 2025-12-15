@@ -13,6 +13,7 @@ import {
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { Ionicons } from '@expo/vector-icons';
 import { ParentStackParamList } from '../../types/navigation';
 import {
   useParentUser,
@@ -112,7 +113,7 @@ const HomeScreen: React.FC = memo(() => {
                 }}
               >
                 <View style={styles.quickActionIcon}>
-                  <PTPText style={{ fontSize: 28 }}>⚽</PTPText>
+                  <Ionicons name="football-outline" size={28} color={colors.inkBlack} />
                 </View>
                 <PTPText variant="label">Camps & Clinics</PTPText>
               </AnimatedPressable>
@@ -125,7 +126,7 @@ const HomeScreen: React.FC = memo(() => {
                 }}
               >
                 <View style={styles.quickActionIcon}>
-                  <PTPText style={{ fontSize: 28 }}>🎯</PTPText>
+                  <Ionicons name="fitness-outline" size={28} color={colors.inkBlack} />
                 </View>
                 <PTPText variant="label">Private Training</PTPText>
               </AnimatedPressable>
@@ -138,7 +139,7 @@ const HomeScreen: React.FC = memo(() => {
                 }}
               >
                 <View style={styles.quickActionIcon}>
-                  <PTPText style={{ fontSize: 28 }}>📅</PTPText>
+                  <Ionicons name="calendar-outline" size={28} color={colors.inkBlack} />
                 </View>
                 <PTPText variant="label">My Schedule</PTPText>
               </AnimatedPressable>
@@ -210,15 +211,15 @@ const HomeScreen: React.FC = memo(() => {
                 </PTPText>
                 <View style={styles.trainingFeatures}>
                   <View style={styles.trainingFeature}>
-                    <PTPText color="primary">✓</PTPText>
+                    <Ionicons name="checkmark" size={16} color={colors.primary} />
                     <PTPText variant="bodySmall">Customized drills</PTPText>
                   </View>
                   <View style={styles.trainingFeature}>
-                    <PTPText color="primary">✓</PTPText>
+                    <Ionicons name="checkmark" size={16} color={colors.primary} />
                     <PTPText variant="bodySmall">Flexible scheduling</PTPText>
                   </View>
                   <View style={styles.trainingFeature}>
-                    <PTPText color="primary">✓</PTPText>
+                    <Ionicons name="checkmark" size={16} color={colors.primary} />
                     <PTPText variant="bodySmall">Progress tracking</PTPText>
                   </View>
                 </View>
@@ -242,21 +243,27 @@ const HomeScreen: React.FC = memo(() => {
             </PTPText>
             <View style={styles.trustBadges}>
               <View style={styles.trustBadge}>
-                <PTPText style={styles.trustIcon}>🎓</PTPText>
+                <View style={styles.trustIconContainer}>
+                  <Ionicons name="school-outline" size={28} color={colors.primary} />
+                </View>
                 <PTPText variant="label" center>NCAA Mentors</PTPText>
                 <PTPText variant="caption" color="gray500" center>
                   Real role models
                 </PTPText>
               </View>
               <View style={styles.trustBadge}>
-                <PTPText style={styles.trustIcon}>✓</PTPText>
+                <View style={styles.trustIconContainer}>
+                  <Ionicons name="checkmark-circle-outline" size={28} color={colors.primary} />
+                </View>
                 <PTPText variant="label" center>Background Checked</PTPText>
                 <PTPText variant="caption" color="gray500" center>
                   Safety first
                 </PTPText>
               </View>
               <View style={styles.trustBadge}>
-                <PTPText style={styles.trustIcon}>🛡️</PTPText>
+                <View style={styles.trustIconContainer}>
+                  <Ionicons name="shield-checkmark-outline" size={28} color={colors.primary} />
+                </View>
                 <PTPText variant="label" center>Fully Insured</PTPText>
                 <PTPText variant="caption" color="gray500" center>
                   Peace of mind
@@ -366,8 +373,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     flex: 1,
   },
-  trustIcon: {
-    fontSize: 32,
+  trustIconContainer: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: colors.gray100,
+    justifyContent: 'center',
+    alignItems: 'center',
     marginBottom: spacing[2],
   },
 });

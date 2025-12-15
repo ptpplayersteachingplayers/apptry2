@@ -6,6 +6,7 @@
 
 import React from 'react';
 import { View, StyleSheet, ViewStyle } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { PTPText } from './PTPText';
 import { PTPButton } from './PTPButton';
 import { colors } from '../theme/colors';
@@ -13,9 +14,9 @@ import { spacing } from '../theme/spacing';
 
 interface PTPEmptyStateProps {
   /**
-   * Emoji or icon to display
+   * Ionicon name to display
    */
-  icon?: string;
+  iconName?: keyof typeof Ionicons.glyphMap;
   /**
    * Main title
    */
@@ -36,6 +37,10 @@ interface PTPEmptyStateProps {
    * Custom style
    */
   style?: ViewStyle;
+  /**
+   * @deprecated Use iconName instead
+   */
+  icon?: string;
 }
 
 /**
@@ -43,7 +48,7 @@ interface PTPEmptyStateProps {
  *
  * @example
  * <PTPEmptyState
- *   icon="⚽"
+ *   iconName="football-outline"
  *   title="No camps found"
  *   description="No camps are live yet for this city."
  *   actionText="Join the priority list"
@@ -51,17 +56,18 @@ interface PTPEmptyStateProps {
  * />
  */
 export const PTPEmptyState: React.FC<PTPEmptyStateProps> = ({
-  icon = '📭',
+  iconName = 'albums-outline',
   title,
   description,
   actionText,
   onAction,
   style,
+  icon,
 }) => {
   return (
     <View style={[styles.container, style]}>
       <View style={styles.iconContainer}>
-        <PTPText style={styles.icon}>{icon}</PTPText>
+        <Ionicons name={iconName} size={40} color={colors.gray500} />
       </View>
       <PTPText variant="sectionTitle" center style={styles.title}>
         {title}
@@ -89,7 +95,7 @@ export const PTPEmptyState: React.FC<PTPEmptyStateProps> = ({
 
 export const NoProgramsEmptyState: React.FC<{ onAction?: () => void }> = ({ onAction }) => (
   <PTPEmptyState
-    icon="⚽"
+    iconName="football-outline"
     title="No programs found"
     description="No camps or clinics are live yet for this area. Tap below to join our priority list."
     actionText="Join Priority List"
@@ -99,7 +105,7 @@ export const NoProgramsEmptyState: React.FC<{ onAction?: () => void }> = ({ onAc
 
 export const NoSessionsEmptyState: React.FC<{ onAction?: () => void }> = ({ onAction }) => (
   <PTPEmptyState
-    icon="📅"
+    iconName="calendar-outline"
     title="No upcoming sessions"
     description="You don't have any training sessions scheduled yet."
     actionText="Find a Trainer"
@@ -109,7 +115,7 @@ export const NoSessionsEmptyState: React.FC<{ onAction?: () => void }> = ({ onAc
 
 export const NoMessagesEmptyState: React.FC<{ onAction?: () => void }> = ({ onAction }) => (
   <PTPEmptyState
-    icon="💬"
+    iconName="chatbubbles-outline"
     title="No messages yet"
     description="Start a conversation with a trainer or contact PTP support."
     actionText="Start a Conversation"
@@ -119,7 +125,7 @@ export const NoMessagesEmptyState: React.FC<{ onAction?: () => void }> = ({ onAc
 
 export const NoOrdersEmptyState: React.FC<{ onAction?: () => void }> = ({ onAction }) => (
   <PTPEmptyState
-    icon="🧾"
+    iconName="receipt-outline"
     title="No orders yet"
     description="You haven't registered for any programs yet."
     actionText="Browse Programs"
