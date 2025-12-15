@@ -16,6 +16,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { Ionicons } from '@expo/vector-icons';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { ParentStackParamList } from '../../types/navigation';
 import { PTPText, PTPLoading, PTPEmptyState } from '../../components';
@@ -56,36 +57,36 @@ const formatRelativeTime = (dateString: string): string => {
 /**
  * Get icon for notification type
  */
-const getNotificationIcon = (type: string): string => {
+const getNotificationIcon = (type: string): keyof typeof Ionicons.glyphMap => {
   switch (type) {
     case 'session_reminder':
-      return '⏰';
+      return 'time-outline';
     case 'new_message':
-      return '💬';
+      return 'chatbubble-outline';
     case 'session_request':
-      return '📩';
+      return 'mail-outline';
     case 'session_confirmed':
-      return '✅';
+      return 'checkmark-circle-outline';
     case 'session_cancelled':
-      return '❌';
+      return 'close-circle-outline';
     case 'new_program':
-      return '🏕️';
+      return 'flag-outline';
     case 'promotion':
-      return '🎉';
+      return 'megaphone-outline';
     case 'booking_new':
-      return '📅';
+      return 'calendar-outline';
     case 'booking_confirmed':
-      return '✅';
+      return 'checkmark-circle-outline';
     case 'booking_cancelled':
-      return '❌';
+      return 'close-circle-outline';
     case 'review_request':
-      return '⭐';
+      return 'star-outline';
     case 'review_received':
-      return '⭐';
+      return 'star';
     case 'group_joined':
-      return '👥';
+      return 'people-outline';
     default:
-      return '🔔';
+      return 'notifications-outline';
   }
 };
 
@@ -108,9 +109,11 @@ const NotificationItemComponent: React.FC<NotificationItemComponentProps> = ({
       activeOpacity={0.7}
     >
       <View style={styles.iconContainer}>
-        <PTPText style={styles.icon}>
-          {getNotificationIcon(notification.type)}
-        </PTPText>
+        <Ionicons
+          name={getNotificationIcon(notification.type)}
+          size={22}
+          color={colors.inkBlack}
+        />
       </View>
       <View style={styles.contentContainer}>
         <View style={styles.headerRow}>
@@ -245,7 +248,7 @@ const NotificationCenterScreen: React.FC = () => {
         }
         ListEmptyComponent={
           <PTPEmptyState
-            icon="🔔"
+            iconName="notifications-outline"
             title="No Notifications"
             description="You're all caught up! Notifications about your sessions and messages will appear here."
           />
