@@ -47,7 +47,7 @@ export type TrainerTabParamList = {
  */
 export type ParentStackParamList = {
   ParentTabs: NavigatorScreenParams<ParentTabParamList>;
-  ProgramDetail: { programId: number };
+  ProgramDetail: { programId: number | string };
   TrainerDetail: { trainerId: number };
   Checkout: { productId: number; returnUrl?: string };
   SessionRequest: { trainerId: number };
@@ -57,6 +57,7 @@ export type ParentStackParamList = {
   EditProfile: undefined;
   EditChild: { childId?: number };
   NotificationSettings: undefined;
+  NotificationCenter: undefined;
 };
 
 /**

@@ -32,6 +32,7 @@ import ConversationDetailScreen from '../screens/parent/ConversationDetailScreen
 import EditProfileScreen from '../screens/parent/EditProfileScreen';
 import EditChildScreen from '../screens/parent/EditChildScreen';
 import NotificationSettingsScreen from '../screens/parent/NotificationSettingsScreen';
+import NotificationCenterScreen from '../screens/parent/NotificationCenterScreen';
 
 // Trainer Detail Screens
 import SessionDetailScreen from '../screens/trainer/SessionDetailScreen';
@@ -187,6 +188,18 @@ const ParentStackNavigator: React.FC = () => {
       <Stack.Screen
         name="NotificationSettings"
         component={NotificationSettingsScreen}
+        options={{
+          headerShown: true,
+          headerTitle: 'Notification Settings',
+          headerTintColor: colors.inkBlack,
+          headerStyle: { backgroundColor: colors.offWhite },
+          headerTitleStyle: { fontFamily: fontFamily.semiBold },
+          headerBackTitle: 'Back',
+        }}
+      />
+      <Stack.Screen
+        name="NotificationCenter"
+        component={NotificationCenterScreen}
         options={{
           headerShown: true,
           headerTitle: 'Notifications',

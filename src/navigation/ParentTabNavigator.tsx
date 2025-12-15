@@ -6,10 +6,11 @@
  */
 
 import React from 'react';
-import { StyleSheet } from 'react-native';
+import { StyleSheet, View, Text } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
 import { ParentTabParamList } from '../types/navigation';
+import { useNotificationContext } from '../providers';
 import { colors } from '../theme/colors';
 import { fontFamily, fontSize } from '../theme/typography';
 import { spacing, layoutSpacing } from '../theme/spacing';
@@ -38,6 +39,8 @@ const TAB_ICONS: { [key: string]: { outline: IconName; filled: IconName } } = {
  * ParentTabNavigator - Bottom tabs for parent users
  */
 export const ParentTabNavigator: React.FC = () => {
+  const { unreadCount } = useNotificationContext();
+
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
@@ -45,6 +48,21 @@ export const ParentTabNavigator: React.FC = () => {
         tabBarIcon: ({ focused, color, size }) => {
           const icons = TAB_ICONS[route.name] || { outline: 'ellipse-outline', filled: 'ellipse' };
           const iconName = focused ? icons.filled : icons.outline;
+
+          // Show badge on Account tab
+          if (route.name === 'Account' && unreadCount > 0) {
+            return (
+              <View>
+                <Ionicons name={iconName} size={size} color={color} />
+                <View style={styles.badge}>
+                  <Text style={styles.badgeText}>
+                    {unreadCount > 9 ? '9+' : unreadCount}
+                  </Text>
+                </View>
+              </View>
+            );
+          }
+
           return <Ionicons name={iconName} size={size} color={color} />;
         },
         tabBarActiveTintColor: colors.primary,
@@ -110,6 +128,23 @@ const styles = StyleSheet.create({
   tabBarLabel: {
     fontFamily: fontFamily.medium,
     fontSize: fontSize.xs,
+  },
+  badge: {
+    position: 'absolute',
+    right: -6,
+    top: -3,
+    backgroundColor: colors.error,
+    borderRadius: 8,
+    minWidth: 16,
+    height: 16,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 4,
+  },
+  badgeText: {
+    color: colors.white,
+    fontSize: 10,
+    fontWeight: '700',
   },
 });
 

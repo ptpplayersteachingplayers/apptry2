@@ -19,6 +19,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import Constants from 'expo-constants';
 import { ParentStackParamList } from '../../types/navigation';
 import { useAuth, useParentUser } from '../../hooks/useAuth';
+import { useNotificationContext } from '../../providers';
 import { PTPText, PTPButton } from '../../components';
 import { colors } from '../../theme/colors';
 import { spacing, borderRadius, shadows } from '../../theme/spacing';
@@ -33,6 +34,7 @@ interface MenuItemProps {
   onPress: () => void;
   showArrow?: boolean;
   danger?: boolean;
+  badge?: number;
 }
 
 const MenuItem: React.FC<MenuItemProps> = ({
@@ -42,6 +44,7 @@ const MenuItem: React.FC<MenuItemProps> = ({
   onPress,
   showArrow = true,
   danger = false,
+  badge,
 }) => (
   <TouchableOpacity
     style={styles.menuItem}
@@ -64,6 +67,13 @@ const MenuItem: React.FC<MenuItemProps> = ({
         </PTPText>
       )}
     </View>
+    {badge !== undefined && badge > 0 && (
+      <View style={styles.badge}>
+        <PTPText style={styles.badgeText}>
+          {badge > 99 ? '99+' : badge}
+        </PTPText>
+      </View>
+    )}
     {showArrow && (
       <PTPText color="gray400">→</PTPText>
     )}
@@ -77,6 +87,7 @@ const AccountScreen: React.FC = () => {
   const navigation = useNavigation<AccountNavigationProp>();
   const { logout } = useAuth();
   const parentUser = useParentUser();
+  const { unreadCount } = useNotificationContext();
 
   const handleLogout = () => {
     Alert.alert(
@@ -146,6 +157,10 @@ const AccountScreen: React.FC = () => {
         },
       ]
     );
+  };
+
+  const handleNotificationCenter = () => {
+    navigation.navigate('NotificationCenter');
   };
 
   const handleNotificationSettings = () => {
@@ -278,7 +293,14 @@ const AccountScreen: React.FC = () => {
             <MenuItem
               icon="🔔"
               title="Notifications"
-              subtitle="Manage push notifications"
+              subtitle="View your notifications"
+              onPress={handleNotificationCenter}
+              badge={unreadCount}
+            />
+            <MenuItem
+              icon="⚙️"
+              title="Notification Settings"
+              subtitle="Manage push notification preferences"
               onPress={handleNotificationSettings}
             />
             <MenuItem
@@ -458,6 +480,21 @@ const styles = StyleSheet.create({
   versionInfo: {
     marginTop: spacing[6],
     padding: spacing[4],
+  },
+  badge: {
+    backgroundColor: colors.error,
+    borderRadius: 10,
+    minWidth: 20,
+    height: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: spacing[1],
+    marginRight: spacing[2],
+  },
+  badgeText: {
+    color: colors.white,
+    fontSize: 11,
+    fontWeight: '700',
   },
 });
 
