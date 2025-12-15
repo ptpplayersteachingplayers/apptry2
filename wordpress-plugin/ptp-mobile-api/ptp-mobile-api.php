@@ -66,6 +66,7 @@ class PTP_Mobile_API {
         require_once PTP_MOBILE_API_PLUGIN_DIR . 'includes/class-ptp-messages-controller.php';
         require_once PTP_MOBILE_API_PLUGIN_DIR . 'includes/class-ptp-events-controller.php';
         require_once PTP_MOBILE_API_PLUGIN_DIR . 'includes/class-ptp-trainer-controller.php';
+        require_once PTP_MOBILE_API_PLUGIN_DIR . 'includes/class-ptp-push-controller.php';
     }
 
     /**
@@ -106,6 +107,10 @@ class PTP_Mobile_API {
         // Trainer-specific routes
         $trainer_controller = new PTP_Trainer_Controller();
         $trainer_controller->register_routes();
+
+        // Push notification routes
+        $push_controller = new PTP_Push_Controller();
+        $push_controller->register_routes();
     }
 
     /**
@@ -232,6 +237,9 @@ class PTP_Mobile_API {
 
         require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
         dbDelta($sql);
+
+        // Create push notification tables
+        PTP_Push_Controller::create_tables();
     }
 
     /**

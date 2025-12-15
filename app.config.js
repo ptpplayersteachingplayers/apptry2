@@ -54,6 +54,10 @@ export default ({ config }) => {
           'PTP Soccer uses your camera to upload photos and videos.',
         NSPhotoLibraryUsageDescription:
           'PTP Soccer accesses your photo library to upload images.',
+        UIBackgroundModes: ['remote-notification'],
+      },
+      entitlements: {
+        'aps-environment': IS_DEV ? 'development' : 'production',
       },
     },
     android: {
@@ -67,7 +71,11 @@ export default ({ config }) => {
         'ACCESS_COARSE_LOCATION',
         'CAMERA',
         'READ_EXTERNAL_STORAGE',
+        'RECEIVE_BOOT_COMPLETED',
+        'VIBRATE',
+        'WAKE_LOCK',
       ],
+      googleServicesFile: process.env.GOOGLE_SERVICES_JSON || './google-services.json',
     },
     web: {
       favicon: './assets/favicon.png',
@@ -80,6 +88,8 @@ export default ({ config }) => {
         {
           icon: './assets/notification-icon.png',
           color: '#FCB900',
+          sounds: ['./assets/notification-sound.wav'],
+          defaultChannel: 'default',
         },
       ],
       [
