@@ -19,13 +19,26 @@ import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
 import { TrainerStackParamList } from '../../types/navigation';
-import { TrainingSession } from '../../types';
+import { TrainingSession, SessionStatus } from '../../types';
 import { getSession, respondToSessionRequest, completeSession, cancelSession } from '../../api/training';
 import { PTPText, PTPButton, PTPLoading } from '../../components';
 import { colors } from '../../theme/colors';
 import { spacing, borderRadius, shadows } from '../../theme/spacing';
 
 type SessionDetailRouteProp = RouteProp<TrainerStackParamList, 'SessionDetail'>;
+
+// Helper function to get status banner style
+const getStatusStyle = (status: SessionStatus) => {
+  const statusColors: Record<SessionStatus, string> = {
+    pending: colors.warning,
+    requested: colors.info,
+    confirmed: colors.success,
+    completed: colors.gray500,
+    cancelled: colors.error,
+    'no-show': colors.error,
+  };
+  return { backgroundColor: statusColors[status] || colors.gray500 };
+};
 type SessionDetailNavigationProp = NativeStackNavigationProp<TrainerStackParamList>;
 
 /**
@@ -58,7 +71,7 @@ const SessionDetailScreen: React.FC = () => {
   const handleAccept = async () => {
     setIsActionLoading(true);
     try {
-      await respondToSessionRequest(sessionId, 'accepted');
+      await respondToSessionRequest(sessionId, 'accept');
       Alert.alert('Success', 'Session accepted! The parent will be notified.');
       loadSession();
     } catch (error) {
@@ -80,7 +93,7 @@ const SessionDetailScreen: React.FC = () => {
           onPress: async () => {
             setIsActionLoading(true);
             try {
-              await respondToSessionRequest(sessionId, 'declined', 'Unable to accommodate this time');
+              await respondToSessionRequest(sessionId, 'decline', 'Unable to accommodate this time');
               Alert.alert('Session Declined', 'The parent will be notified.');
               navigation.goBack();
             } catch (error) {
@@ -197,7 +210,7 @@ const SessionDetailScreen: React.FC = () => {
         showsVerticalScrollIndicator={false}
       >
         {/* Status Banner */}
-        <View style={[styles.statusBanner, styles[`status_${session.status}`]]}>
+        <View style={[styles.statusBanner, getStatusStyle(session.status)]}>
           <PTPText variant="label" color="white">
             {session.status.toUpperCase()}
           </PTPText>
@@ -384,6 +397,9 @@ const styles = StyleSheet.create({
   status_pending: {
     backgroundColor: colors.warning,
   },
+  status_requested: {
+    backgroundColor: colors.info,
+  },
   status_confirmed: {
     backgroundColor: colors.success,
   },
@@ -391,6 +407,9 @@ const styles = StyleSheet.create({
     backgroundColor: colors.gray500,
   },
   status_cancelled: {
+    backgroundColor: colors.error,
+  },
+  'status_no-show': {
     backgroundColor: colors.error,
   },
   section: {

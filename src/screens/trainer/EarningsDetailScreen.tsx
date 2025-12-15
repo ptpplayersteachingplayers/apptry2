@@ -59,12 +59,12 @@ const EarningsDetailScreen: React.FC = () => {
   const loadEarnings = async () => {
     try {
       const data = await getTrainerEarnings();
-      // Transform API response to our format
+      // Use API response data (already in camelCase from TrainerEarnings type)
       setEarnings({
-        totalEarnings: data.total_earned || 0,
-        pendingPayout: data.pending_payout || 0,
-        thisMonth: data.this_month || 0,
-        lastMonth: data.last_month || 0,
+        totalEarnings: data.totalEarnings || 0,
+        pendingPayout: data.pendingPayout || 0,
+        thisMonth: data.thisMonth || 0,
+        lastMonth: data.lastPayoutAmount || 0,
         transactions: mockTransactions, // Use mock for now
       });
     } catch (error) {

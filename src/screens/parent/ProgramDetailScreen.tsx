@@ -49,7 +49,8 @@ const ProgramDetailScreen: React.FC = () => {
 
   const loadProgram = async () => {
     try {
-      const data = await getProgram(programId);
+      const numericProgramId = typeof programId === 'string' ? parseInt(programId, 10) : programId;
+      const data = await getProgram(numericProgramId);
       setProgram(data);
     } catch (error) {
       console.error('Error loading program:', error);
