@@ -54,6 +54,7 @@
     "preview": {
       "extends": "base",
       "distribution": "internal",
+      "channel": "preview",
       "env": {
         "APP_VARIANT": "preview",
         "DEMO_MODE": "false",
