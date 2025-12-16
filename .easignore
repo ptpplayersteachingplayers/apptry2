@@ -1,10 +1,16 @@
 # EAS Build ignore file
-# Explicitly DO NOT ignore package-lock.json (it should be included)
+# IMPORTANT: package-lock.json MUST be included for npm to be used
+
+# Explicitly include the lockfile (negate any potential ignore)
+!package-lock.json
+!package.json
 
 # Ignore development files
 .git
 .github
 .vscode
+
+# Ignore documentation (except README)
 *.md
 !README.md
 
@@ -24,3 +30,8 @@ coverage
 .idea
 *.swp
 *.swo
+
+# Ignore large unnecessary files
+*.zip
+PTP_iOS_Audit.md
+wordpress-plugin
