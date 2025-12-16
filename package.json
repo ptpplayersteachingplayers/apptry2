@@ -2,6 +2,10 @@
   "name": "ptp-soccer",
   "version": "1.0.0",
   "main": "expo/AppEntry.js",
+  "engines": {
+    "node": ">=20.19.4"
+  },
+  "packageManager": "npm@10.9.0",
   "scripts": {
     "start": "expo start",
     "android": "expo start --android",
