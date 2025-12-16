@@ -75,7 +75,7 @@ export default ({ config }) => {
         'VIBRATE',
         'WAKE_LOCK',
       ],
-      googleServicesFile: process.env.GOOGLE_SERVICES_JSON || './google-services.json',
+      // googleServicesFile: process.env.GOOGLE_SERVICES_JSON || './google-services.json',
     },
     web: {
       favicon: './assets/favicon.png',
@@ -88,7 +88,6 @@ export default ({ config }) => {
         {
           icon: './assets/notification-icon.png',
           color: '#FCB900',
-          sounds: ['./assets/notification-sound.wav'],
           defaultChannel: 'default',
         },
       ],
