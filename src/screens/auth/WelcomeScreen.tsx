@@ -3,6 +3,7 @@
  *
  * Brand hero screen with login/signup options.
  * First screen users see when opening the app.
+ * Updated: Centered, smaller, white buttons
  */
 
 import React from 'react';
@@ -13,23 +14,25 @@ import {
   Image,
   SafeAreaView,
   Dimensions,
+  TouchableOpacity,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { AuthStackParamList } from '../../types/navigation';
-import { PTPText, PTPButton } from '../../components';
+import { PTPText } from '../../components';
 import { useAuth } from '../../hooks/useAuth';
 import { colors } from '../../theme/colors';
-import { spacing } from '../../theme/spacing';
+import { spacing, borderRadius } from '../../theme/spacing';
 import { LOGO_URL } from '../../assets/logo';
 import { featureImages } from '../../assets/media';
 
 type WelcomeScreenNavigationProp = NativeStackNavigationProp<AuthStackParamList, 'Welcome'>;
 
-const { height: SCREEN_HEIGHT } = Dimensions.get('window');
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 /**
  * WelcomeScreen - Brand hero with PTP imagery
+ * Clean, minimal design with white centered buttons
  */
 const WelcomeScreen: React.FC = () => {
   const navigation = useNavigation<WelcomeScreenNavigationProp>();
@@ -77,40 +80,45 @@ const WelcomeScreen: React.FC = () => {
             </View>
           </View>
 
-          {/* Action buttons */}
+          {/* Centered white action buttons */}
           <View style={styles.actions}>
-            <PTPButton
-              title="Get Started"
-              variant="primary"
-              size="large"
-              fullWidth
+            <TouchableOpacity
+              style={styles.primaryButton}
               onPress={() => navigation.navigate('SignUp')}
-              accessibilityLabel="Get started with PTP Soccer"
-            />
-            <PTPButton
-              title="I Already Have an Account"
-              variant="ghost"
-              size="medium"
-              fullWidth
+              activeOpacity={0.9}
+            >
+              <PTPText variant="buttonMedium" color="inkBlack">
+                Get Started
+              </PTPText>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.secondaryButton}
               onPress={() => navigation.navigate('Login')}
-              accessibilityLabel="Log in to your account"
-              style={styles.loginButton}
-            />
-            <PTPButton
-              title="Browse as Guest"
-              variant="outline"
-              size="medium"
-              fullWidth
+              activeOpacity={0.8}
+            >
+              <PTPText variant="buttonSmall" color="white">
+                I Already Have an Account
+              </PTPText>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.ghostButton}
               onPress={continueAsGuest}
-              accessibilityLabel="Continue browsing without an account"
-              style={styles.guestButton}
-            />
+              activeOpacity={0.7}
+            >
+              <PTPText variant="buttonSmall" color="gray300">
+                Browse as Guest
+              </PTPText>
+            </TouchableOpacity>
           </View>
         </SafeAreaView>
       </View>
     </ImageBackground>
   );
 };
+
+const BUTTON_WIDTH = SCREEN_WIDTH * 0.7; // 70% of screen width for smaller buttons
 
 const styles = StyleSheet.create({
   background: {
@@ -126,47 +134,77 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: spacing[4],
     justifyContent: 'space-between',
+    alignItems: 'center',
   },
   header: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingTop: SCREEN_HEIGHT * 0.1,
+    paddingTop: spacing[12],
   },
   logo: {
-    width: 180,
-    height: 72,
-    marginBottom: spacing[6],
+    width: 160,
+    height: 64,
+    marginBottom: spacing[5],
   },
   title: {
     textAlign: 'center',
-    marginBottom: spacing[3],
+    marginBottom: spacing[2],
+    fontSize: 28,
   },
   subtitle: {
     textAlign: 'center',
-    maxWidth: 280,
+    maxWidth: 260,
+    fontSize: 16,
   },
   badges: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'center',
-    gap: spacing[3],
-    marginBottom: spacing[8],
+    gap: spacing[2],
+    marginBottom: spacing[6],
   },
   badge: {
     backgroundColor: 'rgba(255, 255, 255, 0.1)',
     paddingHorizontal: spacing[3],
     paddingVertical: spacing[2],
-    borderRadius: 20,
+    borderRadius: 16,
   },
   actions: {
-    paddingBottom: spacing[6],
+    alignItems: 'center',
+    paddingBottom: spacing[8],
+    width: '100%',
   },
-  loginButton: {
-    marginTop: spacing[3],
+  primaryButton: {
+    width: BUTTON_WIDTH,
+    backgroundColor: colors.white,
+    paddingVertical: spacing[4],
+    borderRadius: borderRadius.full,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: spacing[3],
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
+    elevation: 3,
   },
-  guestButton: {
-    marginTop: spacing[2],
+  secondaryButton: {
+    width: BUTTON_WIDTH,
+    backgroundColor: 'rgba(255, 255, 255, 0.15)',
+    paddingVertical: spacing[3],
+    borderRadius: borderRadius.full,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: spacing[2],
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.3)',
+  },
+  ghostButton: {
+    width: BUTTON_WIDTH,
+    paddingVertical: spacing[3],
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });
 
