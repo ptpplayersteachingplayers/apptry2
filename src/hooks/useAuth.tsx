@@ -30,12 +30,14 @@ interface AuthState {
   isLoading: boolean;
   isAuthenticated: boolean;
   isOnboarded: boolean;
+  isGuest: boolean;
 }
 
 interface AuthContextType extends AuthState {
   login: (credentials: LoginRequest) => Promise<void>;
   signUp: (data: SignUpRequest) => Promise<void>;
   logout: () => Promise<void>;
+  continueAsGuest: () => void;
   finishOnboarding: (data: OnboardingData) => Promise<void>;
   refreshUser: () => Promise<void>;
   updateUser: (updates: Partial<User>) => void;
@@ -56,6 +58,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     isLoading: true,
     isAuthenticated: false,
     isOnboarded: false,
+    isGuest: false,
   });
 
   // Check for stored token on mount
@@ -71,6 +74,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         isLoading: false,
         isAuthenticated: false,
         isOnboarded: false,
+        isGuest: false,
       });
     });
   }, []);
@@ -89,6 +93,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           isLoading: false,
           isAuthenticated: true,
           isOnboarded,
+          isGuest: false,
         });
       } else {
         setState({
@@ -96,6 +101,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           isLoading: false,
           isAuthenticated: false,
           isOnboarded: false,
+          isGuest: false,
         });
       }
     } catch (error) {
@@ -105,6 +111,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         isLoading: false,
         isAuthenticated: false,
         isOnboarded: false,
+        isGuest: false,
       });
     }
   };
@@ -135,6 +142,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         isLoading: false,
         isAuthenticated: true,
         isOnboarded,
+        isGuest: false,
       });
     } catch (error) {
       setState((prev) => ({ ...prev, isLoading: false }));
@@ -153,6 +161,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         isLoading: false,
         isAuthenticated: true,
         isOnboarded: false, // New users need onboarding
+        isGuest: false,
       });
     } catch (error) {
       setState((prev) => ({ ...prev, isLoading: false }));
@@ -173,6 +182,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         isLoading: false,
         isAuthenticated: false,
         isOnboarded: false,
+        isGuest: false,
       });
     } catch (error) {
       console.error('Logout error:', error);
@@ -181,8 +191,19 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         isLoading: false,
         isAuthenticated: false,
         isOnboarded: false,
+        isGuest: false,
       });
     }
+  };
+
+  const continueAsGuest = () => {
+    setState({
+      user: null,
+      isLoading: false,
+      isAuthenticated: false,
+      isOnboarded: true, // Skip onboarding for guests
+      isGuest: true,
+    });
   };
 
   const finishOnboarding = async (data: OnboardingData) => {
@@ -217,6 +238,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         login,
         signUp,
         logout,
+        continueAsGuest,
         finishOnboarding,
         refreshUser,
         updateUser,

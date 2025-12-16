@@ -12,6 +12,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { ParentStackParamList } from '../../types/navigation';
 import { getCheckoutUrl } from '../../api/orders';
 import { PTPText, PTPButton } from '../../components';
+import { useAuth } from '../../hooks/useAuth';
 import { colors } from '../../theme/colors';
 import { spacing, borderRadius } from '../../theme/spacing';
 
@@ -30,6 +31,7 @@ const CheckoutScreen: React.FC = () => {
   const navigation = useNavigation<CheckoutNavigationProp>();
   const route = useRoute<CheckoutRouteProp>();
   const { productId } = route.params;
+  const { isGuest, logout } = useAuth();
 
   const [isLoading, setIsLoading] = useState(true);
   const [checkoutUrl, setCheckoutUrl] = useState<string | null>(null);
@@ -39,8 +41,16 @@ const CheckoutScreen: React.FC = () => {
   const hasHandledSuccess = useRef(false);
 
   React.useEffect(() => {
-    loadCheckoutUrl();
-  }, [productId]);
+    if (!isGuest) {
+      loadCheckoutUrl();
+    }
+  }, [productId, isGuest]);
+
+  // Guest users need to create an account to checkout
+  const handleGuestSignUp = async () => {
+    // Exit guest mode and go to sign up
+    await logout();
+  };
 
   const loadCheckoutUrl = async () => {
     try {
@@ -97,6 +107,37 @@ const CheckoutScreen: React.FC = () => {
       handleCheckoutSuccess();
     }
   };
+
+  // Guest users need to create an account first
+  if (isGuest) {
+    return (
+      <View style={styles.guestContainer}>
+        <View style={styles.guestIcon}>
+          <PTPText style={styles.guestEmoji}>👤</PTPText>
+        </View>
+        <PTPText variant="sectionTitle" style={styles.guestTitle}>
+          Create an Account to Register
+        </PTPText>
+        <PTPText variant="body" color="gray500" center style={styles.guestText}>
+          You&apos;ll need an account to complete your registration and receive important updates about your camp or clinic.
+        </PTPText>
+        <View style={styles.guestButtons}>
+          <PTPButton
+            title="Create Account"
+            onPress={handleGuestSignUp}
+            fullWidth
+          />
+          <PTPButton
+            title="Go Back"
+            variant="outline"
+            onPress={() => navigation.goBack()}
+            fullWidth
+            style={styles.secondaryButton}
+          />
+        </View>
+      </View>
+    );
+  }
 
   if (error) {
     return (
@@ -228,6 +269,35 @@ const styles = StyleSheet.create({
   },
   secondaryButton: {
     marginTop: spacing[3],
+  },
+  guestContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: spacing[6],
+    backgroundColor: colors.white,
+  },
+  guestIcon: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: colors.gray100,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: spacing[6],
+  },
+  guestEmoji: {
+    fontSize: 40,
+  },
+  guestTitle: {
+    marginBottom: spacing[3],
+    textAlign: 'center',
+  },
+  guestText: {
+    marginBottom: spacing[8],
+  },
+  guestButtons: {
+    width: '100%',
   },
 });
 

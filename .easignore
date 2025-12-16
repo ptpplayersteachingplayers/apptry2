@@ -1,0 +1,26 @@
+# EAS Build ignore file
+# Explicitly DO NOT ignore package-lock.json (it should be included)
+
+# Ignore development files
+.git
+.github
+.vscode
+*.md
+!README.md
+
+# Ignore test files
+__tests__
+*.test.ts
+*.test.tsx
+*.spec.ts
+*.spec.tsx
+coverage
+
+# Ignore local environment files
+.env.local
+.env.development
+
+# Ignore IDE files
+.idea
+*.swp
+*.swo

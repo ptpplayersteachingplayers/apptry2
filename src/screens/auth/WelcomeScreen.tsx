@@ -18,6 +18,7 @@ import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { AuthStackParamList } from '../../types/navigation';
 import { PTPText, PTPButton } from '../../components';
+import { useAuth } from '../../hooks/useAuth';
 import { colors } from '../../theme/colors';
 import { spacing } from '../../theme/spacing';
 import { LOGO_URL } from '../../assets/logo';
@@ -32,6 +33,7 @@ const { height: SCREEN_HEIGHT } = Dimensions.get('window');
  */
 const WelcomeScreen: React.FC = () => {
   const navigation = useNavigation<WelcomeScreenNavigationProp>();
+  const { continueAsGuest } = useAuth();
 
   return (
     <ImageBackground
@@ -94,6 +96,15 @@ const WelcomeScreen: React.FC = () => {
               accessibilityLabel="Log in to your account"
               style={styles.loginButton}
             />
+            <PTPButton
+              title="Browse as Guest"
+              variant="outline"
+              size="medium"
+              fullWidth
+              onPress={continueAsGuest}
+              accessibilityLabel="Continue browsing without an account"
+              style={styles.guestButton}
+            />
           </View>
         </SafeAreaView>
       </View>
@@ -153,6 +164,9 @@ const styles = StyleSheet.create({
   },
   loginButton: {
     marginTop: spacing[3],
+  },
+  guestButton: {
+    marginTop: spacing[2],
   },
 });
 
