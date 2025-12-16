@@ -4,7 +4,14 @@
     "appVersionSource": "remote"
   },
   "build": {
+    "base": {
+      "node": "18.18.0",
+      "npm": {
+        "install": "npm install --legacy-peer-deps"
+      }
+    },
     "development": {
+      "extends": "base",
       "developmentClient": true,
       "distribution": "internal",
       "env": {
@@ -19,6 +26,7 @@
       }
     },
     "development:device": {
+      "extends": "base",
       "developmentClient": true,
       "distribution": "internal",
       "env": {
@@ -33,6 +41,7 @@
       }
     },
     "preview": {
+      "extends": "base",
       "distribution": "internal",
       "env": {
         "APP_VARIANT": "preview",
@@ -46,6 +55,7 @@
       }
     },
     "production": {
+      "extends": "base",
       "autoIncrement": true,
       "env": {
         "APP_VARIANT": "production",
