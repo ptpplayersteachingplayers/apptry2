@@ -2,12 +2,16 @@
   "cli": {
     "version": ">= 12.0.0",
     "appVersionSource": "remote",
-    "requireCommit": false,
-    "packageManager": "npm"
+    "requireCommit": false
   },
   "build": {
     "base": {
-      "node": "22.11.0"
+      "node": "22.12.0",
+      "npm": "10.9.0",
+      "env": {
+        "NPM_CONFIG_LEGACY_PEER_DEPS": "true",
+        "NPM_CONFIG_ENGINE_STRICT": "false"
+      }
     },
     "development": {
       "extends": "base",
@@ -15,13 +19,17 @@
       "distribution": "internal",
       "env": {
         "APP_VARIANT": "development",
-        "DEMO_MODE": "true"
+        "DEMO_MODE": "true",
+        "NPM_CONFIG_LEGACY_PEER_DEPS": "true",
+        "NPM_CONFIG_ENGINE_STRICT": "false"
       },
       "ios": {
-        "simulator": true
+        "simulator": true,
+        "image": "latest"
       },
       "android": {
-        "buildType": "apk"
+        "buildType": "apk",
+        "image": "latest"
       }
     },
     "development:device": {
@@ -30,13 +38,17 @@
       "distribution": "internal",
       "env": {
         "APP_VARIANT": "development",
-        "DEMO_MODE": "true"
+        "DEMO_MODE": "true",
+        "NPM_CONFIG_LEGACY_PEER_DEPS": "true",
+        "NPM_CONFIG_ENGINE_STRICT": "false"
       },
       "ios": {
-        "resourceClass": "m-medium"
+        "resourceClass": "m-medium",
+        "image": "latest"
       },
       "android": {
-        "buildType": "apk"
+        "buildType": "apk",
+        "image": "latest"
       }
     },
     "preview": {
@@ -44,13 +56,17 @@
       "distribution": "internal",
       "env": {
         "APP_VARIANT": "preview",
-        "DEMO_MODE": "false"
+        "DEMO_MODE": "false",
+        "NPM_CONFIG_LEGACY_PEER_DEPS": "true",
+        "NPM_CONFIG_ENGINE_STRICT": "false"
       },
       "ios": {
-        "resourceClass": "m-medium"
+        "resourceClass": "m-medium",
+        "image": "latest"
       },
       "android": {
-        "buildType": "apk"
+        "buildType": "apk",
+        "image": "latest"
       }
     },
     "production": {
@@ -58,13 +74,17 @@
       "autoIncrement": true,
       "env": {
         "APP_VARIANT": "production",
-        "DEMO_MODE": "false"
+        "DEMO_MODE": "false",
+        "NPM_CONFIG_LEGACY_PEER_DEPS": "true",
+        "NPM_CONFIG_ENGINE_STRICT": "false"
       },
       "ios": {
-        "resourceClass": "m-medium"
+        "resourceClass": "m-medium",
+        "image": "latest"
       },
       "android": {
-        "buildType": "app-bundle"
+        "buildType": "app-bundle",
+        "image": "latest"
       }
     }
   },
