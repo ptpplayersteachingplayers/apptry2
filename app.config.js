@@ -88,7 +88,6 @@ export default ({ config }) => {
         {
           icon: './assets/notification-icon.png',
           color: '#FCB900',
-          sounds: ['./assets/notification-sound.wav'],
           defaultChannel: 'default',
         },
       ],
