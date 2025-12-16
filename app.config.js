@@ -14,9 +14,9 @@ const IS_PREVIEW = process.env.APP_VARIANT === 'preview';
 
 // Get the app variant name for bundle identifier
 const getAppName = () => {
-  if (IS_DEV) return 'PTP Soccer (Dev)';
-  if (IS_PREVIEW) return 'PTP Soccer (Preview)';
-  return 'PTP Soccer';
+  if (IS_DEV) return 'PTP (Dev)';
+  if (IS_PREVIEW) return 'PTP (Preview)';
+  return 'PTP';
 };
 
 const getBundleIdentifier = () => {
@@ -49,11 +49,11 @@ export default ({ config }) => {
       bundleIdentifier: getBundleIdentifier(),
       infoPlist: {
         NSLocationWhenInUseUsageDescription:
-          'PTP Soccer uses your location to find camps and clinics near you.',
+          'PTP uses your location to find camps and clinics near you.',
         NSCameraUsageDescription:
-          'PTP Soccer uses your camera to upload photos and videos.',
+          'PTP uses your camera to upload photos and videos.',
         NSPhotoLibraryUsageDescription:
-          'PTP Soccer accesses your photo library to upload images.',
+          'PTP accesses your photo library to upload images.',
         UIBackgroundModes: ['remote-notification'],
       },
       entitlements: {
@@ -95,7 +95,7 @@ export default ({ config }) => {
         'expo-location',
         {
           locationWhenInUsePermission:
-            'PTP Soccer uses your location to find camps and clinics near you.',
+            'PTP uses your location to find camps and clinics near you.',
         },
       ],
     ],
