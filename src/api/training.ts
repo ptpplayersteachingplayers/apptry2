@@ -340,8 +340,10 @@ const mapWordPressSession = (wpSession: any): TrainingSession => ({
 
 /**
  * Get trainer dashboard data
- *
- * GET /wp-json/ptp/v1/trainer/dashboard
+ * Aggregates data from multiple endpoints:
+ * - GET /wp-json/ptp/v1/trainer/stats
+ * - GET /wp-json/ptp/v1/trainer/bookings
+ * - GET /wp-json/ptp/v1/trainer/earnings
  */
 export const getTrainerDashboard = async (): Promise<{
   todaysSessions: TrainingSession[];
@@ -366,25 +368,38 @@ export const getTrainerDashboard = async (): Promise<{
     };
   }
 
-  const response = await apiClient.get('/trainer/dashboard');
-  const data = response.data;
+  // Fetch data from multiple endpoints
+  const [statsRes, bookingsRes, earningsRes] = await Promise.all([
+    apiClient.get('/trainer/stats'),
+    apiClient.get('/trainer/bookings'),
+    apiClient.get('/trainer/earnings'),
+  ]);
+
+  const stats = statsRes.data;
+  const bookings = bookingsRes.data.bookings || [];
+  const earnings = earningsRes.data;
+
+  // Filter today's sessions and pending
+  const today = getRelativeDate(0);
+  const todaysSessions = bookings.filter((b: any) => b.date === today).map(mapWordPressSession);
+  const pendingRequests = bookings.filter((b: any) => b.status === 'pending').length;
 
   return {
-    todaysSessions: (data.todays_sessions || []).map(mapWordPressSession),
-    pendingRequests: data.pending_requests,
-    weeklySessions: data.weekly_sessions,
-    monthlyEarnings: data.monthly_earnings,
-    totalStudents: data.total_students,
-    nextSession: data.next_session ? mapWordPressSession(data.next_session) : null,
-    rating: data.rating,
-    totalReviews: data.total_reviews,
+    todaysSessions,
+    pendingRequests,
+    weeklySessions: stats.sessions_this_week || 0,
+    monthlyEarnings: earnings.total_earnings || 0,
+    totalStudents: stats.total_students || 0,
+    nextSession: bookings.length > 0 ? mapWordPressSession(bookings[0]) : null,
+    rating: stats.average_rating || 5.0,
+    totalReviews: stats.total_reviews || 0,
   };
 };
 
 /**
- * Get trainer's own sessions
+ * Get trainer's own bookings/sessions
  *
- * GET /wp-json/ptp/v1/trainer/sessions
+ * GET /wp-json/ptp/v1/trainer/bookings
  */
 export const getTrainerSessions = async (
   status?: SessionStatus,
@@ -403,14 +418,15 @@ export const getTrainerSessions = async (
   if (date) params.append('date', date);
 
   const queryString = params.toString();
-  const response = await apiClient.get(`/trainer/sessions${queryString ? '?' + queryString : ''}`);
-  return (response.data.sessions || []).map(mapWordPressSession);
+  const response = await apiClient.get(`/trainer/bookings${queryString ? '?' + queryString : ''}`);
+  return (response.data.bookings || []).map(mapWordPressSession);
 };
 
 /**
  * Respond to a session request (accept/decline)
  *
- * POST /wp-json/ptp/v1/trainer/sessions/:id/respond
+ * POST /wp-json/ptp/v1/bookings/:id/confirm (accept)
+ * POST /wp-json/ptp/v1/bookings/:id/cancel (decline)
  */
 export const respondToSessionRequest = async (
   sessionId: number,
@@ -429,8 +445,8 @@ export const respondToSessionRequest = async (
     };
   }
 
-  const response = await apiClient.post(`/trainer/sessions/${sessionId}/respond`, {
-    action,
+  const endpoint = action === 'accept' ? 'confirm' : 'cancel';
+  const response = await apiClient.post(`/bookings/${sessionId}/${endpoint}`, {
     message,
   });
   return response.data;
@@ -439,7 +455,7 @@ export const respondToSessionRequest = async (
 /**
  * Complete a session
  *
- * POST /wp-json/ptp/v1/trainer/sessions/:id/complete
+ * POST /wp-json/ptp/v1/bookings/:id/complete
  */
 export const completeSession = async (
   sessionId: number,
@@ -454,7 +470,7 @@ export const completeSession = async (
     return { success: true, message: 'Session marked as completed' };
   }
 
-  const response = await apiClient.post(`/trainer/sessions/${sessionId}/complete`, { notes });
+  const response = await apiClient.post(`/bookings/${sessionId}/complete`, { notes });
   return response.data;
 };
 
@@ -547,17 +563,17 @@ export const updateTrainerProfile = async (
 };
 
 /**
- * Get trainer's students
+ * Get trainer's players/students
  *
- * GET /wp-json/ptp/v1/trainer/students
+ * GET /wp-json/ptp/v1/trainer/players
  */
 export const getTrainerStudents = async (): Promise<any[]> => {
   if (apiConfig.demoMode) {
     return [];
   }
 
-  const response = await apiClient.get('/trainer/students');
-  return response.data.students || [];
+  const response = await apiClient.get('/trainer/players');
+  return response.data.players || [];
 };
 
 /**

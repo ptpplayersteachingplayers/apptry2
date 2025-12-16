@@ -20,8 +20,8 @@ import {
 /**
  * Login with email and password
  *
- * Uses WordPress JWT Authentication plugin endpoint.
- * POST /wp-json/jwt-auth/v1/token
+ * Uses PTP Training Platform plugin endpoint.
+ * POST /wp-json/ptp/v1/auth/login
  */
 export const login = async (credentials: LoginRequest): Promise<LoginResponse> => {
   // In demo mode, return mock user
@@ -29,18 +29,15 @@ export const login = async (credentials: LoginRequest): Promise<LoginResponse> =
     return mockLogin(credentials);
   }
 
-  const response = await authClient.post(apiConfig.jwtAuthEndpoint, {
-    username: credentials.email,
+  const response = await authClient.post(`${apiConfig.namespace}/auth/login`, {
+    email: credentials.email,
     password: credentials.password,
   });
 
-  const { token, user_email, user_nicename, user_display_name } = response.data;
+  const { token, user } = response.data;
 
   // Store the token
   await storeToken(token);
-
-  // Fetch full user profile
-  const user = await getCurrentUser();
 
   return {
     token,
@@ -79,7 +76,7 @@ export const signUp = async (data: SignUpRequest): Promise<LoginResponse> => {
 /**
  * Get current logged-in user
  *
- * GET /wp-json/ptp/v1/me
+ * GET /wp-json/ptp/v1/auth/me
  */
 export const getCurrentUser = async (): Promise<User> => {
   // In demo mode, return mock user
@@ -87,23 +84,26 @@ export const getCurrentUser = async (): Promise<User> => {
     return getMockCurrentUser();
   }
 
-  const response = await authClient.get(`${apiConfig.namespace}/me`);
+  const response = await authClient.get(`${apiConfig.namespace}/auth/me`);
   return response.data;
 };
 
 /**
  * Update user profile
  *
- * PUT /wp-json/ptp/v1/profile
+ * PUT /wp-json/ptp/v1/parent/profile (for parents)
+ * PUT /wp-json/ptp/v1/trainer/profile (for trainers)
  */
 export const updateProfile = async (
-  data: Partial<ParentUser | TrainerUser>
+  data: Partial<ParentUser | TrainerUser>,
+  isTrainer: boolean = false
 ): Promise<User> => {
   if (apiConfig.demoMode) {
     return { ...getMockCurrentUser(), ...data } as User;
   }
 
-  const response = await authClient.put(`${apiConfig.namespace}/profile`, data);
+  const endpoint = isTrainer ? '/trainer/profile' : '/parent/profile';
+  const response = await authClient.put(`${apiConfig.namespace}${endpoint}`, data);
   return response.data;
 };
 

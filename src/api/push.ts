@@ -2,15 +2,16 @@
  * Push Notifications API Module
  *
  * Handles push notification registration and preferences.
+ * Uses FCM (Firebase Cloud Messaging) for push notifications.
  */
 
 import { apiClient } from './client';
 import { apiConfig } from './config';
 
 /**
- * Register push notification token
+ * Register push notification token (FCM)
  *
- * POST /wp-json/ptp/v1/push/register
+ * POST /wp-json/ptp/v1/auth/fcm-token
  */
 export const registerPushToken = async (
   token: string,
@@ -21,9 +22,9 @@ export const registerPushToken = async (
     return;
   }
 
-  await apiClient.post('/push/register', {
-    token,
-    platform,
+  await apiClient.post('/auth/fcm-token', {
+    fcm_token: token,
+    device_type: platform,
   });
 };
 
