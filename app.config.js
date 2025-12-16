@@ -48,6 +48,7 @@ export default ({ config }) => {
       supportsTablet: true,
       bundleIdentifier: getBundleIdentifier(),
       infoPlist: {
+        ITSAppUsesNonExemptEncryption: false,
         NSLocationWhenInUseUsageDescription:
           'PTP uses your location to find camps and clinics near you.',
         NSCameraUsageDescription:
