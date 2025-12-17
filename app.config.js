@@ -86,6 +86,14 @@ export default ({ config }) => {
       'expo-secure-store',
       'expo-updates',
       [
+        'expo-image',
+        {
+          ios: {
+            avifEnabled: false,
+          },
+        },
+      ],
+      [
         'expo-notifications',
         {
           icon: './assets/notification-icon.png',
