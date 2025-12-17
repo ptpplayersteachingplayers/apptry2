@@ -10,6 +10,7 @@ import {
   StyleSheet,
   ScrollView,
   RefreshControl,
+  Image,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -34,6 +35,7 @@ import {
 import { colors } from '../../theme/colors';
 import { spacing, borderRadius } from '../../theme/spacing';
 import { featureImages, cardBackgrounds } from '../../assets/media';
+import { LOGO_URL } from '../../assets/logo';
 import { mockPrograms } from '../../mocks/programs';
 
 type HomeScreenNavigationProp = NativeStackNavigationProp<ParentStackParamList>;
@@ -238,9 +240,15 @@ const HomeScreen: React.FC = memo(() => {
         {/* Trust Section */}
         <FadeInView delay={500}>
           <View style={styles.trustSection}>
-            <PTPText variant="sectionTitle" center>
-              Why PTP?
-            </PTPText>
+            <View style={styles.trustLogoContainer}>
+              <PTPText variant="body" color="gray500">Why</PTPText>
+              <Image
+                source={{ uri: LOGO_URL }}
+                style={styles.trustLogo}
+                resizeMode="contain"
+              />
+              <PTPText variant="body" color="gray500">?</PTPText>
+            </View>
             <View style={styles.trustBadges}>
               <View style={styles.trustBadge}>
                 <View style={styles.trustIconContainer}>
@@ -363,6 +371,16 @@ const styles = StyleSheet.create({
     paddingTop: spacing[6],
     borderTopWidth: 1,
     borderTopColor: colors.gray200,
+  },
+  trustLogoContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: spacing[2],
+  },
+  trustLogo: {
+    width: 80,
+    height: 32,
   },
   trustBadges: {
     flexDirection: 'row',

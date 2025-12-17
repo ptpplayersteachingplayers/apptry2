@@ -1,13 +1,14 @@
 /**
- * Children API Module
+ * Children/Players API Module
  *
- * Handles child profile management for parents.
+ * Handles child/player profile management for parents.
  *
- * Endpoints (WordPress PTP Training Plugin):
- * - GET /children - Get all children for current parent
- * - POST /children - Add a new child
- * - PUT /children/:id - Update a child profile
- * - DELETE /children/:id - Delete a child profile
+ * Endpoints (PTP Training Platform REST API):
+ * - GET /players - Get all players for current parent
+ * - GET /players/:id - Get player details
+ * - POST /players - Add a new player
+ * - PUT /players/:id - Update a player profile
+ * - DELETE /players/:id - Delete a player profile
  */
 
 import { apiClient } from './client';
@@ -30,23 +31,23 @@ export interface ChildData {
 }
 
 /**
- * Get all children for the current parent
+ * Get all players for the current parent
  *
- * GET /wp-json/ptp/v1/children
+ * GET /wp-json/ptp/v1/players
  */
 export const getChildren = async (): Promise<ChildProfile[]> => {
   if (apiConfig.demoMode) {
     return mockChildren;
   }
 
-  const response = await apiClient.get('/children');
-  return (response.data.children || []).map(mapWordPressChild);
+  const response = await apiClient.get('/players');
+  return (response.data.players || response.data || []).map(mapWordPressChild);
 };
 
 /**
- * Get a single child by ID
+ * Get a single player by ID
  *
- * GET /wp-json/ptp/v1/children/:id
+ * GET /wp-json/ptp/v1/players/:id
  */
 export const getChild = async (childId: number): Promise<ChildProfile> => {
   if (apiConfig.demoMode) {
@@ -55,14 +56,14 @@ export const getChild = async (childId: number): Promise<ChildProfile> => {
     return child;
   }
 
-  const response = await apiClient.get(`/children/${childId}`);
+  const response = await apiClient.get(`/players/${childId}`);
   return mapWordPressChild(response.data);
 };
 
 /**
- * Add a new child
+ * Add a new player
  *
- * POST /wp-json/ptp/v1/children
+ * POST /wp-json/ptp/v1/players
  */
 export const addChild = async (data: ChildData): Promise<{ success: boolean; childId: number; message: string }> => {
   if (apiConfig.demoMode) {
@@ -82,11 +83,11 @@ export const addChild = async (data: ChildData): Promise<{ success: boolean; chi
     return {
       success: true,
       childId: newChild.id,
-      message: 'Child profile created',
+      message: 'Player profile created',
     };
   }
 
-  const response = await apiClient.post('/children', {
+  const response = await apiClient.post('/players', {
     first_name: data.firstName,
     last_name: data.lastName,
     date_of_birth: data.dateOfBirth,
@@ -106,9 +107,9 @@ export const addChild = async (data: ChildData): Promise<{ success: boolean; chi
 };
 
 /**
- * Update a child profile
+ * Update a player profile
  *
- * PUT /wp-json/ptp/v1/children/:id
+ * PUT /wp-json/ptp/v1/players/:id
  */
 export const updateChild = async (
   childId: number,
@@ -129,10 +130,10 @@ export const updateChild = async (
         avatarUrl: data.avatarUrl ?? child.avatarUrl,
       });
     }
-    return { success: true, message: 'Child profile updated' };
+    return { success: true, message: 'Player profile updated' };
   }
 
-  const response = await apiClient.put(`/children/${childId}`, {
+  const response = await apiClient.put(`/players/${childId}`, {
     first_name: data.firstName,
     last_name: data.lastName,
     date_of_birth: data.dateOfBirth,
@@ -148,9 +149,9 @@ export const updateChild = async (
 };
 
 /**
- * Delete a child profile
+ * Delete a player profile
  *
- * DELETE /wp-json/ptp/v1/children/:id
+ * DELETE /wp-json/ptp/v1/players/:id
  */
 export const deleteChild = async (childId: number): Promise<{ success: boolean; message: string }> => {
   if (apiConfig.demoMode) {
@@ -158,10 +159,10 @@ export const deleteChild = async (childId: number): Promise<{ success: boolean; 
     if (index !== -1) {
       mockChildren.splice(index, 1);
     }
-    return { success: true, message: 'Child profile deleted' };
+    return { success: true, message: 'Player profile deleted' };
   }
 
-  const response = await apiClient.delete(`/children/${childId}`);
+  const response = await apiClient.delete(`/players/${childId}`);
   return response.data;
 };
 

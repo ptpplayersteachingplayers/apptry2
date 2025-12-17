@@ -5,7 +5,7 @@
  * Uses WordPress JWT Authentication plugin.
  */
 
-import { authClient, storeToken, clearTokens } from './client';
+import { apiClient, authClient, storeToken, clearTokens } from './client';
 import { apiConfig } from './config';
 import {
   LoginRequest,
@@ -20,8 +20,8 @@ import {
 /**
  * Login with email and password
  *
- * Uses WordPress JWT Authentication plugin endpoint.
- * POST /wp-json/jwt-auth/v1/token
+ * Uses PTP Training Platform plugin endpoint.
+ * POST /wp-json/ptp/v1/auth/login
  */
 export const login = async (credentials: LoginRequest): Promise<LoginResponse> => {
   // In demo mode, return mock user
@@ -29,18 +29,15 @@ export const login = async (credentials: LoginRequest): Promise<LoginResponse> =
     return mockLogin(credentials);
   }
 
-  const response = await authClient.post(apiConfig.jwtAuthEndpoint, {
-    username: credentials.email,
+  const response = await authClient.post(`${apiConfig.namespace}/auth/login`, {
+    email: credentials.email,
     password: credentials.password,
   });
 
-  const { token, user_email, user_nicename, user_display_name } = response.data;
+  const { token, user } = response.data;
 
   // Store the token
   await storeToken(token);
-
-  // Fetch full user profile
-  const user = await getCurrentUser();
 
   return {
     token,
@@ -79,7 +76,7 @@ export const signUp = async (data: SignUpRequest): Promise<LoginResponse> => {
 /**
  * Get current logged-in user
  *
- * GET /wp-json/ptp/v1/me
+ * GET /wp-json/ptp/v1/auth/me
  */
 export const getCurrentUser = async (): Promise<User> => {
   // In demo mode, return mock user
@@ -87,23 +84,28 @@ export const getCurrentUser = async (): Promise<User> => {
     return getMockCurrentUser();
   }
 
-  const response = await authClient.get(`${apiConfig.namespace}/me`);
+  // Use apiClient which includes the auth token
+  const response = await apiClient.get('/auth/me');
   return response.data;
 };
 
 /**
  * Update user profile
  *
- * PUT /wp-json/ptp/v1/profile
+ * PUT /wp-json/ptp/v1/parent/profile (for parents)
+ * PUT /wp-json/ptp/v1/trainer/profile (for trainers)
  */
 export const updateProfile = async (
-  data: Partial<ParentUser | TrainerUser>
+  data: Partial<ParentUser | TrainerUser>,
+  isTrainer: boolean = false
 ): Promise<User> => {
   if (apiConfig.demoMode) {
     return { ...getMockCurrentUser(), ...data } as User;
   }
 
-  const response = await authClient.put(`${apiConfig.namespace}/profile`, data);
+  // Use apiClient which includes the auth token
+  const endpoint = isTrainer ? '/trainer/profile' : '/parent/profile';
+  const response = await apiClient.put(endpoint, data);
   return response.data;
 };
 
@@ -118,7 +120,8 @@ export const completeOnboarding = async (data: OnboardingData): Promise<void> =>
     return;
   }
 
-  await authClient.post(`${apiConfig.namespace}/profile`, {
+  // Use apiClient which includes the auth token
+  await apiClient.post('/profile', {
     preferred_state: data.state,
     preferred_city: data.city,
     player_age_band: data.ageBand,
@@ -145,6 +148,7 @@ export const requestPasswordReset = async (email: string): Promise<void> => {
     return;
   }
 
+  // No auth needed for password reset
   await authClient.post(`${apiConfig.namespace}/auth/forgot-password`, { email });
 };
 
@@ -159,7 +163,8 @@ export const deleteAccount = async (): Promise<void> => {
     return;
   }
 
-  await authClient.delete(`${apiConfig.namespace}/me`);
+  // Use apiClient which includes the auth token
+  await apiClient.delete('/me');
   await clearTokens();
 };
 

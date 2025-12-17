@@ -17,6 +17,7 @@
       "extends": "base",
       "developmentClient": true,
       "distribution": "internal",
+      "channel": "development",
       "env": {
         "APP_VARIANT": "development",
         "DEMO_MODE": "true",
@@ -36,6 +37,7 @@
       "extends": "base",
       "developmentClient": true,
       "distribution": "internal",
+      "channel": "development",
       "env": {
         "APP_VARIANT": "development",
         "DEMO_MODE": "true",
@@ -54,6 +56,7 @@
     "preview": {
       "extends": "base",
       "distribution": "internal",
+      "channel": "preview",
       "env": {
         "APP_VARIANT": "preview",
         "DEMO_MODE": "false",
@@ -72,6 +75,7 @@
     "production": {
       "extends": "base",
       "autoIncrement": true,
+      "channel": "production",
       "env": {
         "APP_VARIANT": "production",
         "DEMO_MODE": "false",

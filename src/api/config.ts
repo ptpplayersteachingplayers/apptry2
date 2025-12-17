@@ -25,7 +25,8 @@ export const apiConfig = {
 
   // Demo mode - use mock data instead of real API
   // Set DEMO_MODE=true in environment to enable mock data
-  demoMode: expoConfig.DEMO_MODE === 'true' || process.env.DEMO_MODE === 'true',
+  // Default is FALSE to use live data from WordPress
+  demoMode: expoConfig.DEMO_MODE === 'true' || process.env.DEMO_MODE === 'true' || false,
 
   // Request timeout in milliseconds
   timeout: 30000,

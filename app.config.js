@@ -48,6 +48,7 @@ export default ({ config }) => {
       supportsTablet: true,
       bundleIdentifier: getBundleIdentifier(),
       infoPlist: {
+        ITSAppUsesNonExemptEncryption: false,
         NSLocationWhenInUseUsageDescription:
           'PTP uses your location to find camps and clinics near you.',
         NSCameraUsageDescription:
@@ -83,6 +84,7 @@ export default ({ config }) => {
     plugins: [
       'expo-font',
       'expo-secure-store',
+      'expo-updates',
       [
         'expo-notifications',
         {
@@ -111,7 +113,9 @@ export default ({ config }) => {
     },
     owner: 'lmartelli',
     updates: {
+      enabled: true,
       fallbackToCacheTimeout: 0,
+      url: `https://u.expo.dev/${easProjectId}`,
     },
     runtimeVersion: {
       policy: 'sdkVersion',
