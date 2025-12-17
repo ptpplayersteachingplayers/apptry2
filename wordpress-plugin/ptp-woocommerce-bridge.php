@@ -1698,7 +1698,6 @@ function ptp_get_featured_programs(WP_REST_Request $request) {
     // If no featured products, get any products
     if (empty($programs)) {
         unset($args['tax_query']);
-        unset($args['tax_query'][0]);
         $query = new WP_Query($args);
         foreach ($query->posts as $post) {
             $product = wc_get_product($post->ID);
