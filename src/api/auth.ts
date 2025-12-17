@@ -5,7 +5,7 @@
  * Uses WordPress JWT Authentication plugin.
  */
 
-import { authClient, storeToken, clearTokens } from './client';
+import { apiClient, authClient, storeToken, clearTokens } from './client';
 import { apiConfig } from './config';
 import {
   LoginRequest,
@@ -84,7 +84,8 @@ export const getCurrentUser = async (): Promise<User> => {
     return getMockCurrentUser();
   }
 
-  const response = await authClient.get(`${apiConfig.namespace}/auth/me`);
+  // Use apiClient which includes the auth token
+  const response = await apiClient.get('/auth/me');
   return response.data;
 };
 
@@ -102,8 +103,9 @@ export const updateProfile = async (
     return { ...getMockCurrentUser(), ...data } as User;
   }
 
+  // Use apiClient which includes the auth token
   const endpoint = isTrainer ? '/trainer/profile' : '/parent/profile';
-  const response = await authClient.put(`${apiConfig.namespace}${endpoint}`, data);
+  const response = await apiClient.put(endpoint, data);
   return response.data;
 };
 
@@ -118,7 +120,8 @@ export const completeOnboarding = async (data: OnboardingData): Promise<void> =>
     return;
   }
 
-  await authClient.post(`${apiConfig.namespace}/profile`, {
+  // Use apiClient which includes the auth token
+  await apiClient.post('/profile', {
     preferred_state: data.state,
     preferred_city: data.city,
     player_age_band: data.ageBand,
@@ -145,6 +148,7 @@ export const requestPasswordReset = async (email: string): Promise<void> => {
     return;
   }
 
+  // No auth needed for password reset
   await authClient.post(`${apiConfig.namespace}/auth/forgot-password`, { email });
 };
 
@@ -159,7 +163,8 @@ export const deleteAccount = async (): Promise<void> => {
     return;
   }
 
-  await authClient.delete(`${apiConfig.namespace}/me`);
+  // Use apiClient which includes the auth token
+  await apiClient.delete('/me');
   await clearTokens();
 };
 
