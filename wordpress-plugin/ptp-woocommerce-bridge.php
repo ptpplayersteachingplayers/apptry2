@@ -1945,3 +1945,395 @@ add_action('save_post_product', function($post_id) {
         }
     }
 });
+
+// ============================================================
+// TRAINER ADMIN PAGE
+// ============================================================
+
+// Add admin menu
+add_action('admin_menu', function() {
+    add_menu_page(
+        'PTP Trainers',
+        'PTP Trainers',
+        'manage_options',
+        'ptp-trainers',
+        'ptp_trainers_admin_page',
+        'dashicons-groups',
+        30
+    );
+
+    add_submenu_page(
+        'ptp-trainers',
+        'Add New Trainer',
+        'Add New',
+        'manage_options',
+        'ptp-trainer-add',
+        'ptp_trainer_add_page'
+    );
+
+    add_submenu_page(
+        'ptp-trainers',
+        'Trainer Bookings',
+        'Bookings',
+        'manage_options',
+        'ptp-bookings',
+        'ptp_bookings_admin_page'
+    );
+});
+
+// Register trainer role on activation
+add_action('init', function() {
+    if (!get_role('ptp_trainer')) {
+        add_role('ptp_trainer', 'PTP Trainer', [
+            'read' => true,
+            'edit_posts' => false,
+            'delete_posts' => false,
+        ]);
+    }
+});
+
+// Trainers list page
+function ptp_trainers_admin_page() {
+    // Handle delete action
+    if (isset($_GET['action']) && $_GET['action'] === 'delete' && isset($_GET['trainer_id'])) {
+        if (wp_verify_nonce($_GET['_wpnonce'], 'delete_trainer_' . $_GET['trainer_id'])) {
+            $user = get_user_by('ID', intval($_GET['trainer_id']));
+            if ($user && in_array('ptp_trainer', $user->roles)) {
+                wp_delete_user($user->ID);
+                echo '<div class="notice notice-success"><p>Trainer deleted successfully.</p></div>';
+            }
+        }
+    }
+
+    $trainers = get_users(['role' => 'ptp_trainer']);
+    ?>
+    <div class="wrap">
+        <h1 class="wp-heading-inline">PTP Trainers</h1>
+        <a href="<?php echo admin_url('admin.php?page=ptp-trainer-add'); ?>" class="page-title-action">Add New Trainer</a>
+        <hr class="wp-header-end">
+
+        <?php if (empty($trainers)): ?>
+            <div class="notice notice-info">
+                <p>No trainers found. <a href="<?php echo admin_url('admin.php?page=ptp-trainer-add'); ?>">Add your first trainer</a>.</p>
+            </div>
+        <?php else: ?>
+            <table class="wp-list-table widefat fixed striped">
+                <thead>
+                    <tr>
+                        <th>Photo</th>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Location</th>
+                        <th>Hourly Rate</th>
+                        <th>Specializations</th>
+                        <th>Rating</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($trainers as $trainer):
+                        $headshot = get_user_meta($trainer->ID, 'trainer_headshot', true);
+                        $avatar = $headshot ?: get_avatar_url($trainer->ID, ['size' => 50]);
+                    ?>
+                    <tr>
+                        <td><img src="<?php echo esc_url($avatar); ?>" width="50" height="50" style="border-radius: 50%; object-fit: cover;"></td>
+                        <td>
+                            <strong><?php echo esc_html($trainer->first_name . ' ' . $trainer->last_name); ?></strong>
+                        </td>
+                        <td><?php echo esc_html($trainer->user_email); ?></td>
+                        <td><?php echo esc_html(get_user_meta($trainer->ID, 'trainer_location', true)); ?></td>
+                        <td>$<?php echo esc_html(get_user_meta($trainer->ID, 'trainer_hourly_rate', true) ?: '80'); ?>/hr</td>
+                        <td><?php echo esc_html(get_user_meta($trainer->ID, 'trainer_specializations', true)); ?></td>
+                        <td><?php echo esc_html(get_user_meta($trainer->ID, 'trainer_rating', true) ?: '5.0'); ?> ⭐</td>
+                        <td>
+                            <a href="<?php echo admin_url('admin.php?page=ptp-trainer-add&edit=' . $trainer->ID); ?>" class="button button-small">Edit</a>
+                            <a href="<?php echo wp_nonce_url(admin_url('admin.php?page=ptp-trainers&action=delete&trainer_id=' . $trainer->ID), 'delete_trainer_' . $trainer->ID); ?>" class="button button-small" onclick="return confirm('Are you sure you want to delete this trainer?');">Delete</a>
+                        </td>
+                    </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+        <?php endif; ?>
+
+        <div class="card" style="max-width: 600px; margin-top: 20px;">
+            <h2>API Endpoint</h2>
+            <p>Trainers are available via the API at:</p>
+            <code><?php echo home_url('/wp-json/ptp/v1/trainers'); ?></code>
+        </div>
+    </div>
+    <?php
+}
+
+// Add/Edit trainer page
+function ptp_trainer_add_page() {
+    $editing = isset($_GET['edit']) ? intval($_GET['edit']) : 0;
+    $trainer = $editing ? get_user_by('ID', $editing) : null;
+
+    // Handle form submission
+    if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['ptp_trainer_nonce'])) {
+        if (wp_verify_nonce($_POST['ptp_trainer_nonce'], 'ptp_save_trainer')) {
+            $user_data = [
+                'first_name' => sanitize_text_field($_POST['first_name']),
+                'last_name' => sanitize_text_field($_POST['last_name']),
+                'user_email' => sanitize_email($_POST['email']),
+                'description' => sanitize_textarea_field($_POST['bio']),
+            ];
+
+            if ($editing) {
+                // Update existing user
+                $user_data['ID'] = $editing;
+                $user_id = wp_update_user($user_data);
+            } else {
+                // Create new user
+                $user_data['user_login'] = sanitize_user($_POST['email']);
+                $user_data['user_pass'] = wp_generate_password();
+                $user_data['role'] = 'ptp_trainer';
+                $user_id = wp_insert_user($user_data);
+
+                if (!is_wp_error($user_id)) {
+                    // Send password reset email
+                    wp_new_user_notification($user_id, null, 'user');
+                }
+            }
+
+            if (!is_wp_error($user_id)) {
+                // Save trainer meta
+                update_user_meta($user_id, 'first_name', sanitize_text_field($_POST['first_name']));
+                update_user_meta($user_id, 'last_name', sanitize_text_field($_POST['last_name']));
+                update_user_meta($user_id, 'trainer_headshot', esc_url_raw($_POST['headshot']));
+                update_user_meta($user_id, 'trainer_education', sanitize_text_field($_POST['education']));
+                update_user_meta($user_id, 'trainer_hourly_rate', floatval($_POST['hourly_rate']));
+                update_user_meta($user_id, 'trainer_location', sanitize_text_field($_POST['location']));
+                update_user_meta($user_id, 'trainer_specializations', sanitize_text_field($_POST['specializations']));
+                update_user_meta($user_id, 'trainer_teaching_style', sanitize_textarea_field($_POST['teaching_style']));
+                update_user_meta($user_id, 'trainer_rating', floatval($_POST['rating']) ?: 5.0);
+
+                // Save availability
+                $availability = [];
+                $days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+                foreach ($days as $day) {
+                    if (!empty($_POST['availability'][$day]['enabled'])) {
+                        $availability[$day] = [
+                            ['start' => sanitize_text_field($_POST['availability'][$day]['start']),
+                             'end' => sanitize_text_field($_POST['availability'][$day]['end'])]
+                        ];
+                    }
+                }
+                update_user_meta($user_id, 'trainer_availability', $availability);
+
+                echo '<div class="notice notice-success"><p>Trainer ' . ($editing ? 'updated' : 'created') . ' successfully!</p></div>';
+
+                // Redirect to edit page if new
+                if (!$editing) {
+                    echo '<script>window.location.href="' . admin_url('admin.php?page=ptp-trainer-add&edit=' . $user_id . '&saved=1') . '";</script>';
+                    return;
+                }
+
+                // Refresh trainer data
+                $trainer = get_user_by('ID', $user_id);
+            } else {
+                echo '<div class="notice notice-error"><p>Error: ' . $user_id->get_error_message() . '</p></div>';
+            }
+        }
+    }
+
+    // Get trainer data for form
+    $data = [
+        'first_name' => $trainer ? $trainer->first_name : '',
+        'last_name' => $trainer ? $trainer->last_name : '',
+        'email' => $trainer ? $trainer->user_email : '',
+        'bio' => $trainer ? $trainer->description : '',
+        'headshot' => $trainer ? get_user_meta($trainer->ID, 'trainer_headshot', true) : '',
+        'education' => $trainer ? get_user_meta($trainer->ID, 'trainer_education', true) : '',
+        'hourly_rate' => $trainer ? get_user_meta($trainer->ID, 'trainer_hourly_rate', true) : 80,
+        'location' => $trainer ? get_user_meta($trainer->ID, 'trainer_location', true) : '',
+        'specializations' => $trainer ? get_user_meta($trainer->ID, 'trainer_specializations', true) : '',
+        'teaching_style' => $trainer ? get_user_meta($trainer->ID, 'trainer_teaching_style', true) : '',
+        'rating' => $trainer ? get_user_meta($trainer->ID, 'trainer_rating', true) : 5.0,
+        'availability' => $trainer ? get_user_meta($trainer->ID, 'trainer_availability', true) : [],
+    ];
+    ?>
+    <div class="wrap">
+        <h1><?php echo $editing ? 'Edit Trainer' : 'Add New Trainer'; ?></h1>
+
+        <form method="post" action="">
+            <?php wp_nonce_field('ptp_save_trainer', 'ptp_trainer_nonce'); ?>
+
+            <table class="form-table">
+                <tr>
+                    <th><label for="first_name">First Name *</label></th>
+                    <td><input type="text" name="first_name" id="first_name" value="<?php echo esc_attr($data['first_name']); ?>" class="regular-text" required></td>
+                </tr>
+                <tr>
+                    <th><label for="last_name">Last Name *</label></th>
+                    <td><input type="text" name="last_name" id="last_name" value="<?php echo esc_attr($data['last_name']); ?>" class="regular-text" required></td>
+                </tr>
+                <tr>
+                    <th><label for="email">Email *</label></th>
+                    <td><input type="email" name="email" id="email" value="<?php echo esc_attr($data['email']); ?>" class="regular-text" required <?php echo $editing ? 'readonly' : ''; ?>></td>
+                </tr>
+                <tr>
+                    <th><label for="headshot">Profile Photo URL</label></th>
+                    <td>
+                        <input type="url" name="headshot" id="headshot" value="<?php echo esc_attr($data['headshot']); ?>" class="large-text">
+                        <p class="description">Enter URL or use Media Library. <button type="button" class="button" onclick="ptp_open_media('headshot')">Choose Image</button></p>
+                        <?php if ($data['headshot']): ?>
+                            <img src="<?php echo esc_url($data['headshot']); ?>" style="max-width: 150px; margin-top: 10px; border-radius: 8px;">
+                        <?php endif; ?>
+                    </td>
+                </tr>
+                <tr>
+                    <th><label for="education">Education / School</label></th>
+                    <td>
+                        <input type="text" name="education" id="education" value="<?php echo esc_attr($data['education']); ?>" class="regular-text" placeholder="e.g., Villanova University">
+                        <p class="description">College/University they play for or attended</p>
+                    </td>
+                </tr>
+                <tr>
+                    <th><label for="location">Location</label></th>
+                    <td>
+                        <input type="text" name="location" id="location" value="<?php echo esc_attr($data['location']); ?>" class="regular-text" placeholder="e.g., Philadelphia, PA">
+                    </td>
+                </tr>
+                <tr>
+                    <th><label for="hourly_rate">Hourly Rate ($)</label></th>
+                    <td><input type="number" name="hourly_rate" id="hourly_rate" value="<?php echo esc_attr($data['hourly_rate']); ?>" class="small-text" min="0" step="5"> per hour</td>
+                </tr>
+                <tr>
+                    <th><label for="specializations">Specializations</label></th>
+                    <td>
+                        <input type="text" name="specializations" id="specializations" value="<?php echo esc_attr($data['specializations']); ?>" class="large-text" placeholder="e.g., Ball Control, Shooting, Defense, Goalkeeper">
+                        <p class="description">Comma-separated list of skills they specialize in</p>
+                    </td>
+                </tr>
+                <tr>
+                    <th><label for="bio">Bio / Description</label></th>
+                    <td><textarea name="bio" id="bio" rows="4" class="large-text"><?php echo esc_textarea($data['bio']); ?></textarea></td>
+                </tr>
+                <tr>
+                    <th><label for="teaching_style">Teaching Style</label></th>
+                    <td><textarea name="teaching_style" id="teaching_style" rows="3" class="large-text" placeholder="e.g., Patient, encouraging, focuses on fundamentals..."><?php echo esc_textarea($data['teaching_style']); ?></textarea></td>
+                </tr>
+                <tr>
+                    <th><label for="rating">Rating</label></th>
+                    <td>
+                        <input type="number" name="rating" id="rating" value="<?php echo esc_attr($data['rating'] ?: 5.0); ?>" class="small-text" min="0" max="5" step="0.1">
+                        <span>/ 5.0</span>
+                    </td>
+                </tr>
+            </table>
+
+            <h2>Weekly Availability</h2>
+            <p class="description">Set the trainer's available hours for private training sessions.</p>
+
+            <table class="form-table">
+                <?php
+                $days = ['monday' => 'Monday', 'tuesday' => 'Tuesday', 'wednesday' => 'Wednesday', 'thursday' => 'Thursday', 'friday' => 'Friday', 'saturday' => 'Saturday', 'sunday' => 'Sunday'];
+                foreach ($days as $day_key => $day_name):
+                    $day_data = isset($data['availability'][$day_key]) ? $data['availability'][$day_key][0] : ['start' => '', 'end' => ''];
+                    $is_enabled = !empty($data['availability'][$day_key]);
+                ?>
+                <tr>
+                    <th><?php echo $day_name; ?></th>
+                    <td>
+                        <label>
+                            <input type="checkbox" name="availability[<?php echo $day_key; ?>][enabled]" value="1" <?php checked($is_enabled); ?>>
+                            Available
+                        </label>
+                        &nbsp;&nbsp;
+                        <input type="time" name="availability[<?php echo $day_key; ?>][start]" value="<?php echo esc_attr($day_data['start'] ?: '16:00'); ?>">
+                        to
+                        <input type="time" name="availability[<?php echo $day_key; ?>][end]" value="<?php echo esc_attr($day_data['end'] ?: '19:00'); ?>">
+                    </td>
+                </tr>
+                <?php endforeach; ?>
+            </table>
+
+            <p class="submit">
+                <input type="submit" name="submit" class="button button-primary" value="<?php echo $editing ? 'Update Trainer' : 'Add Trainer'; ?>">
+                <a href="<?php echo admin_url('admin.php?page=ptp-trainers'); ?>" class="button">Cancel</a>
+            </p>
+        </form>
+    </div>
+
+    <script>
+    function ptp_open_media(field_id) {
+        var mediaUploader = wp.media({
+            title: 'Choose Image',
+            button: { text: 'Use This Image' },
+            multiple: false
+        });
+        mediaUploader.on('select', function() {
+            var attachment = mediaUploader.state().get('selection').first().toJSON();
+            document.getElementById(field_id).value = attachment.url;
+        });
+        mediaUploader.open();
+    }
+    </script>
+    <?php
+    wp_enqueue_media();
+}
+
+// Bookings admin page
+function ptp_bookings_admin_page() {
+    $bookings = get_posts([
+        'post_type' => 'ptp_booking',
+        'posts_per_page' => 50,
+        'orderby' => 'date',
+        'order' => 'DESC',
+    ]);
+    ?>
+    <div class="wrap">
+        <h1>Training Session Bookings</h1>
+
+        <?php if (empty($bookings)): ?>
+            <div class="notice notice-info">
+                <p>No bookings yet. Bookings will appear here when parents request private training sessions through the app.</p>
+            </div>
+        <?php else: ?>
+            <table class="wp-list-table widefat fixed striped">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Time</th>
+                        <th>Trainer</th>
+                        <th>Parent</th>
+                        <th>Player</th>
+                        <th>Location</th>
+                        <th>Status</th>
+                        <th>Price</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($bookings as $booking):
+                        $trainer_id = get_post_meta($booking->ID, 'trainer_id', true);
+                        $parent_id = get_post_meta($booking->ID, 'parent_id', true);
+                        $trainer = get_user_by('ID', $trainer_id);
+                        $parent = get_user_by('ID', $parent_id);
+                    ?>
+                    <tr>
+                        <td><?php echo esc_html(get_post_meta($booking->ID, 'session_date', true)); ?></td>
+                        <td><?php echo esc_html(get_post_meta($booking->ID, 'start_time', true) . ' - ' . get_post_meta($booking->ID, 'end_time', true)); ?></td>
+                        <td><?php echo $trainer ? esc_html($trainer->first_name . ' ' . $trainer->last_name) : 'Unknown'; ?></td>
+                        <td><?php echo $parent ? esc_html($parent->first_name . ' ' . $parent->last_name) : 'Unknown'; ?></td>
+                        <td><?php echo esc_html(get_post_meta($booking->ID, 'player_name', true)); ?></td>
+                        <td><?php echo esc_html(get_post_meta($booking->ID, 'location', true)); ?></td>
+                        <td>
+                            <?php
+                            $status = get_post_meta($booking->ID, 'status', true);
+                            $status_colors = ['pending' => '#f0ad4e', 'confirmed' => '#5cb85c', 'completed' => '#5bc0de', 'cancelled' => '#d9534f'];
+                            $color = isset($status_colors[$status]) ? $status_colors[$status] : '#999';
+                            ?>
+                            <span style="background: <?php echo $color; ?>; color: white; padding: 2px 8px; border-radius: 3px; font-size: 12px;">
+                                <?php echo esc_html(ucfirst($status)); ?>
+                            </span>
+                        </td>
+                        <td>$<?php echo esc_html(get_post_meta($booking->ID, 'price', true)); ?></td>
+                    </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+        <?php endif; ?>
+    </div>
+    <?php
+}
