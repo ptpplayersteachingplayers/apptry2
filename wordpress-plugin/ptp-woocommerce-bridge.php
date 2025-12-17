@@ -1623,38 +1623,20 @@ function ptp_get_my_events(WP_REST_Request $request) {
 function ptp_get_programs(WP_REST_Request $request) {
     $page = $request->get_param('page') ?: 1;
     $per_page = $request->get_param('per_page') ?: 20;
-    $type = $request->get_param('type');
     $state = $request->get_param('state');
     $city = $request->get_param('city');
     $market = $request->get_param('market');
 
+    // Get ALL WooCommerce products (no category filter)
     $args = [
         'post_type' => 'product',
         'post_status' => 'publish',
         'posts_per_page' => $per_page,
         'paged' => $page,
         'meta_query' => [],
-        'tax_query' => [],
     ];
 
-    $categories = [];
-    if ($type === 'camp') {
-        $categories = ['summer-camps', 'summer', 'camps'];
-    } elseif ($type === 'clinic') {
-        $categories = ['winter-clinics', 'clinics', 'clinic'];
-    } else {
-        $categories = ['summer-camps', 'summer', 'camps', 'winter-clinics', 'clinics', 'clinic'];
-    }
-
-    if (!empty($categories)) {
-        $args['tax_query'][] = [
-            'taxonomy' => 'product_cat',
-            'field' => 'slug',
-            'terms' => $categories,
-            'operator' => 'IN',
-        ];
-    }
-
+    // Optional filters by location
     if ($state) {
         $args['meta_query'][] = ['key' => '_camp_state', 'value' => $state];
     }
@@ -1713,10 +1695,9 @@ function ptp_get_featured_programs(WP_REST_Request $request) {
         if ($product) $programs[] = ptp_format_program($product);
     }
 
+    // If no featured products, get any products
     if (empty($programs)) {
-        $args['tax_query'] = [
-            ['taxonomy' => 'product_cat', 'field' => 'slug', 'terms' => ['summer-camps', 'summer', 'camps', 'winter-clinics', 'clinics'], 'operator' => 'IN'],
-        ];
+        unset($args['tax_query']);
         unset($args['tax_query'][0]);
         $query = new WP_Query($args);
         foreach ($query->posts as $post) {
