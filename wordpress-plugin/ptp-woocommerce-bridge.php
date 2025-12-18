@@ -297,7 +297,53 @@ add_action('rest_api_init', function () {
         'callback' => 'ptp_get_my_events',
         'permission_callback' => 'ptp_is_authenticated',
     ]);
+
+    // =====================
+    // DEBUG ENDPOINT
+    // =====================
+    register_rest_route('ptp/v1', '/debug', [
+        'methods' => 'GET',
+        'callback' => 'ptp_debug_info',
+        'permission_callback' => '__return_true',
+    ]);
 });
+
+// ============================================================
+// DEBUG FUNCTION
+// ============================================================
+
+function ptp_debug_info() {
+    global $wpdb;
+
+    // Check if WooCommerce is active
+    $wc_active = class_exists('WooCommerce');
+
+    // Count products directly from database
+    $product_count = $wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->posts} WHERE post_type = 'product' AND post_status = 'publish'");
+
+    // Count all products (any status)
+    $all_products = $wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->posts} WHERE post_type = 'product'");
+
+    // Get sample products
+    $sample_products = $wpdb->get_results("SELECT ID, post_title, post_status FROM {$wpdb->posts} WHERE post_type = 'product' LIMIT 5");
+
+    // Check if wc_get_product function exists
+    $wc_function_exists = function_exists('wc_get_product');
+
+    // Get all post types
+    $post_types = get_post_types(['public' => true], 'names');
+
+    return [
+        'woocommerce_active' => $wc_active,
+        'wc_get_product_exists' => $wc_function_exists,
+        'published_products_count' => (int) $product_count,
+        'all_products_count' => (int) $all_products,
+        'sample_products' => $sample_products,
+        'registered_post_types' => array_values($post_types),
+        'php_version' => PHP_VERSION,
+        'wp_version' => get_bloginfo('version'),
+    ];
+}
 
 // ============================================================
 // AUTHENTICATION HELPERS
