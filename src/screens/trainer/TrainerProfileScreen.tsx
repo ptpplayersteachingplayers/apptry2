@@ -9,6 +9,7 @@ import { View, StyleSheet, ScrollView, TouchableOpacity, Alert, Image, Linking }
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { Ionicons } from '@expo/vector-icons';
 import Constants from 'expo-constants';
 import { TrainerStackParamList } from '../../types/navigation';
 import { useAuth, useTrainerUser } from '../../hooks/useAuth';
@@ -40,8 +41,9 @@ const TrainerProfileScreen: React.FC = () => {
           <PTPText variant="body" color="gray500">{trainerUser?.collegePro} • {trainerUser?.position}</PTPText>
           {trainerUser?.rating && (
             <View style={styles.rating}>
-              <PTPText variant="body" color="primary">★ {trainerUser.rating.toFixed(1)}</PTPText>
-              <PTPText variant="bodySmall" color="gray500"> ({trainerUser.reviewCount} reviews)</PTPText>
+              <Ionicons name="star" size={18} color={colors.primary} />
+              <PTPText variant="body" color="primary" style={styles.ratingText}>{trainerUser.rating.toFixed(1)}</PTPText>
+              <PTPText variant="bodySmall" color="gray500">({trainerUser.reviewCount} reviews)</PTPText>
             </View>
           )}
         </View>
@@ -127,7 +129,8 @@ const styles = StyleSheet.create({
   scrollContent: { paddingBottom: spacing[8] },
   profileHeader: { alignItems: 'center', padding: spacing[6], backgroundColor: colors.white, borderBottomWidth: 1, borderBottomColor: colors.gray100 },
   avatar: { width: 100, height: 100, borderRadius: 50, backgroundColor: colors.gray200, marginBottom: spacing[4] },
-  rating: { flexDirection: 'row', alignItems: 'center', marginTop: spacing[2] },
+  rating: { flexDirection: 'row', alignItems: 'center', marginTop: spacing[2], gap: spacing[1] },
+  ratingText: { marginLeft: spacing[1] },
   statsCard: { flexDirection: 'row', margin: spacing[4], backgroundColor: colors.white, borderRadius: borderRadius.lg, padding: spacing[4], ...shadows.sm },
   statItem: { flex: 1, alignItems: 'center' },
   statDivider: { width: 1, backgroundColor: colors.gray200 },

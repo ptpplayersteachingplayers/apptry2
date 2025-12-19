@@ -17,6 +17,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { Ionicons } from '@expo/vector-icons';
 import { ParentStackParamList } from '../../types/navigation';
 import { Program } from '../../types';
 import { getProgram } from '../../api/programs';
@@ -76,10 +77,12 @@ const ProgramDetailScreen: React.FC = () => {
   };
 
   const formatDate = (dateString: string) => {
+    if (!dateString) return 'Date TBD';
     const date = new Date(dateString);
+    if (isNaN(date.getTime())) return 'Date TBD';
     return date.toLocaleDateString('en-US', {
-      weekday: 'long',
-      month: 'long',
+      weekday: 'short',
+      month: 'short',
       day: 'numeric',
       year: 'numeric',
     });
@@ -149,18 +152,22 @@ const ProgramDetailScreen: React.FC = () => {
           {/* Quick Info Cards */}
           <View style={styles.infoCards}>
             <View style={styles.infoCard}>
-              <PTPText style={styles.infoIcon}>📅</PTPText>
+              <View style={styles.infoIconContainer}>
+                <Ionicons name="calendar-outline" size={24} color={colors.primary} />
+              </View>
               <PTPText variant="label">Date</PTPText>
-              <PTPText variant="bodySmall" color="gray500">
+              <PTPText variant="bodySmall" color="gray500" center>
                 {formatDate(program.date)}
-                {program.endDate && ` - ${formatDate(program.endDate)}`}
+                {program.endDate && program.endDate !== program.date && `\nto ${formatDate(program.endDate)}`}
               </PTPText>
             </View>
             <View style={styles.infoCard}>
-              <PTPText style={styles.infoIcon}>⏰</PTPText>
+              <View style={styles.infoIconContainer}>
+                <Ionicons name="time-outline" size={24} color={colors.primary} />
+              </View>
               <PTPText variant="label">Time</PTPText>
               <PTPText variant="bodySmall" color="gray500">
-                {program.time}
+                {program.time || 'Time TBD'}
               </PTPText>
             </View>
           </View>
@@ -172,7 +179,7 @@ const ProgramDetailScreen: React.FC = () => {
             accessibilityLabel="Open location in maps"
           >
             <View style={styles.locationIcon}>
-              <PTPText style={{ fontSize: 24 }}>📍</PTPText>
+              <Ionicons name="location-outline" size={24} color={colors.primary} />
             </View>
             <View style={styles.locationInfo}>
               <PTPText variant="label">{program.venue || program.location}</PTPText>
@@ -237,7 +244,7 @@ const ProgramDetailScreen: React.FC = () => {
               <View style={styles.bringList}>
                 {program.whatToBring.map((item, index) => (
                   <View key={index} style={styles.bringItem}>
-                    <PTPText color="primary">✓</PTPText>
+                    <Ionicons name="checkmark" size={18} color={colors.primary} />
                     <PTPText variant="body">{item}</PTPText>
                   </View>
                 ))}
@@ -248,15 +255,21 @@ const ProgramDetailScreen: React.FC = () => {
           {/* Trust Badges */}
           <View style={styles.trustSection}>
             <View style={styles.trustBadge}>
-              <PTPText style={styles.trustIcon}>🎓</PTPText>
+              <View style={styles.trustIconContainer}>
+                <Ionicons name="school-outline" size={24} color={colors.primary} />
+              </View>
               <PTPText variant="caption" center>College-Athlete{'\n'}Mentors</PTPText>
             </View>
             <View style={styles.trustBadge}>
-              <PTPText style={styles.trustIcon}>✓</PTPText>
+              <View style={styles.trustIconContainer}>
+                <Ionicons name="checkmark-circle-outline" size={24} color={colors.primary} />
+              </View>
               <PTPText variant="caption" center>Background{'\n'}Checked</PTPText>
             </View>
             <View style={styles.trustBadge}>
-              <PTPText style={styles.trustIcon}>🛡️</PTPText>
+              <View style={styles.trustIconContainer}>
+                <Ionicons name="shield-checkmark-outline" size={24} color={colors.primary} />
+              </View>
               <PTPText variant="caption" center>Fully{'\n'}Insured</PTPText>
             </View>
           </View>
@@ -271,9 +284,14 @@ const ProgramDetailScreen: React.FC = () => {
             <PTPText variant="heroTitle" color="primary">
               ${program.price}
             </PTPText>
-            {program.stock <= 5 && (
+            {program.stock !== undefined && program.stock <= 5 && program.stock > 0 && (
               <PTPText variant="caption" color="warning">
                 Only {program.stock} spots left!
+              </PTPText>
+            )}
+            {program.stock === 0 && (
+              <PTPText variant="caption" color="error">
+                Sold Out
               </PTPText>
             )}
           </View>
@@ -346,9 +364,14 @@ const styles = StyleSheet.create({
     padding: spacing[3],
     alignItems: 'center',
   },
-  infoIcon: {
-    fontSize: 24,
-    marginBottom: spacing[1],
+  infoIconContainer: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: colors.white,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: spacing[2],
   },
   locationCard: {
     flexDirection: 'row',
@@ -401,10 +424,16 @@ const styles = StyleSheet.create({
   },
   trustBadge: {
     alignItems: 'center',
+    flex: 1,
   },
-  trustIcon: {
-    fontSize: 28,
-    marginBottom: spacing[1],
+  trustIconContainer: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: colors.gray100,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: spacing[2],
   },
   bottomBar: {
     position: 'absolute',

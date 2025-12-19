@@ -14,6 +14,7 @@ import {
   ImageBackground,
   ViewStyle,
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { PTPText } from './PTPText';
 import { PTPTag } from './PTPTag';
 import { colors } from '../theme/colors';
@@ -256,9 +257,12 @@ export const PTPTrainerCard: React.FC<PTPTrainerCardProps> = ({
             ${hourlyRate}/hr
           </PTPText>
           {rating && (
-            <PTPText variant="caption" color="gray500">
-              {rating.toFixed(1)} ★
-            </PTPText>
+            <View style={styles.trainerRating}>
+              <Ionicons name="star" size={12} color={colors.primary} />
+              <PTPText variant="caption" color="gray500">
+                {rating.toFixed(1)}
+              </PTPText>
+            </View>
           )}
         </View>
       }
@@ -333,6 +337,11 @@ const styles = StyleSheet.create({
   },
   trainerRight: {
     alignItems: 'flex-end',
+  },
+  trainerRating: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing[1],
   },
 });
 

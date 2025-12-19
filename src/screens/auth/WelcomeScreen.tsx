@@ -16,6 +16,7 @@ import {
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { Ionicons } from '@expo/vector-icons';
 import { AuthStackParamList } from '../../types/navigation';
 import { PTPText, PTPButton } from '../../components';
 import { colors } from '../../theme/colors';
@@ -59,18 +60,21 @@ const WelcomeScreen: React.FC = () => {
           {/* Trust badges */}
           <View style={styles.badges}>
             <View style={styles.badge}>
+              <Ionicons name="school" size={14} color={colors.gray300} style={styles.badgeIcon} />
               <PTPText variant="caption" color="gray300">
-                🎓 College-Athlete Coaches
+                College-Athlete Coaches
               </PTPText>
             </View>
             <View style={styles.badge}>
+              <Ionicons name="checkmark-circle" size={14} color={colors.gray300} style={styles.badgeIcon} />
               <PTPText variant="caption" color="gray300">
-                ✓ Background-Checked
+                Background-Checked
               </PTPText>
             </View>
             <View style={styles.badge}>
+              <Ionicons name="shield-checkmark" size={14} color={colors.gray300} style={styles.badgeIcon} />
               <PTPText variant="caption" color="gray300">
-                🛡️ Fully Insured
+                Fully Insured
               </PTPText>
             </View>
           </View>
@@ -143,10 +147,15 @@ const styles = StyleSheet.create({
     marginBottom: spacing[8],
   },
   badge: {
+    flexDirection: 'row',
+    alignItems: 'center',
     backgroundColor: 'rgba(255, 255, 255, 0.1)',
     paddingHorizontal: spacing[3],
     paddingVertical: spacing[2],
     borderRadius: 20,
+  },
+  badgeIcon: {
+    marginRight: spacing[1],
   },
   actions: {
     paddingBottom: spacing[6],

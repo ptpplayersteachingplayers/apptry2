@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRoute, RouteProp } from '@react-navigation/native';
+import { Ionicons } from '@expo/vector-icons';
 import { ParentStackParamList } from '../../types/navigation';
 import { Message } from '../../types';
 import { getMessages, sendMessage, markAsRead } from '../../api/messages';
@@ -70,10 +71,14 @@ const ConversationDetailScreen: React.FC = () => {
             <PTPText variant="caption" color="gray500" style={styles.senderName}>{item.senderName}</PTPText>
           )}
           <PTPText variant="body" color={isOwnMessage ? 'white' : 'inkBlack'}>{item.content}</PTPText>
-          <PTPText variant="caption" color={isOwnMessage ? 'gray300' : 'gray400'} style={styles.messageTime}>
-            {formatTime(item.createdAt)}
-            {isOwnMessage && item.status === 'read' && ' ✓✓'}
-          </PTPText>
+          <View style={styles.messageTimeRow}>
+            <PTPText variant="caption" color={isOwnMessage ? 'gray300' : 'gray400'}>
+              {formatTime(item.createdAt)}
+            </PTPText>
+            {isOwnMessage && item.status === 'read' && (
+              <Ionicons name="checkmark-done" size={14} color={colors.gray300} style={styles.readIcon} />
+            )}
+          </View>
         </View>
       </View>
     );
@@ -125,7 +130,8 @@ const styles = StyleSheet.create({
   ownMessage: { backgroundColor: colors.primary, borderBottomRightRadius: 4 },
   otherMessage: { backgroundColor: colors.white, borderBottomLeftRadius: 4 },
   senderName: { marginBottom: spacing[1] },
-  messageTime: { marginTop: spacing[1], alignSelf: 'flex-end' },
+  messageTimeRow: { flexDirection: 'row', alignItems: 'center', marginTop: spacing[1], alignSelf: 'flex-end', gap: spacing[1] },
+  readIcon: { marginLeft: spacing[1] },
   inputContainer: { flexDirection: 'row', alignItems: 'flex-end', padding: spacing[3], backgroundColor: colors.white, borderTopWidth: 1, borderTopColor: colors.gray200 },
   input: { flex: 1, backgroundColor: colors.gray50, borderRadius: borderRadius.lg, paddingHorizontal: spacing[4], paddingVertical: spacing[3], maxHeight: 100, fontSize: 16, color: colors.inkBlack },
   sendButton: { marginLeft: spacing[2], paddingHorizontal: spacing[3], paddingVertical: spacing[3] },

@@ -15,6 +15,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { Ionicons } from '@expo/vector-icons';
 import { ParentStackParamList } from '../../types/navigation';
 import { TrainerUser, TrainerReview } from '../../types';
 import { getTrainer, getTrainerReviews, requestSession } from '../../api/training';
@@ -100,7 +101,12 @@ const TrainerDetailScreen: React.FC = () => {
         {/* Hero */}
         <ImageBackground source={{ uri: trainer.headshotUrl }} style={styles.heroImage}>
           <View style={styles.heroOverlay}>
-            {trainer.isVerified && <PTPTag label="Verified ✓" variant="success" />}
+            {trainer.isVerified && (
+                <View style={styles.verifiedBadge}>
+                  <Ionicons name="checkmark-circle" size={16} color={colors.success} />
+                  <PTPText variant="caption" color="success" style={styles.verifiedText}>Verified</PTPText>
+                </View>
+              )}
           </View>
         </ImageBackground>
 
@@ -115,8 +121,9 @@ const TrainerDetailScreen: React.FC = () => {
             </PTPText>
             {trainer.rating && (
               <View style={styles.rating}>
-                <PTPText variant="body" color="primary">★ {trainer.rating.toFixed(1)}</PTPText>
-                <PTPText variant="bodySmall" color="gray500"> ({trainer.reviewCount} reviews)</PTPText>
+                <Ionicons name="star" size={18} color={colors.primary} />
+                <PTPText variant="body" color="primary" style={styles.ratingText}>{trainer.rating.toFixed(1)}</PTPText>
+                <PTPText variant="bodySmall" color="gray500">({trainer.reviewCount} reviews)</PTPText>
               </View>
             )}
           </View>
@@ -159,7 +166,10 @@ const TrainerDetailScreen: React.FC = () => {
                 <View key={review.id} style={styles.reviewCard}>
                   <View style={styles.reviewHeader}>
                     <PTPText variant="label">{review.parentName}</PTPText>
-                    <PTPText variant="bodySmall" color="primary">★ {review.rating}</PTPText>
+                    <View style={styles.reviewRating}>
+                      <Ionicons name="star" size={14} color={colors.primary} />
+                      <PTPText variant="bodySmall" color="primary">{review.rating}</PTPText>
+                    </View>
                   </View>
                   <PTPText variant="bodySmall" color="gray600">{review.comment}</PTPText>
                 </View>
@@ -171,13 +181,17 @@ const TrainerDetailScreen: React.FC = () => {
           <View style={styles.trustSection}>
             {trainer.isBackgroundChecked && (
               <View style={styles.trustBadge}>
-                <PTPText style={{ fontSize: 24 }}>✓</PTPText>
-                <PTPText variant="caption">Background Checked</PTPText>
+                <View style={styles.trustIconContainer}>
+                  <Ionicons name="shield-checkmark" size={28} color={colors.success} />
+                </View>
+                <PTPText variant="caption" weight="medium">Background Checked</PTPText>
               </View>
             )}
             <View style={styles.trustBadge}>
-              <PTPText style={{ fontSize: 24 }}>🎓</PTPText>
-              <PTPText variant="caption">NCAA Athlete</PTPText>
+              <View style={styles.trustIconContainer}>
+                <Ionicons name="school" size={28} color={colors.primary} />
+              </View>
+              <PTPText variant="caption" weight="medium">NCAA Athlete</PTPText>
             </View>
           </View>
         </View>
@@ -207,17 +221,37 @@ const styles = StyleSheet.create({
   errorContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: spacing[4] },
   heroImage: { height: 350, justifyContent: 'flex-end' },
   heroOverlay: { padding: spacing[4], backgroundColor: colors.overlayLight },
+  verifiedBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255,255,255,0.95)',
+    paddingHorizontal: spacing[3],
+    paddingVertical: spacing[2],
+    borderRadius: borderRadius.md,
+    gap: spacing[1],
+  },
+  verifiedText: { marginLeft: spacing[1] },
   content: { padding: spacing[4], backgroundColor: colors.white, marginTop: -spacing[4], borderTopLeftRadius: borderRadius.xl, borderTopRightRadius: borderRadius.xl },
   header: { marginBottom: spacing[4] },
-  rating: { flexDirection: 'row', alignItems: 'center', marginTop: spacing[2] },
+  rating: { flexDirection: 'row', alignItems: 'center', marginTop: spacing[2], gap: spacing[1] },
+  ratingText: { marginLeft: spacing[1] },
   priceCard: { flexDirection: 'row', alignItems: 'baseline', gap: spacing[2], backgroundColor: colors.gray50, padding: spacing[4], borderRadius: borderRadius.md, marginBottom: spacing[4] },
   section: { marginBottom: spacing[4] },
   sectionTitle: { marginBottom: spacing[3] },
   specialties: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing[2] },
   reviewCard: { backgroundColor: colors.gray50, padding: spacing[3], borderRadius: borderRadius.md, marginBottom: spacing[2] },
-  reviewHeader: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: spacing[2] },
+  reviewHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: spacing[2] },
+  reviewRating: { flexDirection: 'row', alignItems: 'center', gap: spacing[1] },
   trustSection: { flexDirection: 'row', justifyContent: 'space-around', paddingTop: spacing[4], borderTopWidth: 1, borderTopColor: colors.gray100 },
-  trustBadge: { alignItems: 'center' },
+  trustBadge: { alignItems: 'center', gap: spacing[2] },
+  trustIconContainer: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: colors.gray50,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   bottomBar: { position: 'absolute', bottom: 0, left: 0, right: 0, backgroundColor: colors.white, borderTopWidth: 1, borderTopColor: colors.gray200, ...shadows.lg },
   bottomBarContent: { padding: spacing[4] },
 });

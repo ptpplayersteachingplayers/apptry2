@@ -9,6 +9,7 @@ import { View, StyleSheet, TouchableOpacity, ImageBackground } from 'react-nativ
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { Ionicons } from '@expo/vector-icons';
 import { AuthStackParamList } from '../../types/navigation';
 import { SkillLevel } from '../../types';
 import { PTPText, PTPButton } from '../../components';
@@ -101,7 +102,7 @@ const OnboardingSkillScreen: React.FC = () => {
                   </PTPText>
                 </View>
                 {selectedSkill === skill.value && (
-                  <PTPText style={styles.checkmark}>✓</PTPText>
+                  <Ionicons name="checkmark-circle" size={24} color={colors.inkBlack} style={styles.checkmark} />
                 )}
               </TouchableOpacity>
             ))}
@@ -181,8 +182,6 @@ const styles = StyleSheet.create({
     marginTop: spacing[1],
   },
   checkmark: {
-    fontSize: 20,
-    color: colors.inkBlack,
     marginLeft: spacing[2],
   },
   footer: {

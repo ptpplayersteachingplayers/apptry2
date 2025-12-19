@@ -7,6 +7,7 @@
 import React, { useEffect, useState } from 'react';
 import { View, StyleSheet, ScrollView, RefreshControl, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
 import { getTrainerSessions, updateSessionStatus } from '../../api/training';
 import { TrainingSession } from '../../types';
 import { PTPText, PTPButton, PTPTag, PTPListSkeleton, PTPEmptyState } from '../../components';
@@ -77,7 +78,7 @@ const TrainerScheduleScreen: React.FC = () => {
         refreshControl={<RefreshControl refreshing={isRefreshing} onRefresh={handleRefresh} tintColor={colors.primary} />}
       >
         {sessions.length === 0 ? (
-          <PTPEmptyState icon="📅" title="No sessions scheduled" description="When parents request sessions with you, they'll appear here." />
+          <PTPEmptyState iconName="calendar-outline" title="No sessions scheduled" description="When parents request sessions with you, they'll appear here." />
         ) : (
           Object.entries(groupedSessions).sort().map(([date, daySessions]) => (
             <View key={date} style={styles.dateGroup}>
@@ -91,7 +92,10 @@ const TrainerScheduleScreen: React.FC = () => {
                     </View>
                     <PTPTag label={session.status} variant={session.status === 'confirmed' ? 'success' : session.status === 'pending' ? 'warning' : 'default'} size="small" />
                   </View>
-                  <PTPText variant="bodySmall" color="gray500" style={styles.location}>📍 {session.location}</PTPText>
+                  <View style={styles.locationRow}>
+                                  <Ionicons name="location-outline" size={14} color={colors.gray500} />
+                                  <PTPText variant="bodySmall" color="gray500" style={styles.locationText}>{session.location}</PTPText>
+                                </View>
                   <View style={styles.focusTags}>
                     {session.focus.map(f => <PTPTag key={f} label={f} size="small" />)}
                   </View>
@@ -130,7 +134,8 @@ const styles = StyleSheet.create({
   dateHeader: { marginBottom: spacing[2] },
   sessionCard: { backgroundColor: colors.white, borderRadius: borderRadius.lg, padding: spacing[4], marginBottom: spacing[3], ...shadows.sm },
   sessionHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' },
-  location: { marginTop: spacing[2] },
+  locationRow: { flexDirection: 'row', alignItems: 'center', marginTop: spacing[2], gap: spacing[1] },
+  locationText: { marginLeft: spacing[1] },
   focusTags: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing[1], marginTop: spacing[2] },
   notes: { marginTop: spacing[2], padding: spacing[2], backgroundColor: colors.gray50, borderRadius: borderRadius.sm },
   actions: { flexDirection: 'row', marginTop: spacing[3] },

@@ -14,10 +14,11 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
+import { Ionicons } from '@expo/vector-icons';
 import { PTPText, PTPButton, PTPInput } from '../../components';
 import { requestPasswordReset } from '../../api/auth';
 import { colors } from '../../theme/colors';
-import { spacing } from '../../theme/spacing';
+import { spacing, borderRadius } from '../../theme/spacing';
 
 /**
  * ForgotPasswordScreen - Password reset request
@@ -58,7 +59,7 @@ const ForgotPasswordScreen: React.FC = () => {
       <SafeAreaView style={styles.container} edges={['bottom']}>
         <View style={styles.content}>
           <View style={styles.successIcon}>
-            <PTPText style={{ fontSize: 48 }}>✉️</PTPText>
+            <Ionicons name="mail-outline" size={64} color={colors.primary} />
           </View>
           <PTPText variant="sectionTitle" center style={styles.successTitle}>
             Check Your Email

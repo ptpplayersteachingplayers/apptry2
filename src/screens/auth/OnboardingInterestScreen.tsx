@@ -8,6 +8,7 @@ import React, { useState } from 'react';
 import { View, StyleSheet, TouchableOpacity, ImageBackground, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
+import { Ionicons } from '@expo/vector-icons';
 import { MainInterest } from '../../types';
 import { useAuth } from '../../hooks/useAuth';
 import { PTPText, PTPButton } from '../../components';
@@ -15,29 +16,29 @@ import { colors } from '../../theme/colors';
 import { spacing, borderRadius } from '../../theme/spacing';
 import { featureImages } from '../../assets/media';
 
-const interests: { value: MainInterest; label: string; emoji: string; description: string }[] = [
+const interests: { value: MainInterest; label: string; icon: keyof typeof Ionicons.glyphMap; description: string }[] = [
   {
     value: 'winter-clinics',
     label: 'Winter Clinics',
-    emoji: '❄️',
+    icon: 'snow-outline',
     description: 'Half-day skill-building sessions',
   },
   {
     value: 'summer-camps',
     label: 'Summer Camps',
-    emoji: '☀️',
+    icon: 'sunny-outline',
     description: 'Full week immersive experiences',
   },
   {
     value: 'private-training',
     label: 'Private Training',
-    emoji: '🎯',
+    icon: 'person-outline',
     description: '1-on-1 with NCAA mentors',
   },
   {
     value: 'all',
     label: 'All of the Above',
-    emoji: '⚽',
+    icon: 'football-outline',
     description: 'Show me everything!',
   },
 ];
@@ -102,8 +103,12 @@ const OnboardingInterestScreen: React.FC = () => {
                 accessibilityLabel={`${interest.label} - ${interest.description}`}
                 accessibilityState={{ selected: selectedInterest === interest.value }}
               >
-                <View style={styles.emojiContainer}>
-                  <PTPText style={styles.emoji}>{interest.emoji}</PTPText>
+                <View style={styles.iconContainer}>
+                  <Ionicons
+                    name={interest.icon}
+                    size={24}
+                    color={selectedInterest === interest.value ? colors.inkBlack : colors.white}
+                  />
                 </View>
                 <View style={styles.optionContent}>
                   <PTPText
@@ -120,7 +125,7 @@ const OnboardingInterestScreen: React.FC = () => {
                   </PTPText>
                 </View>
                 {selectedInterest === interest.value && (
-                  <PTPText style={styles.checkmark}>✓</PTPText>
+                  <Ionicons name="checkmark-circle" size={24} color={colors.inkBlack} style={styles.checkmark} />
                 )}
               </TouchableOpacity>
             ))}
@@ -193,7 +198,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.primary,
     borderColor: colors.primary,
   },
-  emojiContainer: {
+  iconContainer: {
     width: 44,
     height: 44,
     borderRadius: 22,
@@ -202,15 +207,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginRight: spacing[3],
   },
-  emoji: {
-    fontSize: 24,
-  },
   optionContent: {
     flex: 1,
   },
   checkmark: {
-    fontSize: 20,
-    color: colors.inkBlack,
     marginLeft: spacing[2],
   },
   footer: {

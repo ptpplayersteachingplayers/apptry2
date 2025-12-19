@@ -9,6 +9,7 @@ import { View, StyleSheet, ActivityIndicator, Alert } from 'react-native';
 import { WebView } from 'react-native-webview';
 import { useNavigation, useRoute, RouteProp, CommonActions } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { Ionicons } from '@expo/vector-icons';
 import { ParentStackParamList } from '../../types/navigation';
 import { getCheckoutUrl } from '../../api/orders';
 import { PTPText, PTPButton } from '../../components';
@@ -113,7 +114,7 @@ const CheckoutScreen: React.FC = () => {
     return (
       <View style={styles.successContainer}>
         <View style={styles.successIcon}>
-          <PTPText style={styles.successEmoji}>✓</PTPText>
+          <Ionicons name="checkmark-circle" size={64} color={colors.success} />
         </View>
         <PTPText variant="sectionTitle" style={styles.successTitle}>
           Booking Confirmed!
