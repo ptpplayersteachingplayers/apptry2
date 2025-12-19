@@ -7,6 +7,22 @@
 // Query Client
 export { queryClient, queryKeys } from './queryClient';
 
+// Formatting Utilities
+export {
+  parseDate,
+  isValidDate,
+  formatDateShort,
+  formatDateLong,
+  formatDateMedium,
+  formatDateRange,
+  formatTime,
+  formatPrice,
+  formatLocation,
+  getStockStatus,
+  safeString,
+  formatProgramSubtitle,
+} from './formatting';
+
 // Validation
 export {
   loginSchema,

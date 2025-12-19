@@ -31,6 +31,7 @@ import {
 import { colors } from '../../theme/colors';
 import { spacing, borderRadius } from '../../theme/spacing';
 import { featureImages } from '../../assets/media';
+import { formatDateShort, formatTime, formatLocation } from '../../lib/formatting';
 
 type CampsClinicsNavigationProp = NativeStackNavigationProp<ParentStackParamList>;
 type CampsClinicsRouteProp = RouteProp<ParentTabParamList, 'CampsClinics'>;
@@ -47,6 +48,7 @@ const CampsClinicsScreen: React.FC = () => {
   const [programs, setPrograms] = useState<Program[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [filter, setFilter] = useState<FilterType>((route.params?.filter as FilterType) || 'all');
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -55,12 +57,15 @@ const CampsClinicsScreen: React.FC = () => {
   }, [filter]);
 
   const loadPrograms = async () => {
+    setError(null);
     try {
       const typeFilter = filter === 'all' ? undefined : filter;
       const response = await getPrograms({ type: typeFilter as ProgramType });
-      setPrograms(response.programs);
-    } catch (error) {
-      console.error('Error loading programs:', error);
+      setPrograms(response.programs || []);
+    } catch (err) {
+      console.error('Error loading programs:', err);
+      setError('Unable to load programs');
+      setPrograms([]);
     } finally {
       setIsLoading(false);
     }
@@ -76,29 +81,20 @@ const CampsClinicsScreen: React.FC = () => {
     if (!searchQuery) return true;
     const query = searchQuery.toLowerCase();
     return (
-      program.title.toLowerCase().includes(query) ||
-      program.city.toLowerCase().includes(query) ||
-      program.location.toLowerCase().includes(query)
+      (program.title?.toLowerCase() || '').includes(query) ||
+      (program.city?.toLowerCase() || '').includes(query) ||
+      (program.location?.toLowerCase() || '').includes(query)
     );
   });
-
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', {
-      weekday: 'short',
-      month: 'short',
-      day: 'numeric',
-    });
-  };
 
   const renderProgram = useCallback(
     ({ item }: { item: Program }) => (
       <View style={styles.cardContainer}>
         <PTPProgramCard
           title={item.title}
-          date={formatDate(item.date)}
-          time={item.time}
-          location={`${item.city}, ${item.state}`}
+          date={formatDateShort(item.date)}
+          time={formatTime(item.time)}
+          location={formatLocation(item.city, item.state)}
           price={item.price}
           imageUrl={item.mainImageUrl}
           almostFull={item.almostFull}
