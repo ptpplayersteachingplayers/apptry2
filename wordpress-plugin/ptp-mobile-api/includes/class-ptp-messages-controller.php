@@ -164,6 +164,8 @@ class PTP_Messages_Controller {
         $table_messages = $wpdb->prefix . 'ptp_messages';
 
         // Get conversations where user is a participant
+        // Use proper escaping for LIKE query with user ID
+        $user_id_pattern = '%"' . intval($user->ID) . '"%';
         $conversations = $wpdb->get_results(
             $wpdb->prepare(
                 "SELECT c.*,
@@ -175,7 +177,7 @@ class PTP_Messages_Controller {
                  AND c.status = 'active'
                  ORDER BY c.updated_at DESC",
                 $user->ID,
-                '%"' . $user->ID . '"%'
+                $user_id_pattern
             ),
             ARRAY_A
         );
@@ -505,6 +507,8 @@ class PTP_Messages_Controller {
         $table_conversations = $wpdb->prefix . 'ptp_conversations';
         $table_messages = $wpdb->prefix . 'ptp_messages';
 
+        // Use proper escaping for LIKE query with user ID
+        $user_id_pattern = '%"' . intval($user->ID) . '"%';
         $count = $wpdb->get_var(
             $wpdb->prepare(
                 "SELECT COUNT(*) FROM $table_messages m
@@ -512,7 +516,7 @@ class PTP_Messages_Controller {
                  WHERE c.participant_ids LIKE %s
                  AND m.sender_id != %d
                  AND m.read_at IS NULL",
-                '%"' . $user->ID . '"%',
+                $user_id_pattern,
                 $user->ID
             )
         );

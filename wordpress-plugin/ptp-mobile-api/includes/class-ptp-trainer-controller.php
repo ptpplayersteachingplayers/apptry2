@@ -522,17 +522,119 @@ class PTP_Trainer_Controller {
         $params = $request->get_json_params();
 
         if (isset($params['working_hours'])) {
-            update_user_meta($user->ID, 'trainer_working_hours', $params['working_hours']);
+            $sanitized_hours = $this->sanitize_working_hours($params['working_hours']);
+            if (is_wp_error($sanitized_hours)) {
+                return $sanitized_hours;
+            }
+            update_user_meta($user->ID, 'trainer_working_hours', $sanitized_hours);
         }
 
         if (isset($params['blocked_dates'])) {
-            update_user_meta($user->ID, 'trainer_blocked_dates', $params['blocked_dates']);
+            $sanitized_dates = $this->sanitize_blocked_dates($params['blocked_dates']);
+            if (is_wp_error($sanitized_dates)) {
+                return $sanitized_dates;
+            }
+            update_user_meta($user->ID, 'trainer_blocked_dates', $sanitized_dates);
         }
+
+        ptp_log_activity($user->ID, 'availability_updated', array(
+            'has_working_hours' => isset($params['working_hours']),
+            'has_blocked_dates' => isset($params['blocked_dates']),
+        ));
 
         return rest_ensure_response(array(
             'success' => true,
             'message' => 'Availability updated',
         ));
+    }
+
+    /**
+     * Sanitize and validate working hours input
+     */
+    private function sanitize_working_hours($working_hours) {
+        if (!is_array($working_hours)) {
+            return new WP_Error(
+                'invalid_format',
+                'Working hours must be an array',
+                array('status' => 400)
+            );
+        }
+
+        $valid_days = array('monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday');
+        $sanitized = array();
+
+        foreach ($valid_days as $day) {
+            if (isset($working_hours[$day]) && is_array($working_hours[$day])) {
+                $day_data = $working_hours[$day];
+
+                // Validate time format (HH:MM)
+                $start = isset($day_data['start']) ? sanitize_text_field($day_data['start']) : null;
+                $end = isset($day_data['end']) ? sanitize_text_field($day_data['end']) : null;
+                $available = isset($day_data['available']) ? (bool) $day_data['available'] : false;
+
+                // Validate time format if provided
+                if ($start && !preg_match('/^([01]?[0-9]|2[0-3]):[0-5][0-9]$/', $start)) {
+                    return new WP_Error(
+                        'invalid_time',
+                        "Invalid start time format for $day",
+                        array('status' => 400)
+                    );
+                }
+
+                if ($end && !preg_match('/^([01]?[0-9]|2[0-3]):[0-5][0-9]$/', $end)) {
+                    return new WP_Error(
+                        'invalid_time',
+                        "Invalid end time format for $day",
+                        array('status' => 400)
+                    );
+                }
+
+                $sanitized[$day] = array(
+                    'start' => $start,
+                    'end' => $end,
+                    'available' => $available,
+                );
+            }
+        }
+
+        return $sanitized;
+    }
+
+    /**
+     * Sanitize and validate blocked dates input
+     */
+    private function sanitize_blocked_dates($blocked_dates) {
+        if (!is_array($blocked_dates)) {
+            return new WP_Error(
+                'invalid_format',
+                'Blocked dates must be an array',
+                array('status' => 400)
+            );
+        }
+
+        // Limit to 365 blocked dates to prevent abuse
+        if (count($blocked_dates) > 365) {
+            return new WP_Error(
+                'too_many_dates',
+                'Maximum 365 blocked dates allowed',
+                array('status' => 400)
+            );
+        }
+
+        $sanitized = array();
+        foreach ($blocked_dates as $date) {
+            $date = sanitize_text_field($date);
+            // Validate date format (YYYY-MM-DD)
+            if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)) {
+                // Verify it's a valid date
+                $parts = explode('-', $date);
+                if (checkdate((int) $parts[1], (int) $parts[2], (int) $parts[0])) {
+                    $sanitized[] = $date;
+                }
+            }
+        }
+
+        return array_unique($sanitized);
     }
 
     /**
