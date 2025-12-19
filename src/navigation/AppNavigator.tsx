@@ -33,6 +33,9 @@ import EditProfileScreen from '../screens/parent/EditProfileScreen';
 import EditChildScreen from '../screens/parent/EditChildScreen';
 import NotificationSettingsScreen from '../screens/parent/NotificationSettingsScreen';
 import NotificationCenterScreen from '../screens/parent/NotificationCenterScreen';
+import OrderHistoryScreen from '../screens/parent/OrderHistoryScreen';
+import SubmitReviewScreen from '../screens/parent/SubmitReviewScreen';
+import SessionRequestScreen from '../screens/parent/SessionRequestScreen';
 
 // Trainer Detail Screens
 import SessionDetailScreen from '../screens/trainer/SessionDetailScreen';
@@ -207,6 +210,42 @@ const ParentStackNavigator: React.FC = () => {
           headerStyle: { backgroundColor: colors.offWhite },
           headerTitleStyle: { fontFamily: fontFamily.semiBold },
           headerBackTitle: 'Back',
+        }}
+      />
+      <Stack.Screen
+        name="OrderHistory"
+        component={OrderHistoryScreen}
+        options={{
+          headerShown: true,
+          headerTitle: 'Order History',
+          headerTintColor: colors.inkBlack,
+          headerStyle: { backgroundColor: colors.offWhite },
+          headerTitleStyle: { fontFamily: fontFamily.semiBold },
+          headerBackTitle: 'Back',
+        }}
+      />
+      <Stack.Screen
+        name="SubmitReview"
+        component={SubmitReviewScreen}
+        options={{
+          headerShown: true,
+          headerTitle: 'Review Session',
+          headerTintColor: colors.inkBlack,
+          headerStyle: { backgroundColor: colors.offWhite },
+          headerTitleStyle: { fontFamily: fontFamily.semiBold },
+          headerBackTitle: 'Back',
+        }}
+      />
+      <Stack.Screen
+        name="SessionRequest"
+        component={SessionRequestScreen}
+        options={{
+          presentation: 'modal',
+          headerShown: true,
+          headerTitle: 'Request Session',
+          headerTintColor: colors.inkBlack,
+          headerStyle: { backgroundColor: colors.offWhite },
+          headerTitleStyle: { fontFamily: fontFamily.semiBold },
         }}
       />
     </Stack.Navigator>

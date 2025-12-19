@@ -54,10 +54,12 @@ export type ParentStackParamList = {
   Messages: { conversationId?: number };
   ConversationDetail: { conversationId: number };
   OrderDetail: { orderId: number };
+  OrderHistory: undefined;
   EditProfile: undefined;
   EditChild: { childId?: number };
   NotificationSettings: undefined;
   NotificationCenter: undefined;
+  SubmitReview: { trainerId: number; sessionId: number };
 };
 
 /**

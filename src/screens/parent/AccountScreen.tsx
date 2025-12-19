@@ -149,19 +149,7 @@ const AccountScreen: React.FC = () => {
   };
 
   const handleOrderHistory = () => {
-    // Navigate to a filtered view or orders screen
-    // For now, show an informational message about orders
-    Alert.alert(
-      'Order History',
-      'Your order history is available on the PTP Soccer website. Would you like to open it?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Open Website',
-          onPress: () => Linking.openURL('https://ptpsummercamps.com/my-account/orders/'),
-        },
-      ]
-    );
+    navigation.navigate('OrderHistory');
   };
 
   const handleNotificationCenter = () => {

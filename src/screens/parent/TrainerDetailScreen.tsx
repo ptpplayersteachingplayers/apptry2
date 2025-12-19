@@ -18,7 +18,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
 import { ParentStackParamList } from '../../types/navigation';
 import { TrainerUser, TrainerReview } from '../../types';
-import { getTrainer, getTrainerReviews, requestSession } from '../../api/training';
+import { getTrainer, getTrainerReviews } from '../../api/training';
 import { PTPText, PTPButton, PTPTag, PTPLoading } from '../../components';
 import { colors } from '../../theme/colors';
 import { spacing, borderRadius, shadows } from '../../theme/spacing';
@@ -34,7 +34,6 @@ const TrainerDetailScreen: React.FC = () => {
   const [trainer, setTrainer] = useState<TrainerUser | null>(null);
   const [reviews, setReviews] = useState<TrainerReview[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [isRequesting, setIsRequesting] = useState(false);
 
   useEffect(() => {
     loadTrainer();
@@ -55,29 +54,9 @@ const TrainerDetailScreen: React.FC = () => {
     }
   };
 
-  const handleRequestSession = async () => {
+  const handleRequestSession = () => {
     if (!trainer) return;
-
-    setIsRequesting(true);
-    try {
-      const response = await requestSession({
-        trainerId: trainer.id,
-        preferredSlots: [
-          { date: '2024-12-10', startTime: '16:00', endTime: '17:00' },
-        ],
-        locationPreference: 'trainer',
-        focus: ['1v1', 'finishing'],
-        notes: 'Looking forward to working on weak foot finishing.',
-      });
-
-      Alert.alert('Request Sent!', response.message, [
-        { text: 'OK', onPress: () => navigation.goBack() },
-      ]);
-    } catch (error: any) {
-      Alert.alert('Error', error.message || 'Failed to send request. Please try again.');
-    } finally {
-      setIsRequesting(false);
-    }
+    navigation.navigate('SessionRequest', { trainerId: trainer.id });
   };
 
   if (isLoading) {
@@ -205,7 +184,6 @@ const TrainerDetailScreen: React.FC = () => {
             variant="primary"
             size="large"
             fullWidth
-            loading={isRequesting}
             onPress={handleRequestSession}
           />
         </View>
