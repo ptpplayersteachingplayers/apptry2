@@ -4,7 +4,7 @@
  * Main landing screen with hero, featured programs, and quick actions.
  */
 
-import React, { useCallback, useState, memo } from 'react';
+import React, { useCallback, useState, useEffect, memo } from 'react';
 import {
   View,
   StyleSheet,
@@ -16,6 +16,7 @@ import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
 import { ParentStackParamList } from '../../types/navigation';
+import { Program } from '../../types';
 import {
   useParentUser,
   useRefresh,
@@ -36,7 +37,7 @@ import { colors } from '../../theme/colors';
 import { spacing, borderRadius } from '../../theme/spacing';
 import { featureImages, cardBackgrounds } from '../../assets/media';
 import { LOGO_URL } from '../../assets/logo';
-import { mockPrograms } from '../../mocks/programs';
+import { getPrograms } from '../../api/programs';
 
 type HomeScreenNavigationProp = NativeStackNavigationProp<ParentStackParamList>;
 
@@ -47,19 +48,35 @@ const HomeScreen: React.FC = memo(() => {
   const navigation = useNavigation<HomeScreenNavigationProp>();
   const parentUser = useParentUser();
   const { selection } = useHaptics();
-  const [isLoading, setIsLoading] = useState(false);
-
-  // Use mock data for clinics
-  const winterClinics = mockPrograms.filter(p => p.type === 'clinic').slice(0, 3);
+  const [isLoading, setIsLoading] = useState(true);
+  const [programs, setPrograms] = useState<Program[]>([]);
 
   const firstName = parentUser?.firstName || 'there';
 
+  // Load programs from API
+  const loadPrograms = useCallback(async () => {
+    try {
+      const response = await getPrograms();
+      setPrograms(response.programs);
+    } catch (error) {
+      console.error('Error loading programs:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  // Load programs on mount
+  useEffect(() => {
+    loadPrograms();
+  }, [loadPrograms]);
+
+  // Get featured clinics (first 3 clinics or any programs if no clinics)
+  const featuredPrograms = programs.filter(p => p.type === 'clinic').slice(0, 3);
+  const winterClinics = featuredPrograms.length > 0 ? featuredPrograms : programs.slice(0, 3);
+
   // Pull-to-refresh with haptic feedback
   const { refreshing, onRefresh } = useRefresh({
-    onRefresh: async () => {
-      // Simulate refresh
-      await new Promise(resolve => setTimeout(resolve, 1000));
-    },
+    onRefresh: loadPrograms,
   });
 
   // Navigate to program
