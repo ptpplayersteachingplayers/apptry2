@@ -75,4 +75,9 @@ export {
 } from './PTPAnimated';
 
 // Error Boundary
-export { PTPErrorBoundary, ErrorFallback } from './PTPErrorBoundary';
+export {
+  PTPErrorBoundary,
+  ErrorFallback,
+  InlineErrorFallback,
+  NetworkErrorFallback,
+} from './PTPErrorBoundary';

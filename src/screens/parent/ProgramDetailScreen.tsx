@@ -28,6 +28,13 @@ import {
 } from '../../components';
 import { colors } from '../../theme/colors';
 import { spacing, borderRadius, shadows } from '../../theme/spacing';
+import {
+  formatDateLong,
+  formatTime,
+  formatLocation,
+  getStockStatus,
+  safeString,
+} from '../../lib/formatting';
 
 type ProgramDetailNavigationProp = NativeStackNavigationProp<ParentStackParamList, 'ProgramDetail'>;
 type ProgramDetailRouteProp = RouteProp<ParentStackParamList, 'ProgramDetail'>;
@@ -42,18 +49,28 @@ const ProgramDetailScreen: React.FC = () => {
 
   const [program, setProgram] = useState<Program | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     loadProgram();
   }, [programId]);
 
   const loadProgram = async () => {
+    setIsLoading(true);
+    setError(null);
     try {
       const numericProgramId = typeof programId === 'string' ? parseInt(programId, 10) : programId;
+      if (isNaN(numericProgramId)) {
+        throw new Error('Invalid program ID');
+      }
       const data = await getProgram(numericProgramId);
+      if (!data) {
+        throw new Error('Program not found');
+      }
       setProgram(data);
-    } catch (error) {
-      console.error('Error loading program:', error);
+    } catch (err) {
+      console.error('Error loading program:', err);
+      setError(err instanceof Error ? err.message : 'Failed to load program');
     } finally {
       setIsLoading(false);
     }
@@ -75,31 +92,40 @@ const ProgramDetailScreen: React.FC = () => {
     }
   };
 
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', {
-      weekday: 'long',
-      month: 'long',
-      day: 'numeric',
-      year: 'numeric',
-    });
-  };
+  // Get stock status for display
+  const stockStatus = program ? getStockStatus(program.stock) : null;
 
   if (isLoading) {
     return <PTPLoading message="Loading program..." />;
   }
 
-  if (!program) {
+  if (error || !program) {
     return (
-      <SafeAreaView style={styles.container}>
+      <SafeAreaView style={styles.container} edges={['top']}>
         <View style={styles.errorContainer}>
-          <PTPText variant="sectionTitle">Program not found</PTPText>
-          <PTPButton
-            title="Go Back"
-            variant="outline"
-            onPress={() => navigation.goBack()}
-            style={{ marginTop: spacing[4] }}
-          />
+          <View style={styles.errorIconContainer}>
+            <PTPText style={styles.errorIcon}>📋</PTPText>
+          </View>
+          <PTPText variant="sectionTitle" style={styles.errorTitle}>
+            {error || 'Program not found'}
+          </PTPText>
+          <PTPText variant="body" color="gray500" style={styles.errorMessage}>
+            We couldn't load this program. It may have been removed or there was a connection issue.
+          </PTPText>
+          <View style={styles.errorActions}>
+            <PTPButton
+              title="Try Again"
+              variant="primary"
+              onPress={loadProgram}
+              style={styles.errorButton}
+            />
+            <PTPButton
+              title="Go Back"
+              variant="outline"
+              onPress={() => navigation.goBack()}
+              style={styles.errorButton}
+            />
+          </View>
         </View>
       </SafeAreaView>
     );
@@ -139,10 +165,10 @@ const ProgramDetailScreen: React.FC = () => {
               size="small"
             />
             <PTPText variant="heroTitle" style={styles.title}>
-              {program.title}
+              {safeString(program.title, 'Program Details')}
             </PTPText>
             <PTPText variant="body" color="gray500">
-              {program.city}, {program.state}
+              {formatLocation(program.city, program.state)}
             </PTPText>
           </View>
 
@@ -152,15 +178,15 @@ const ProgramDetailScreen: React.FC = () => {
               <PTPText style={styles.infoIcon}>📅</PTPText>
               <PTPText variant="label">Date</PTPText>
               <PTPText variant="bodySmall" color="gray500">
-                {formatDate(program.date)}
-                {program.endDate && ` - ${formatDate(program.endDate)}`}
+                {formatDateLong(program.date)}
+                {program.endDate && ` - ${formatDateLong(program.endDate)}`}
               </PTPText>
             </View>
             <View style={styles.infoCard}>
               <PTPText style={styles.infoIcon}>⏰</PTPText>
               <PTPText variant="label">Time</PTPText>
               <PTPText variant="bodySmall" color="gray500">
-                {program.time}
+                {formatTime(program.time)}
               </PTPText>
             </View>
           </View>
@@ -175,7 +201,9 @@ const ProgramDetailScreen: React.FC = () => {
               <PTPText style={{ fontSize: 24 }}>📍</PTPText>
             </View>
             <View style={styles.locationInfo}>
-              <PTPText variant="label">{program.venue || program.location}</PTPText>
+              <PTPText variant="label">
+                {safeString(program.venue, '') || safeString(program.location, 'Location TBD')}
+              </PTPText>
               {program.address && (
                 <PTPText variant="bodySmall" color="gray500">
                   {program.address}
@@ -269,19 +297,23 @@ const ProgramDetailScreen: React.FC = () => {
           <View style={styles.priceContainer}>
             <PTPText variant="caption" color="gray500">Price</PTPText>
             <PTPText variant="heroTitle" color="primary">
-              ${program.price}
+              ${program.price ?? 0}
             </PTPText>
-            {program.stock <= 5 && (
-              <PTPText variant="caption" color="warning">
-                Only {program.stock} spots left!
+            {stockStatus?.message && (
+              <PTPText
+                variant="caption"
+                color={stockStatus.variant === 'error' ? 'error' : 'warning'}
+              >
+                {stockStatus.message}
               </PTPText>
             )}
           </View>
           <PTPButton
-            title="Register Now"
-            variant="primary"
+            title={stockStatus?.isSoldOut ? 'Sold Out' : 'Register Now'}
+            variant={stockStatus?.isSoldOut ? 'outline' : 'primary'}
             size="large"
             onPress={handleRegister}
+            disabled={stockStatus?.isSoldOut}
             style={styles.registerButton}
           />
         </View>
@@ -305,7 +337,36 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: spacing[4],
+    padding: spacing[6],
+  },
+  errorIconContainer: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: colors.gray100,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: spacing[4],
+  },
+  errorIcon: {
+    fontSize: 40,
+  },
+  errorTitle: {
+    textAlign: 'center',
+    marginBottom: spacing[2],
+  },
+  errorMessage: {
+    textAlign: 'center',
+    marginBottom: spacing[6],
+    maxWidth: 300,
+  },
+  errorActions: {
+    width: '100%',
+    maxWidth: 280,
+    gap: spacing[3],
+  },
+  errorButton: {
+    width: '100%',
   },
   heroImage: {
     height: 300,

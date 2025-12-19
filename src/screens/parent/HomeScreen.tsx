@@ -38,6 +38,7 @@ import { spacing, borderRadius } from '../../theme/spacing';
 import { featureImages, cardBackgrounds } from '../../assets/media';
 import { LOGO_URL } from '../../assets/logo';
 import { getPrograms } from '../../api/programs';
+import { formatProgramSubtitle } from '../../lib/formatting';
 
 type HomeScreenNavigationProp = NativeStackNavigationProp<ParentStackParamList>;
 
@@ -50,16 +51,20 @@ const HomeScreen: React.FC = memo(() => {
   const { selection } = useHaptics();
   const [isLoading, setIsLoading] = useState(true);
   const [programs, setPrograms] = useState<Program[]>([]);
+  const [error, setError] = useState<string | null>(null);
 
   const firstName = parentUser?.firstName || 'there';
 
   // Load programs from API
   const loadPrograms = useCallback(async () => {
+    setError(null);
     try {
       const response = await getPrograms();
-      setPrograms(response.programs);
-    } catch (error) {
-      console.error('Error loading programs:', error);
+      setPrograms(response.programs || []);
+    } catch (err) {
+      console.error('Error loading programs:', err);
+      setError('Unable to load programs');
+      setPrograms([]);
     } finally {
       setIsLoading(false);
     }
@@ -185,7 +190,7 @@ const HomeScreen: React.FC = memo(() => {
                   <PTPHeroCard
                     imageUrl={program.mainImageUrl || cardBackgrounds.winterClinics[index % 3]}
                     title={program.title}
-                    subtitle={`${program.date} • ${program.city}, ${program.state}`}
+                    subtitle={formatProgramSubtitle(program.date, program.city, program.state)}
                     onPress={() => navigateToProgram(program.id)}
                     style={styles.horizontalCard}
                   />
