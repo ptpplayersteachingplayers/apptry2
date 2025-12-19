@@ -21,6 +21,53 @@ import {
 import { heroImages } from '../assets/media';
 
 // ============================================================
+// V2 API MAPPER - Convert camps response to Program format
+// ============================================================
+
+/**
+ * Map v2 API camp response to app Program type
+ */
+const mapCampToProgram = (camp: any): Program => ({
+  id: camp.id,
+  title: camp.name,
+  type: camp.type || 'camp',
+  description: camp.description || camp.short_description || '',
+  shortDescription: camp.short_description || '',
+  date: camp.start_date,
+  endDate: camp.end_date,
+  time: camp.daily_times ? `${camp.daily_times.start} - ${camp.daily_times.end}` : '',
+  timeStart: camp.daily_times?.start,
+  timeEnd: camp.daily_times?.end,
+  location: camp.location?.name || '',
+  venue: camp.location?.name || '',
+  address: camp.location?.address || '',
+  city: camp.location?.city || '',
+  state: camp.location?.state || '',
+  marketSlug: '',
+  price: camp.price,
+  regularPrice: camp.regular_price,
+  salePrice: camp.sale_price,
+  stock: camp.capacity?.available || 0,
+  stockStatus: camp.capacity?.is_sold_out ? 'outofstock' : 'instock',
+  almostFull: (camp.capacity?.available || 0) < 5,
+  bestseller: camp.is_featured,
+  ageBands: camp.age_groups || [],
+  mainImageUrl: camp.featured_image,
+  galleryUrls: camp.gallery || [],
+  whatToBring: camp.what_to_bring ? camp.what_to_bring.split('\n') : [],
+  schedule: camp.schedule?.map((s: any) => ({
+    time: s.start_time,
+    activity: `Day ${s.day}: ${s.day_name}`,
+  })) || [],
+  highlights: [],
+  status: 'upcoming',
+  wooProductId: camp.id,
+  categorySlug: camp.type,
+  createdAt: new Date().toISOString(),
+  updatedAt: new Date().toISOString(),
+});
+
+// ============================================================
 // DATE HELPERS FOR DYNAMIC MOCK DATA
 // ============================================================
 
@@ -93,18 +140,28 @@ export const getPrograms = async (
 
   const params = new URLSearchParams();
   params.append('page', page.toString());
-  params.append('per_page', perPage.toString());
+  params.append('limit', perPage.toString());
 
   if (filters?.type) params.append('type', filters.type);
   if (filters?.state) params.append('state', filters.state);
   if (filters?.city) params.append('city', filters.city);
   if (filters?.marketSlug) params.append('market', filters.marketSlug);
-  if (filters?.ageBand) params.append('age_band', filters.ageBand);
+  if (filters?.ageBand) params.append('age_group', filters.ageBand);
   if (filters?.dateFrom) params.append('date_from', filters.dateFrom);
   if (filters?.dateTo) params.append('date_to', filters.dateTo);
 
-  const response = await apiClient.get(`/programs?${params.toString()}`);
-  return response.data;
+  // v2 API uses /camps endpoint
+  const response = await apiClient.get(`/camps?${params.toString()}`);
+
+  // Map v2 response format to app format
+  const { camps, pagination } = response.data;
+  return {
+    programs: camps.map(mapCampToProgram),
+    total: pagination?.total || camps.length,
+    page: pagination?.page || page,
+    perPage: pagination?.per_page || perPage,
+    hasMore: pagination ? pagination.page < pagination.pages : false,
+  };
 };
 
 /**
@@ -119,8 +176,9 @@ export const getProgram = async (programId: number): Promise<Program> => {
     return program;
   }
 
-  const response = await apiClient.get(`/programs/${programId}`);
-  return response.data;
+  // v2 API uses /camps endpoint
+  const response = await apiClient.get(`/camps/${programId}`);
+  return mapCampToProgram(response.data);
 };
 
 /**
@@ -147,8 +205,9 @@ export const getFeaturedPrograms = async (): Promise<Program[]> => {
     return mockPrograms.filter((p) => p.bestseller).slice(0, 3);
   }
 
-  const response = await apiClient.get('/programs/featured');
-  return response.data;
+  // v2 API uses /camps/featured endpoint
+  const response = await apiClient.get('/camps/featured');
+  return (response.data || []).map(mapCampToProgram);
 };
 
 /**

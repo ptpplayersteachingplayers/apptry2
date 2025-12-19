@@ -34,14 +34,16 @@ export const login = async (credentials: LoginRequest): Promise<LoginResponse> =
     password: credentials.password,
   });
 
-  const { token, user } = response.data;
+  // v2 API returns { user, auth: { access_token, ... } }
+  const { user, auth } = response.data;
+  const token = auth?.access_token || response.data.token;
 
   // Store the token
   await storeToken(token);
 
   return {
     token,
-    user,
+    user: mapV2User(user),
   };
 };
 
@@ -56,21 +58,22 @@ export const signUp = async (data: SignUpRequest): Promise<LoginResponse> => {
     return mockSignUp(data);
   }
 
+  // v2 API register endpoint
   const response = await authClient.post(`${apiConfig.namespace}/auth/register`, {
     email: data.email,
     password: data.password,
-    first_name: data.firstName,
-    last_name: data.lastName,
-    phone: data.phone,
-    role: data.role || 'ptp_parent',
+    name: `${data.firstName} ${data.lastName}`,
+    type: data.role === 'ptp_trainer' ? 'trainer' : 'parent',
   });
 
-  const { token, user } = response.data;
+  // v2 API returns { user, auth: { access_token, ... } }
+  const { user, auth } = response.data;
+  const token = auth?.access_token || response.data.token;
 
   // Store the token
   await storeToken(token);
 
-  return { token, user };
+  return { token, user: mapV2User(user) };
 };
 
 /**
@@ -84,9 +87,37 @@ export const getCurrentUser = async (): Promise<User> => {
     return getMockCurrentUser();
   }
 
-  // Use apiClient which includes the auth token
-  const response = await apiClient.get('/auth/me');
-  return response.data;
+  // v2 API uses /me endpoint directly
+  const response = await apiClient.get('/me');
+  return mapV2User(response.data);
+};
+
+/**
+ * Map v2 API user response to app User type
+ */
+const mapV2User = (v2User: any): User => {
+  const baseUser = {
+    id: v2User.id,
+    email: v2User.email,
+    firstName: v2User.first_name || v2User.name?.split(' ')[0] || '',
+    lastName: v2User.last_name || v2User.name?.split(' ').slice(1).join(' ') || '',
+    phone: v2User.phone || '',
+    avatarUrl: v2User.avatar,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  };
+
+  if (v2User.type === 'trainer') {
+    return {
+      ...baseUser,
+      role: 'ptp_trainer',
+    } as User;
+  }
+
+  return {
+    ...baseUser,
+    role: 'ptp_parent',
+  } as User;
 };
 
 /**
