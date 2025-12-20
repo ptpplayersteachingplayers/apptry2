@@ -4,12 +4,12 @@
  * Select main interest during onboarding (final step).
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, TouchableOpacity, ImageBackground, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { MainInterest } from '../../types';
-import { useAuth } from '../../hooks/useAuth';
+import { useAuth, useOnboarding } from '../../hooks';
 import { PTPText, PTPButton } from '../../components';
 import { colors } from '../../theme/colors';
 import { spacing, borderRadius } from '../../theme/spacing';
@@ -48,21 +48,47 @@ const interests: { value: MainInterest; label: string; emoji: string; descriptio
 const OnboardingInterestScreen: React.FC = () => {
   const navigation = useNavigation();
   const { finishOnboarding, isLoading } = useAuth();
-  const [selectedInterest, setSelectedInterest] = useState<MainInterest | null>(null);
+  const { data, setMainInterest, getOnboardingData, resetOnboarding } = useOnboarding();
+  const [selectedInterest, setSelectedInterest] = useState<MainInterest | null>(data.mainInterest);
+
+  // Sync local state with context on mount
+  useEffect(() => {
+    if (data.mainInterest) setSelectedInterest(data.mainInterest);
+  }, []);
 
   const handleFinish = async () => {
     if (!selectedInterest) return;
 
+    // Store interest in context
+    setMainInterest(selectedInterest);
+
+    // Get all collected onboarding data
+    const onboardingData = getOnboardingData();
+
+    if (!onboardingData) {
+      // If somehow data is missing, use the current interest with defaults
+      // This shouldn't happen in normal flow
+      Alert.alert(
+        'Missing Information',
+        'Some onboarding data is missing. Please go back and complete all steps.',
+        [{ text: 'OK', onPress: () => navigation.goBack() }]
+      );
+      return;
+    }
+
     try {
-      // In a real app, we'd collect all onboarding data from previous screens
-      // For demo, we use defaults
+      // Use actual collected data from all previous screens
       await finishOnboarding({
-        state: 'PA',
-        city: 'Main Line',
-        ageBand: '9-11',
-        skillLevel: 'travel',
+        state: onboardingData.state,
+        city: onboardingData.city,
+        ageBand: onboardingData.ageBand,
+        skillLevel: onboardingData.skillLevel,
         mainInterest: selectedInterest,
       });
+
+      // Reset onboarding context after successful completion
+      resetOnboarding();
+
       // Navigation handled by AppNavigator after isOnboarded becomes true
     } catch (error: any) {
       Alert.alert('Error', error.message || 'Something went wrong. Please try again.');

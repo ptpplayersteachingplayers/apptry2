@@ -4,13 +4,14 @@
  * Select player skill level during onboarding.
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, TouchableOpacity, ImageBackground } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { AuthStackParamList } from '../../types/navigation';
 import { SkillLevel } from '../../types';
+import { useOnboarding } from '../../hooks';
 import { PTPText, PTPButton } from '../../components';
 import { colors } from '../../theme/colors';
 import { spacing, borderRadius } from '../../theme/spacing';
@@ -44,10 +45,18 @@ const skillLevels: { value: SkillLevel; label: string; description: string }[] =
  */
 const OnboardingSkillScreen: React.FC = () => {
   const navigation = useNavigation<OnboardingSkillNavigationProp>();
-  const [selectedSkill, setSelectedSkill] = useState<SkillLevel | null>(null);
+  const { data, setSkillLevel } = useOnboarding();
+  const [selectedSkill, setSelectedSkill] = useState<SkillLevel | null>(data.skillLevel);
+
+  // Sync local state with context on mount
+  useEffect(() => {
+    if (data.skillLevel) setSelectedSkill(data.skillLevel);
+  }, []);
 
   const handleContinue = () => {
     if (selectedSkill) {
+      // Store in onboarding context
+      setSkillLevel(selectedSkill);
       navigation.navigate('OnboardingInterest');
     }
   };

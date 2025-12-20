@@ -4,7 +4,7 @@
  * Select state and city during onboarding.
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   StyleSheet,
@@ -17,6 +17,7 @@ import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { AuthStackParamList } from '../../types/navigation';
 import { USState } from '../../types';
+import { useOnboarding } from '../../hooks';
 import { PTPText, PTPButton } from '../../components';
 import { colors } from '../../theme/colors';
 import { spacing, borderRadius } from '../../theme/spacing';
@@ -50,13 +51,20 @@ const citiesByState: { [key in USState]: string[] } = {
  */
 const OnboardingLocationScreen: React.FC = () => {
   const navigation = useNavigation<OnboardingLocationNavigationProp>();
-  const [selectedState, setSelectedState] = useState<USState | null>(null);
-  const [selectedCity, setSelectedCity] = useState<string | null>(null);
+  const { data, setLocation } = useOnboarding();
+  const [selectedState, setSelectedState] = useState<USState | null>(data.state);
+  const [selectedCity, setSelectedCity] = useState<string | null>(data.city);
+
+  // Sync local state with context on mount
+  useEffect(() => {
+    if (data.state) setSelectedState(data.state);
+    if (data.city) setSelectedCity(data.city);
+  }, []);
 
   const handleContinue = () => {
     if (selectedState && selectedCity) {
-      // Store in temp state and pass to next screen
-      // In real app, use context or route params
+      // Store in onboarding context
+      setLocation(selectedState, selectedCity);
       navigation.navigate('OnboardingAge');
     }
   };
