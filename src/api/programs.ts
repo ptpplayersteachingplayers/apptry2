@@ -522,4 +522,62 @@ const getMockPrograms = async (
   };
 };
 
+/**
+ * Join waitlist for a sold-out program
+ *
+ * POST /wp-json/ptp/v1/programs/:id/waitlist
+ */
+export interface WaitlistRequest {
+  programId: number;
+  email?: string;
+  phone?: string;
+  childId?: number;
+  notes?: string;
+}
+
+export interface WaitlistResponse {
+  success: boolean;
+  message: string;
+  position?: number;
+  estimatedAvailability?: string;
+}
+
+export const joinWaitlist = async (data: WaitlistRequest): Promise<WaitlistResponse> => {
+  if (apiConfig.demoMode) {
+    // Simulate API delay
+    await new Promise((resolve) => setTimeout(resolve, 500));
+
+    // Mock successful waitlist join
+    const position = Math.floor(Math.random() * 5) + 1; // Position 1-5
+    return {
+      success: true,
+      message: `You've been added to the waitlist! You're #${position} in line.`,
+      position,
+      estimatedAvailability: 'We typically see openings 1-2 weeks before the program starts.',
+    };
+  }
+
+  const response = await apiClient.post(`/programs/${data.programId}/waitlist`, data);
+  return response.data;
+};
+
+/**
+ * Check waitlist status for a program
+ *
+ * GET /wp-json/ptp/v1/programs/:id/waitlist/status
+ */
+export const getWaitlistStatus = async (programId: number): Promise<{
+  isOnWaitlist: boolean;
+  position?: number;
+  totalWaiting?: number;
+}> => {
+  if (apiConfig.demoMode) {
+    await new Promise((resolve) => setTimeout(resolve, 200));
+    return { isOnWaitlist: false };
+  }
+
+  const response = await apiClient.get(`/programs/${programId}/waitlist/status`);
+  return response.data;
+};
+
 export { mockPrograms, mockMarkets };

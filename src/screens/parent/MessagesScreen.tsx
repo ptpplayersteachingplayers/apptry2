@@ -21,7 +21,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
 import { ParentStackParamList } from '../../types/navigation';
 import { Conversation } from '../../types';
-import { getConversations } from '../../api/messages';
+import { getConversations, getOnlineStatus } from '../../api/messages';
 import { PTPText, PTPListSkeleton, NoMessagesEmptyState } from '../../components';
 import { colors } from '../../theme/colors';
 import { spacing, borderRadius } from '../../theme/spacing';
@@ -119,6 +119,7 @@ const MessagesScreen: React.FC = () => {
   const renderConversation = ({ item, index }: { item: Conversation; index: number }) => {
     const other = getOtherParticipant(item);
     const hasUnread = item.unreadCount > 0;
+    const onlineStatus = getOnlineStatus(other.id);
 
     return (
       <TouchableOpacity
@@ -126,9 +127,12 @@ const MessagesScreen: React.FC = () => {
         onPress={() => navigation.navigate('ConversationDetail', { conversationId: item.id })}
         activeOpacity={0.6}
       >
-        {/* Avatar */}
-        <View style={[styles.avatar, { backgroundColor: getAvatarColor(other.name) }]}>
-          <PTPText style={styles.avatarText}>{getInitials(other.name)}</PTPText>
+        {/* Avatar with online indicator */}
+        <View style={styles.avatarContainer}>
+          <View style={[styles.avatar, { backgroundColor: getAvatarColor(other.name) }]}>
+            <PTPText style={styles.avatarText}>{getInitials(other.name)}</PTPText>
+          </View>
+          {onlineStatus.isOnline && <View style={styles.onlineIndicator} />}
         </View>
 
         {/* Content */}
@@ -292,13 +296,27 @@ const styles = StyleSheet.create({
     paddingVertical: spacing[3],
     backgroundColor: colors.white,
   },
+  avatarContainer: {
+    position: 'relative',
+    marginRight: spacing[3],
+  },
   avatar: {
     width: 52,
     height: 52,
     borderRadius: 26,
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: spacing[3],
+  },
+  onlineIndicator: {
+    position: 'absolute',
+    bottom: 2,
+    right: 2,
+    width: 14,
+    height: 14,
+    borderRadius: 7,
+    backgroundColor: '#34C759', // iOS green
+    borderWidth: 2,
+    borderColor: colors.white,
   },
   avatarText: {
     color: colors.white,
@@ -351,7 +369,7 @@ const styles = StyleSheet.create({
   separator: {
     height: StyleSheet.hairlineWidth,
     backgroundColor: colors.gray200,
-    marginLeft: 76, // Avatar width + margin
+    marginLeft: 76, // Avatar container width + margin
   },
   emptySearch: {
     flex: 1,

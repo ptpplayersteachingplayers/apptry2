@@ -10,6 +10,7 @@ export * from './training';
 export * from './message';
 export * from './order';
 export * from './event';
+export * from './payment';
 
 // Navigation types
 export type {

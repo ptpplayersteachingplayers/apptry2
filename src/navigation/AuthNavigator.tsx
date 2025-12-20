@@ -8,6 +8,7 @@
 import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { AuthStackParamList } from '../types/navigation';
+import { OnboardingProvider } from '../hooks';
 import { colors } from '../theme/colors';
 import { fontFamily } from '../theme/typography';
 
@@ -28,33 +29,35 @@ const Stack = createNativeStackNavigator<AuthStackParamList>();
  */
 export const AuthNavigator: React.FC = () => {
   return (
-    <Stack.Navigator
-      screenOptions={{
-        headerShown: false,
-        contentStyle: { backgroundColor: colors.offWhite },
-        animation: 'slide_from_right',
-      }}
-    >
-      <Stack.Screen name="Welcome" component={WelcomeScreen} />
-      <Stack.Screen name="Login" component={LoginScreen} />
-      <Stack.Screen name="SignUp" component={SignUpScreen} />
-      <Stack.Screen
-        name="ForgotPassword"
-        component={ForgotPasswordScreen}
-        options={{
-          headerShown: true,
-          headerTitle: 'Reset Password',
-          headerBackTitle: 'Back',
-          headerTintColor: colors.inkBlack,
-          headerStyle: { backgroundColor: colors.offWhite },
-          headerTitleStyle: { fontFamily: fontFamily.semiBold },
+    <OnboardingProvider>
+      <Stack.Navigator
+        screenOptions={{
+          headerShown: false,
+          contentStyle: { backgroundColor: colors.offWhite },
+          animation: 'slide_from_right',
         }}
-      />
-      <Stack.Screen name="OnboardingLocation" component={OnboardingLocationScreen} />
-      <Stack.Screen name="OnboardingAge" component={OnboardingAgeScreen} />
-      <Stack.Screen name="OnboardingSkill" component={OnboardingSkillScreen} />
-      <Stack.Screen name="OnboardingInterest" component={OnboardingInterestScreen} />
-    </Stack.Navigator>
+      >
+        <Stack.Screen name="Welcome" component={WelcomeScreen} />
+        <Stack.Screen name="Login" component={LoginScreen} />
+        <Stack.Screen name="SignUp" component={SignUpScreen} />
+        <Stack.Screen
+          name="ForgotPassword"
+          component={ForgotPasswordScreen}
+          options={{
+            headerShown: true,
+            headerTitle: 'Reset Password',
+            headerBackTitle: 'Back',
+            headerTintColor: colors.inkBlack,
+            headerStyle: { backgroundColor: colors.offWhite },
+            headerTitleStyle: { fontFamily: fontFamily.semiBold },
+          }}
+        />
+        <Stack.Screen name="OnboardingLocation" component={OnboardingLocationScreen} />
+        <Stack.Screen name="OnboardingAge" component={OnboardingAgeScreen} />
+        <Stack.Screen name="OnboardingSkill" component={OnboardingSkillScreen} />
+        <Stack.Screen name="OnboardingInterest" component={OnboardingInterestScreen} />
+      </Stack.Navigator>
+    </OnboardingProvider>
   );
 };
 

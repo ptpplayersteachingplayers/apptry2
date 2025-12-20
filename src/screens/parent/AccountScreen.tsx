@@ -4,7 +4,7 @@
  * User profile, children, orders, and settings.
  */
 
-import React from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   View,
   StyleSheet,
@@ -12,9 +12,10 @@ import {
   TouchableOpacity,
   Alert,
   Linking,
+  RefreshControl,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
 import Constants from 'expo-constants';
@@ -90,9 +91,27 @@ const MenuItem: React.FC<MenuItemProps> = ({
  */
 const AccountScreen: React.FC = () => {
   const navigation = useNavigation<AccountNavigationProp>();
-  const { logout } = useAuth();
+  const { logout, refreshUser } = useAuth();
   const parentUser = useParentUser();
   const { unreadCount } = useNotificationContext();
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  // Refresh user data when screen comes into focus
+  useFocusEffect(
+    useCallback(() => {
+      if (refreshUser) {
+        refreshUser();
+      }
+    }, [refreshUser])
+  );
+
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    if (refreshUser) {
+      await refreshUser();
+    }
+    setIsRefreshing(false);
+  };
 
   const handleLogout = () => {
     Alert.alert(
@@ -149,8 +168,6 @@ const AccountScreen: React.FC = () => {
   };
 
   const handleOrderHistory = () => {
-    // Navigate to a filtered view or orders screen
-    // For now, show an informational message about orders
     Alert.alert(
       'Order History',
       'Your order history is available on the PTP Soccer website. Would you like to open it?',
@@ -173,7 +190,6 @@ const AccountScreen: React.FC = () => {
   };
 
   const handleLocationSettings = () => {
-    // Navigate back to onboarding location screen or dedicated settings
     Alert.alert(
       'Location Preferences',
       'To change your location preferences, please update your profile.',
@@ -192,34 +208,88 @@ const AccountScreen: React.FC = () => {
     Linking.openURL('mailto:support@ptpsoccer.com?subject=PTP%20Soccer%20App%20Support');
   };
 
+  const childCount = parentUser?.children?.length || 0;
+  const locationText = parentUser?.preferredLocation
+    ? `${parentUser.preferredLocation.city || ''}, ${parentUser.preferredLocation.state || ''}`.replace(/^, |, $/g, '')
+    : 'Not set';
+
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={isRefreshing}
+            onRefresh={handleRefresh}
+            tintColor={colors.primary}
+          />
+        }
       >
         {/* Profile Header */}
         <View style={styles.profileHeader}>
-          <View style={styles.avatar}>
-            <PTPText style={styles.avatarText}>
-              {parentUser?.firstName?.[0] || 'U'}
-              {parentUser?.lastName?.[0] || ''}
-            </PTPText>
+          <View style={styles.profileHeaderTop}>
+            <TouchableOpacity
+              style={styles.avatar}
+              onPress={handleEditProfile}
+              accessibilityLabel="Edit profile"
+            >
+              <PTPText style={styles.avatarText}>
+                {parentUser?.firstName?.[0]?.toUpperCase() || 'U'}
+                {parentUser?.lastName?.[0]?.toUpperCase() || ''}
+              </PTPText>
+              <View style={styles.avatarEditBadge}>
+                <Ionicons name="pencil" size={12} color={colors.white} />
+              </View>
+            </TouchableOpacity>
           </View>
           <PTPText variant="sectionTitle">
-            {parentUser?.firstName} {parentUser?.lastName}
+            {parentUser?.firstName || 'User'} {parentUser?.lastName || ''}
           </PTPText>
           <PTPText variant="body" color="gray500">
-            {parentUser?.email}
+            {parentUser?.email || 'No email'}
           </PTPText>
+
+          {/* Quick Stats */}
+          <View style={styles.statsRow}>
+            <View style={styles.statItem}>
+              <PTPText variant="sectionTitle" color="primary">
+                {childCount}
+              </PTPText>
+              <PTPText variant="caption" color="gray500">
+                {childCount === 1 ? 'Player' : 'Players'}
+              </PTPText>
+            </View>
+            <View style={styles.statDivider} />
+            <TouchableOpacity style={styles.statItem} onPress={handleNotificationCenter}>
+              <PTPText variant="sectionTitle" color={unreadCount > 0 ? 'error' : 'primary'}>
+                {unreadCount}
+              </PTPText>
+              <PTPText variant="caption" color="gray500">
+                Unread
+              </PTPText>
+            </TouchableOpacity>
+            <View style={styles.statDivider} />
+            <TouchableOpacity style={styles.statItem} onPress={handleLocationSettings}>
+              <Ionicons name="location" size={20} color={colors.primary} />
+              <PTPText variant="caption" color="gray500" numberOfLines={1}>
+                {locationText || 'Set location'}
+              </PTPText>
+            </TouchableOpacity>
+          </View>
         </View>
 
         {/* Children Section */}
         <View style={styles.section}>
-          <PTPText variant="label" color="gray500" style={styles.sectionTitle}>
-            PLAYERS
-          </PTPText>
+          <View style={styles.sectionHeader}>
+            <PTPText variant="label" color="gray500">
+              PLAYERS
+            </PTPText>
+            <TouchableOpacity onPress={handleAddChild}>
+              <PTPText variant="caption" color="primary">+ Add</PTPText>
+            </TouchableOpacity>
+          </View>
           <View style={styles.card}>
             {parentUser?.children && parentUser.children.length > 0 ? (
               parentUser.children.map((child, index) => (
@@ -231,15 +301,15 @@ const AccountScreen: React.FC = () => {
                   ]}
                   onPress={() => handleEditChild(child.id)}
                 >
-                  <View style={styles.childAvatar}>
+                  <View style={[styles.childAvatar, { backgroundColor: getAvatarColor(index) }]}>
                     <PTPText color="white" weight="semiBold">
-                      {child.firstName[0]}
+                      {child.firstName?.[0]?.toUpperCase() || '?'}
                     </PTPText>
                   </View>
                   <View style={styles.childInfo}>
-                    <PTPText variant="buttonMedium">{child.firstName}</PTPText>
+                    <PTPText variant="buttonMedium">{child.firstName || 'Player'}</PTPText>
                     <PTPText variant="caption" color="gray500">
-                      {child.ageBand} • {child.skillLevel} • {child.position || 'No position'}
+                      {[child.ageBand, child.skillLevel, child.position].filter(Boolean).join(' • ') || 'Tap to edit'}
                     </PTPText>
                   </View>
                   <Ionicons name="chevron-forward" size={18} color={colors.gray400} />
@@ -247,19 +317,24 @@ const AccountScreen: React.FC = () => {
               ))
             ) : (
               <View style={styles.emptyChildren}>
+                <View style={styles.emptyIcon}>
+                  <Ionicons name="people-outline" size={32} color={colors.gray300} />
+                </View>
                 <PTPText variant="body" color="gray500" center>
                   No players added yet
                 </PTPText>
+                <PTPText variant="caption" color="gray400" center style={styles.emptyHint}>
+                  Add your players to register for camps and training
+                </PTPText>
+                <PTPButton
+                  title="Add Player"
+                  variant="primary"
+                  size="small"
+                  onPress={handleAddChild}
+                  style={styles.emptyButton}
+                />
               </View>
             )}
-            <TouchableOpacity
-              style={styles.addChildButton}
-              onPress={handleAddChild}
-            >
-              <PTPText variant="label" color="primary">
-                + Add Player
-              </PTPText>
-            </TouchableOpacity>
           </View>
         </View>
 
@@ -273,6 +348,12 @@ const AccountScreen: React.FC = () => {
               iconName="person-outline"
               title="Edit Profile"
               onPress={handleEditProfile}
+            />
+            <MenuItem
+              iconName="card-outline"
+              title="Payment Methods"
+              subtitle="Manage your saved cards"
+              onPress={() => navigation.navigate('PaymentMethods')}
             />
             <MenuItem
               iconName="receipt-outline"
@@ -311,7 +392,7 @@ const AccountScreen: React.FC = () => {
             <MenuItem
               iconName="location-outline"
               title="Location Preferences"
-              subtitle={parentUser?.preferredLocation?.city || 'Not set'}
+              subtitle={locationText}
               onPress={handleLocationSettings}
             />
           </View>
@@ -380,10 +461,26 @@ const AccountScreen: React.FC = () => {
           <PTPText variant="caption" color="gray400" center>
             PTP Soccer v{Constants.expoConfig?.version || '1.0.0'}
           </PTPText>
+          <PTPText variant="caption" color="gray300" center>
+            Made with passion for young athletes
+          </PTPText>
         </View>
       </ScrollView>
     </SafeAreaView>
   );
+};
+
+// Helper function to get different colors for child avatars
+const getAvatarColor = (index: number): string => {
+  const colorPalette = [
+    colors.inkBlack,
+    colors.primary,
+    colors.info,
+    colors.success,
+    '#8B5CF6', // purple
+    '#EC4899', // pink
+  ];
+  return colorPalette[index % colorPalette.length];
 };
 
 const styles = StyleSheet.create({
@@ -405,23 +502,61 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: colors.gray100,
   },
+  profileHeaderTop: {
+    position: 'relative',
+    marginBottom: spacing[3],
+  },
   avatar: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
+    width: 88,
+    height: 88,
+    borderRadius: 44,
     backgroundColor: colors.primary,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: spacing[3],
   },
   avatarText: {
-    fontSize: 28,
+    fontSize: 32,
     fontWeight: '700',
     color: colors.inkBlack,
+  },
+  avatarEditBadge: {
+    position: 'absolute',
+    bottom: 0,
+    right: 0,
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: colors.inkBlack,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: colors.white,
+  },
+  statsRow: {
+    flexDirection: 'row',
+    marginTop: spacing[4],
+    paddingHorizontal: spacing[2],
+  },
+  statItem: {
+    flex: 1,
+    alignItems: 'center',
+    paddingVertical: spacing[2],
+  },
+  statDivider: {
+    width: 1,
+    backgroundColor: colors.gray200,
+    marginVertical: spacing[1],
   },
   section: {
     paddingHorizontal: spacing[4],
     marginTop: spacing[6],
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: spacing[2],
+    marginLeft: spacing[1],
   },
   sectionTitle: {
     marginBottom: spacing[2],
@@ -450,7 +585,7 @@ const styles = StyleSheet.create({
     marginRight: spacing[3],
   },
   menuItemIconDanger: {
-    backgroundColor: colors.errorLight || '#FFEBEE',
+    backgroundColor: colors.errorLight,
   },
   menuItemContent: {
     flex: 1,
@@ -465,9 +600,9 @@ const styles = StyleSheet.create({
     borderBottomColor: colors.gray100,
   },
   childAvatar: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
     backgroundColor: colors.inkBlack,
     justifyContent: 'center',
     alignItems: 'center',
@@ -477,7 +612,24 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   emptyChildren: {
-    padding: spacing[4],
+    padding: spacing[6],
+    alignItems: 'center',
+  },
+  emptyIcon: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: colors.gray100,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: spacing[3],
+  },
+  emptyHint: {
+    marginTop: spacing[1],
+    marginBottom: spacing[4],
+  },
+  emptyButton: {
+    minWidth: 140,
   },
   addChildButton: {
     padding: spacing[4],
@@ -488,6 +640,7 @@ const styles = StyleSheet.create({
   versionInfo: {
     marginTop: spacing[6],
     padding: spacing[4],
+    gap: spacing[1],
   },
   badge: {
     backgroundColor: colors.error,

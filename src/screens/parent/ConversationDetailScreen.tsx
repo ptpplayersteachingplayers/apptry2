@@ -15,17 +15,27 @@ import {
   KeyboardAvoidingView,
   Platform,
   Animated,
-  Keyboard,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useRoute, RouteProp, useFocusEffect } from '@react-navigation/native';
+import { useRoute, RouteProp, useFocusEffect, useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
+import * as Haptics from 'expo-haptics';
 import { ParentStackParamList } from '../../types/navigation';
-import { Message } from '../../types';
-import { getMessages, sendMessage, markAsRead } from '../../api/messages';
+import { Message, Conversation } from '../../types';
+import {
+  getMessages,
+  sendMessage,
+  markAsRead,
+  getConversation,
+  sendTypingIndicator,
+  getTypingStatus,
+  getOnlineStatus,
+  formatLastSeen,
+  TYPING_INDICATOR_TIMEOUT,
+} from '../../api/messages';
 import { PTPText, PTPLoading } from '../../components';
 import { colors } from '../../theme/colors';
-import { spacing, borderRadius } from '../../theme/spacing';
+import { spacing } from '../../theme/spacing';
 
 type ConversationDetailRouteProp = RouteProp<ParentStackParamList, 'ConversationDetail'>;
 
@@ -37,30 +47,121 @@ const iOSColors = {
   sendButton: '#007AFF',
 };
 
+// Typing indicator dots animation component
+const TypingIndicator: React.FC = () => {
+  const dot1 = useRef(new Animated.Value(0)).current;
+  const dot2 = useRef(new Animated.Value(0)).current;
+  const dot3 = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    const animateDots = () => {
+      Animated.loop(
+        Animated.sequence([
+          Animated.timing(dot1, { toValue: 1, duration: 300, useNativeDriver: true }),
+          Animated.timing(dot2, { toValue: 1, duration: 300, useNativeDriver: true }),
+          Animated.timing(dot3, { toValue: 1, duration: 300, useNativeDriver: true }),
+          Animated.parallel([
+            Animated.timing(dot1, { toValue: 0, duration: 300, useNativeDriver: true }),
+            Animated.timing(dot2, { toValue: 0, duration: 300, useNativeDriver: true }),
+            Animated.timing(dot3, { toValue: 0, duration: 300, useNativeDriver: true }),
+          ]),
+        ])
+      ).start();
+    };
+    animateDots();
+  }, [dot1, dot2, dot3]);
+
+  return (
+    <View style={styles.typingContainer}>
+      <View style={styles.typingBubble}>
+        {[dot1, dot2, dot3].map((dot, index) => (
+          <Animated.View
+            key={index}
+            style={[
+              styles.typingDot,
+              {
+                opacity: dot.interpolate({ inputRange: [0, 1], outputRange: [0.4, 1] }),
+                transform: [{ scale: dot.interpolate({ inputRange: [0, 1], outputRange: [0.8, 1.2] }) }],
+              },
+            ]}
+          />
+        ))}
+      </View>
+    </View>
+  );
+};
+
 const ConversationDetailScreen: React.FC = () => {
   const route = useRoute<ConversationDetailRouteProp>();
+  const navigation = useNavigation();
   const { conversationId } = route.params;
 
   const [messages, setMessages] = useState<Message[]>([]);
+  const [conversation, setConversation] = useState<Conversation | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSending, setIsSending] = useState(false);
   const [inputText, setInputText] = useState('');
   const [inputHeight, setInputHeight] = useState(36);
+  const [isOtherTyping, setIsOtherTyping] = useState(false);
   const flatListRef = useRef<FlatList>(null);
   const inputRef = useRef<TextInput>(null);
+  const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const lastTypingSentRef = useRef<number>(0);
 
-  // Poll for new messages every 5 seconds
+  // Get other participant info
+  const otherParticipant = conversation?.participants.find((p) => p.role !== 'parent');
+  const onlineStatus = otherParticipant ? getOnlineStatus(otherParticipant.id) : null;
+
+  // Poll for new messages and typing status
   useFocusEffect(
     useCallback(() => {
-      const interval = setInterval(loadMessages, 5000);
-      return () => clearInterval(interval);
+      const messageInterval = setInterval(loadMessages, 5000);
+      const typingInterval = setInterval(() => {
+        setIsOtherTyping(getTypingStatus(conversationId));
+      }, 1000);
+
+      return () => {
+        clearInterval(messageInterval);
+        clearInterval(typingInterval);
+      };
     }, [conversationId])
   );
 
   useEffect(() => {
+    loadConversation();
     loadMessages();
     markAsRead(conversationId);
   }, [conversationId]);
+
+  // Update header with online status
+  useEffect(() => {
+    if (otherParticipant && onlineStatus) {
+      navigation.setOptions({
+        headerTitle: () => (
+          <View style={styles.headerTitle}>
+            <PTPText variant="body" weight="semiBold" numberOfLines={1}>
+              {otherParticipant.name}
+            </PTPText>
+            <View style={styles.onlineStatusContainer}>
+              {onlineStatus.isOnline && <View style={styles.onlineDot} />}
+              <PTPText variant="caption" color="gray400">
+                {onlineStatus.isOnline ? 'Active now' : formatLastSeen(onlineStatus.lastSeen)}
+              </PTPText>
+            </View>
+          </View>
+        ),
+      });
+    }
+  }, [otherParticipant, onlineStatus, navigation]);
+
+  const loadConversation = async () => {
+    try {
+      const conv = await getConversation(conversationId);
+      setConversation(conv);
+    } catch (error) {
+      console.error('Error loading conversation:', error);
+    }
+  };
 
   const loadMessages = async () => {
     try {
@@ -73,15 +174,35 @@ const ConversationDetailScreen: React.FC = () => {
     }
   };
 
+  // Send typing indicator when user types
+  const handleInputChange = (text: string) => {
+    setInputText(text);
+
+    // Throttle typing indicator - send at most once per 2 seconds
+    const now = Date.now();
+    if (text.length > 0 && now - lastTypingSentRef.current > 2000) {
+      lastTypingSentRef.current = now;
+      sendTypingIndicator(conversationId);
+    }
+
+    // Reset typing timeout
+    if (typingTimeoutRef.current) {
+      clearTimeout(typingTimeoutRef.current);
+    }
+  };
+
   const handleSend = async () => {
     if (!inputText.trim() || isSending) return;
+
+    // Haptic feedback on send
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
 
     const messageContent = inputText.trim();
     setInputText('');
     setInputHeight(36);
     setIsSending(true);
 
-    // Optimistic update - add message immediately
+    // Optimistic update - add message immediately with animation
     const tempMessage: Message = {
       id: Date.now(),
       conversationId,
@@ -101,9 +222,14 @@ const ConversationDetailScreen: React.FC = () => {
       setMessages((prev) =>
         prev.map((m) => (m.id === tempMessage.id ? response.message : m))
       );
+
+      // Haptic feedback on success
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       setTimeout(() => flatListRef.current?.scrollToEnd({ animated: true }), 100);
     } catch (error) {
       console.error('Error sending message:', error);
+      // Haptic feedback on error
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
       // Mark message as failed
       setMessages((prev) =>
         prev.map((m) =>
@@ -139,18 +265,48 @@ const ConversationDetailScreen: React.FC = () => {
     return currentDate !== prevDate;
   };
 
-  const getDeliveryStatus = (status: Message['status']) => {
+  // Render checkmark icons for message status
+  const renderDeliveryStatus = (status: Message['status']) => {
     switch (status) {
       case 'sending':
-        return null;
+        return (
+          <View style={styles.statusIconContainer}>
+            <Ionicons name="time-outline" size={14} color={colors.gray400} />
+          </View>
+        );
       case 'sent':
-        return 'Sent';
+        return (
+          <View style={styles.statusIconContainer}>
+            <Ionicons name="checkmark" size={14} color={colors.gray400} />
+          </View>
+        );
       case 'delivered':
-        return 'Delivered';
+        return (
+          <View style={styles.statusIconContainer}>
+            <View style={styles.doubleCheck}>
+              <Ionicons name="checkmark" size={14} color={colors.gray400} style={{ marginRight: -6 }} />
+              <Ionicons name="checkmark" size={14} color={colors.gray400} />
+            </View>
+          </View>
+        );
       case 'read':
-        return 'Read';
+        return (
+          <View style={styles.statusIconContainer}>
+            <View style={styles.doubleCheck}>
+              <Ionicons name="checkmark" size={14} color={iOSColors.blue} style={{ marginRight: -6 }} />
+              <Ionicons name="checkmark" size={14} color={iOSColors.blue} />
+            </View>
+          </View>
+        );
       case 'failed':
-        return 'Not Delivered';
+        return (
+          <View style={styles.statusIconContainer}>
+            <Ionicons name="alert-circle" size={14} color={colors.error} />
+            <PTPText variant="caption" color="error" style={{ marginLeft: 2 }}>
+              Failed
+            </PTPText>
+          </View>
+        );
       default:
         return null;
     }
@@ -209,15 +365,7 @@ const ConversationDetailScreen: React.FC = () => {
               <PTPText variant="caption" color="gray400" style={styles.timeText}>
                 {formatTime(item.createdAt)}
               </PTPText>
-              {showDeliveryStatus && item.status && (
-                <PTPText
-                  variant="caption"
-                  color={item.status === 'failed' ? 'error' : 'gray400'}
-                  style={styles.statusText}
-                >
-                  {getDeliveryStatus(item.status)}
-                </PTPText>
-              )}
+              {showDeliveryStatus && item.status && renderDeliveryStatus(item.status)}
             </View>
           )}
         </View>
@@ -245,6 +393,7 @@ const ConversationDetailScreen: React.FC = () => {
           onLayout={() => flatListRef.current?.scrollToEnd({ animated: false })}
           showsVerticalScrollIndicator={false}
           keyboardDismissMode="interactive"
+          ListFooterComponent={isOtherTyping ? <TypingIndicator /> : null}
         />
 
         {/* Input Area - iOS iMessage style */}
@@ -261,8 +410,8 @@ const ConversationDetailScreen: React.FC = () => {
                 ref={inputRef}
                 style={[styles.input, { height: Math.max(36, Math.min(inputHeight, 100)) }]}
                 value={inputText}
-                onChangeText={setInputText}
-                placeholder="iMessage"
+                onChangeText={handleInputChange}
+                placeholder="Message"
                 placeholderTextColor={colors.gray400}
                 multiline
                 maxLength={1000}
@@ -419,6 +568,52 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     justifyContent: 'center',
+    alignItems: 'center',
+  },
+  // Header title with online status
+  headerTitle: {
+    alignItems: 'center',
+  },
+  onlineStatusContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  onlineDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: '#34C759', // iOS green
+  },
+  // Typing indicator styles
+  typingContainer: {
+    alignSelf: 'flex-start',
+    marginBottom: spacing[2],
+    marginLeft: spacing[1],
+  },
+  typingBubble: {
+    flexDirection: 'row',
+    backgroundColor: iOSColors.gray,
+    paddingHorizontal: spacing[4],
+    paddingVertical: spacing[3],
+    borderRadius: 18,
+    borderBottomLeftRadius: 4,
+    gap: 4,
+  },
+  typingDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: colors.gray500,
+  },
+  // Status icon styles
+  statusIconContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginLeft: spacing[1],
+  },
+  doubleCheck: {
+    flexDirection: 'row',
     alignItems: 'center',
   },
 });

@@ -13,19 +13,23 @@ import {
   ImageBackground,
   TouchableOpacity,
   Linking,
+  Modal,
+  Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { Ionicons } from '@expo/vector-icons';
 import { ParentStackParamList } from '../../types/navigation';
 import { Program } from '../../types';
-import { getProgram } from '../../api/programs';
+import { getProgram, joinWaitlist, getWaitlistStatus } from '../../api/programs';
 import {
   PTPText,
   PTPButton,
   PTPTag,
   PTPLoading,
 } from '../../components';
+import { useAuth } from '../../hooks';
 import { colors } from '../../theme/colors';
 import { spacing, borderRadius, shadows } from '../../theme/spacing';
 import {
@@ -46,10 +50,15 @@ const ProgramDetailScreen: React.FC = () => {
   const navigation = useNavigation<ProgramDetailNavigationProp>();
   const route = useRoute<ProgramDetailRouteProp>();
   const { programId } = route.params;
+  const { user } = useAuth();
 
   const [program, setProgram] = useState<Program | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [showWaitlistModal, setShowWaitlistModal] = useState(false);
+  const [isJoiningWaitlist, setIsJoiningWaitlist] = useState(false);
+  const [isOnWaitlist, setIsOnWaitlist] = useState(false);
+  const [waitlistPosition, setWaitlistPosition] = useState<number | null>(null);
 
   useEffect(() => {
     loadProgram();
@@ -68,6 +77,20 @@ const ProgramDetailScreen: React.FC = () => {
         throw new Error('Program not found');
       }
       setProgram(data);
+
+      // Check waitlist status if program is sold out
+      const stockStatus = getStockStatus(data.stock);
+      if (stockStatus.isSoldOut) {
+        try {
+          const waitlistStatus = await getWaitlistStatus(numericProgramId);
+          setIsOnWaitlist(waitlistStatus.isOnWaitlist);
+          if (waitlistStatus.position) {
+            setWaitlistPosition(waitlistStatus.position);
+          }
+        } catch (err) {
+          console.log('Waitlist status check failed:', err);
+        }
+      }
     } catch (err) {
       console.error('Error loading program:', err);
       setError(err instanceof Error ? err.message : 'Failed to load program');
@@ -78,7 +101,43 @@ const ProgramDetailScreen: React.FC = () => {
 
   const handleRegister = () => {
     if (program) {
-      navigation.navigate('Checkout', { productId: program.wooProductId });
+      navigation.navigate('Checkout', {
+        productId: program.wooProductId,
+        programName: program.title,
+        programDate: program.date,
+        programLocation: program.location,
+      });
+    }
+  };
+
+  const handleJoinWaitlist = async () => {
+    if (!program) return;
+
+    setIsJoiningWaitlist(true);
+    try {
+      const result = await joinWaitlist({
+        programId: program.id,
+        email: user?.email,
+      });
+
+      setShowWaitlistModal(false);
+
+      if (result.success) {
+        setIsOnWaitlist(true);
+        if (result.position) {
+          setWaitlistPosition(result.position);
+        }
+
+        Alert.alert(
+          'Waitlist Confirmed!',
+          `${result.message}\n\n${result.estimatedAvailability || ''}`,
+          [{ text: 'Got it!' }]
+        );
+      }
+    } catch (err: any) {
+      Alert.alert('Error', err.message || 'Failed to join waitlist. Please try again.');
+    } finally {
+      setIsJoiningWaitlist(false);
     }
   };
 
@@ -307,17 +366,150 @@ const ProgramDetailScreen: React.FC = () => {
                 {stockStatus.message}
               </PTPText>
             )}
+            {isOnWaitlist && waitlistPosition && (
+              <PTPText variant="caption" color="success">
+                Waitlist Position: #{waitlistPosition}
+              </PTPText>
+            )}
           </View>
-          <PTPButton
-            title={stockStatus?.isSoldOut ? 'Sold Out' : 'Register Now'}
-            variant={stockStatus?.isSoldOut ? 'outline' : 'primary'}
-            size="large"
-            onPress={handleRegister}
-            disabled={stockStatus?.isSoldOut}
-            style={styles.registerButton}
-          />
+          {stockStatus?.isSoldOut ? (
+            <PTPButton
+              title={isOnWaitlist ? 'On Waitlist' : 'Join Waitlist'}
+              variant={isOnWaitlist ? 'outline' : 'secondary'}
+              size="large"
+              onPress={() => !isOnWaitlist && setShowWaitlistModal(true)}
+              disabled={isOnWaitlist}
+              leftIcon={isOnWaitlist ? <Ionicons name="checkmark-circle" size={18} color={colors.success} /> : <Ionicons name="notifications-outline" size={18} color={colors.white} />}
+              style={styles.registerButton}
+            />
+          ) : (
+            <PTPButton
+              title="Register Now"
+              variant="primary"
+              size="large"
+              onPress={handleRegister}
+              style={styles.registerButton}
+            />
+          )}
         </View>
       </SafeAreaView>
+
+      {/* Waitlist Modal */}
+      <Modal
+        visible={showWaitlistModal}
+        animationType="slide"
+        presentationStyle="pageSheet"
+        onRequestClose={() => setShowWaitlistModal(false)}
+      >
+        <SafeAreaView style={styles.modalContainer} edges={['top', 'bottom']}>
+          {/* Modal Header */}
+          <View style={styles.modalHeader}>
+            <TouchableOpacity
+              onPress={() => setShowWaitlistModal(false)}
+              style={styles.modalCloseButton}
+            >
+              <Ionicons name="close" size={24} color={colors.gray600} />
+            </TouchableOpacity>
+            <PTPText variant="sectionTitle">Join Waitlist</PTPText>
+            <View style={styles.modalCloseButton} />
+          </View>
+
+          <ScrollView
+            style={styles.modalScroll}
+            contentContainerStyle={styles.modalScrollContent}
+          >
+            {/* Program Info */}
+            <View style={styles.waitlistProgramInfo}>
+              <PTPTag
+                label={program.type === 'camp' ? 'Camp' : 'Clinic'}
+                variant="default"
+                size="small"
+              />
+              <PTPText variant="cardTitle" style={styles.waitlistProgramTitle}>
+                {program.title}
+              </PTPText>
+              <PTPText variant="bodySmall" color="gray500">
+                {formatDateLong(program.date)} | {program.location}
+              </PTPText>
+            </View>
+
+            {/* Waitlist Benefits */}
+            <View style={styles.waitlistBenefits}>
+              <PTPText variant="label" style={styles.waitlistSectionTitle}>
+                What Happens When You Join
+              </PTPText>
+              <View style={styles.waitlistBenefit}>
+                <View style={styles.waitlistBenefitIcon}>
+                  <Ionicons name="notifications" size={20} color={colors.primary} />
+                </View>
+                <View style={styles.waitlistBenefitContent}>
+                  <PTPText variant="bodySmall" weight="semiBold">
+                    Instant Notifications
+                  </PTPText>
+                  <PTPText variant="caption" color="gray500">
+                    Get notified immediately when a spot opens up
+                  </PTPText>
+                </View>
+              </View>
+              <View style={styles.waitlistBenefit}>
+                <View style={styles.waitlistBenefitIcon}>
+                  <Ionicons name="flash" size={20} color={colors.primary} />
+                </View>
+                <View style={styles.waitlistBenefitContent}>
+                  <PTPText variant="bodySmall" weight="semiBold">
+                    Priority Access
+                  </PTPText>
+                  <PTPText variant="caption" color="gray500">
+                    24-hour window to register before spots go public
+                  </PTPText>
+                </View>
+              </View>
+              <View style={styles.waitlistBenefit}>
+                <View style={styles.waitlistBenefitIcon}>
+                  <Ionicons name="shield-checkmark" size={20} color={colors.primary} />
+                </View>
+                <View style={styles.waitlistBenefitContent}>
+                  <PTPText variant="bodySmall" weight="semiBold">
+                    No Obligation
+                  </PTPText>
+                  <PTPText variant="caption" color="gray500">
+                    You can remove yourself from the waitlist anytime
+                  </PTPText>
+                </View>
+              </View>
+            </View>
+
+            {/* Contact Info */}
+            <View style={styles.waitlistContact}>
+              <Ionicons name="mail-outline" size={18} color={colors.gray500} />
+              <PTPText variant="bodySmall" color="gray500">
+                Notifications will be sent to: {user?.email || 'your email'}
+              </PTPText>
+            </View>
+          </ScrollView>
+
+          {/* Modal Footer */}
+          <View style={styles.modalFooter}>
+            <PTPButton
+              title="Join Waitlist"
+              variant="primary"
+              size="large"
+              fullWidth
+              loading={isJoiningWaitlist}
+              onPress={handleJoinWaitlist}
+              leftIcon={<Ionicons name="notifications" size={18} color={colors.inkBlack} />}
+            />
+            <TouchableOpacity
+              onPress={() => setShowWaitlistModal(false)}
+              style={styles.modalCancelButton}
+            >
+              <PTPText variant="label" color="gray500">
+                Maybe Later
+              </PTPText>
+            </TouchableOpacity>
+          </View>
+        </SafeAreaView>
+      </Modal>
     </View>
   );
 };
@@ -488,6 +680,83 @@ const styles = StyleSheet.create({
   },
   registerButton: {
     flex: 1,
+  },
+  // Waitlist Modal Styles
+  modalContainer: {
+    flex: 1,
+    backgroundColor: colors.white,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: spacing[4],
+    paddingVertical: spacing[3],
+    borderBottomWidth: 1,
+    borderBottomColor: colors.gray200,
+  },
+  modalCloseButton: {
+    width: 44,
+    height: 44,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  modalScroll: {
+    flex: 1,
+  },
+  modalScrollContent: {
+    padding: spacing[4],
+  },
+  waitlistProgramInfo: {
+    backgroundColor: colors.gray50,
+    padding: spacing[4],
+    borderRadius: borderRadius.lg,
+    marginBottom: spacing[6],
+  },
+  waitlistProgramTitle: {
+    marginTop: spacing[2],
+    marginBottom: spacing[1],
+  },
+  waitlistBenefits: {
+    marginBottom: spacing[6],
+  },
+  waitlistSectionTitle: {
+    marginBottom: spacing[4],
+  },
+  waitlistBenefit: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    marginBottom: spacing[4],
+    gap: spacing[3],
+  },
+  waitlistBenefitIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: colors.primaryLight,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  waitlistBenefitContent: {
+    flex: 1,
+  },
+  waitlistContact: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing[2],
+    backgroundColor: colors.gray50,
+    padding: spacing[3],
+    borderRadius: borderRadius.md,
+  },
+  modalFooter: {
+    padding: spacing[4],
+    borderTopWidth: 1,
+    borderTopColor: colors.gray200,
+    alignItems: 'center',
+  },
+  modalCancelButton: {
+    marginTop: spacing[4],
+    padding: spacing[2],
   },
 });
 

@@ -7,6 +7,9 @@
 // Auth
 export { AuthProvider, useAuth, useParentUser, useTrainerUser, useIsTrainer } from './useAuth';
 
+// Onboarding
+export { OnboardingProvider, useOnboarding } from './useOnboarding';
+
 // Notifications
 export { useNotifications, scheduleLocalNotification } from './useNotifications';
 

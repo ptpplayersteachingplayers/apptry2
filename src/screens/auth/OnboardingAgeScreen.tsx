@@ -4,13 +4,14 @@
  * Select player age band during onboarding.
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, TouchableOpacity, ImageBackground } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { AuthStackParamList } from '../../types/navigation';
 import { AgeBand } from '../../types';
+import { useOnboarding } from '../../hooks';
 import { PTPText, PTPButton } from '../../components';
 import { colors } from '../../theme/colors';
 import { spacing, borderRadius } from '../../theme/spacing';
@@ -34,10 +35,18 @@ const ageBands: { value: AgeBand; label: string; description: string }[] = [
  */
 const OnboardingAgeScreen: React.FC = () => {
   const navigation = useNavigation<OnboardingAgeNavigationProp>();
-  const [selectedAge, setSelectedAge] = useState<AgeBand | null>(null);
+  const { data, setAgeBand } = useOnboarding();
+  const [selectedAge, setSelectedAge] = useState<AgeBand | null>(data.ageBand);
+
+  // Sync local state with context on mount
+  useEffect(() => {
+    if (data.ageBand) setSelectedAge(data.ageBand);
+  }, []);
 
   const handleContinue = () => {
     if (selectedAge) {
+      // Store in onboarding context
+      setAgeBand(selectedAge);
       navigation.navigate('OnboardingSkill');
     }
   };
