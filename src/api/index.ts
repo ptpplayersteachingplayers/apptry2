@@ -16,4 +16,5 @@ export * from './messages';
 export * from './children';
 export * from './events';
 export * from './orders';
+export * from './payments';
 export * from './push';

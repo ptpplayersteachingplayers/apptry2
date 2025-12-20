@@ -81,3 +81,6 @@ export {
   InlineErrorFallback,
   NetworkErrorFallback,
 } from './PTPErrorBoundary';
+
+// Payment Components
+export { NativeCheckout } from './payment';

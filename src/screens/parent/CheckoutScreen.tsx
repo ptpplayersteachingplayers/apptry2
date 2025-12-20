@@ -5,20 +5,23 @@
  */
 
 import React, { useState, useRef } from 'react';
-import { View, StyleSheet, ActivityIndicator, Alert, ScrollView } from 'react-native';
+import { View, StyleSheet, ActivityIndicator, Alert, ScrollView, TouchableOpacity, Platform } from 'react-native';
 import { WebView } from 'react-native-webview';
 import { useNavigation, useRoute, RouteProp, CommonActions } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { ParentStackParamList } from '../../types/navigation';
-import { getCheckoutUrl, verifyCheckout, getOrder, mockOrders } from '../../api/orders';
-import { Order } from '../../types';
-import { PTPText, PTPButton, PTPTag } from '../../components';
+import { getCheckoutUrl, getOrder, mockOrders } from '../../api/orders';
+import { Order, PaymentResult } from '../../types';
+import { PTPText, PTPButton, NativeCheckout } from '../../components';
 import { useAuth } from '../../hooks/useAuth';
+import { apiConfig } from '../../api/config';
 import { colors } from '../../theme/colors';
 import { spacing, borderRadius, shadows } from '../../theme/spacing';
 import { formatDateLong } from '../../lib/formatting';
+
+type CheckoutMode = 'native' | 'webview';
 
 type CheckoutRouteProp = RouteProp<ParentStackParamList, 'Checkout'>;
 type CheckoutNavigationProp = NativeStackNavigationProp<ParentStackParamList>;
@@ -31,6 +34,9 @@ type CheckoutNavigationProp = NativeStackNavigationProp<ParentStackParamList>;
  * - Detection of successful order completion
  * - Navigation to Schedule after success
  */
+// Demo price for native checkout (in production, fetch from API)
+const DEMO_PRICE = 175;
+
 const CheckoutScreen: React.FC = () => {
   const navigation = useNavigation<CheckoutNavigationProp>();
   const route = useRoute<CheckoutRouteProp>();
@@ -42,6 +48,10 @@ const CheckoutScreen: React.FC = () => {
   };
   const { isGuest, logout, user } = useAuth();
 
+  // Checkout mode: native (Stripe) or webview (WooCommerce)
+  const [checkoutMode, setCheckoutMode] = useState<CheckoutMode>(
+    apiConfig.demoMode ? 'native' : 'webview'
+  );
   const [isLoading, setIsLoading] = useState(true);
   const [checkoutUrl, setCheckoutUrl] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -51,10 +61,22 @@ const CheckoutScreen: React.FC = () => {
   const hasHandledSuccess = useRef(false);
 
   React.useEffect(() => {
-    if (!isGuest) {
+    if (!isGuest && checkoutMode === 'webview') {
       loadCheckoutUrl();
+    } else {
+      setIsLoading(false);
     }
-  }, [productId, isGuest]);
+  }, [productId, isGuest, checkoutMode]);
+
+  // Handle native checkout success
+  const handleNativePaymentSuccess = (result: PaymentResult) => {
+    handleCheckoutSuccess(result.orderId);
+  };
+
+  // Handle native checkout cancel
+  const handleNativePaymentCancel = () => {
+    navigation.goBack();
+  };
 
   // Guest users need to create an account to checkout
   const handleGuestSignUp = async () => {
@@ -348,8 +370,97 @@ const CheckoutScreen: React.FC = () => {
     );
   }
 
+  // Native checkout mode
+  if (checkoutMode === 'native') {
+    return (
+      <View style={styles.container}>
+        {/* Checkout Mode Toggle */}
+        <View style={styles.modeToggle}>
+          <TouchableOpacity
+            style={[styles.modeButton, checkoutMode === 'native' && styles.modeButtonActive]}
+            onPress={() => setCheckoutMode('native')}
+          >
+            <Ionicons
+              name="card"
+              size={16}
+              color={checkoutMode === 'native' ? colors.inkBlack : colors.gray500}
+            />
+            <PTPText
+              variant="caption"
+              color={checkoutMode === 'native' ? 'inkBlack' : 'gray500'}
+            >
+              Card / {Platform.OS === 'ios' ? 'Apple Pay' : 'Google Pay'}
+            </PTPText>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.modeButton, checkoutMode === 'webview' && styles.modeButtonActive]}
+            onPress={() => setCheckoutMode('webview')}
+          >
+            <Ionicons
+              name="globe-outline"
+              size={16}
+              color={checkoutMode === 'webview' ? colors.inkBlack : colors.gray500}
+            />
+            <PTPText
+              variant="caption"
+              color={checkoutMode === 'webview' ? 'inkBlack' : 'gray500'}
+            >
+              Web Checkout
+            </PTPText>
+          </TouchableOpacity>
+        </View>
+
+        <NativeCheckout
+          amount={DEMO_PRICE}
+          productName={programName || 'Training Program'}
+          productDescription={programDate ? `${formatDateLong(programDate)} | ${programLocation || 'TBD'}` : undefined}
+          programId={productId}
+          onSuccess={handleNativePaymentSuccess}
+          onCancel={handleNativePaymentCancel}
+        />
+      </View>
+    );
+  }
+
+  // WebView checkout mode
   return (
     <View style={styles.container}>
+      {/* Checkout Mode Toggle */}
+      <View style={styles.modeToggle}>
+        <TouchableOpacity
+          style={[styles.modeButton, checkoutMode === 'native' && styles.modeButtonActive]}
+          onPress={() => setCheckoutMode('native')}
+        >
+          <Ionicons
+            name="card"
+            size={16}
+            color={checkoutMode === 'native' ? colors.inkBlack : colors.gray500}
+          />
+          <PTPText
+            variant="caption"
+            color={checkoutMode === 'native' ? 'inkBlack' : 'gray500'}
+          >
+            Card / {Platform.OS === 'ios' ? 'Apple Pay' : 'Google Pay'}
+          </PTPText>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.modeButton, checkoutMode === 'webview' && styles.modeButtonActive]}
+          onPress={() => setCheckoutMode('webview')}
+        >
+          <Ionicons
+            name="globe-outline"
+            size={16}
+            color={checkoutMode === 'webview' ? colors.inkBlack : colors.gray500}
+          />
+          <PTPText
+            variant="caption"
+            color={checkoutMode === 'webview' ? 'inkBlack' : 'gray500'}
+          >
+            Web Checkout
+          </PTPText>
+        </TouchableOpacity>
+      </View>
+
       {isLoading && (
         <View style={styles.loadingOverlay}>
           <ActivityIndicator size="large" color={colors.primary} />
@@ -380,6 +491,27 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.white,
+  },
+  modeToggle: {
+    flexDirection: 'row',
+    backgroundColor: colors.gray100,
+    borderRadius: borderRadius.md,
+    padding: 4,
+    margin: spacing[3],
+  },
+  modeButton: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: spacing[1],
+    paddingVertical: spacing[2],
+    paddingHorizontal: spacing[3],
+    borderRadius: borderRadius.sm,
+  },
+  modeButtonActive: {
+    backgroundColor: colors.white,
+    ...shadows.sm,
   },
   webview: {
     flex: 1,

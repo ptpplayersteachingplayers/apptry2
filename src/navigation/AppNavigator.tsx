@@ -31,6 +31,7 @@ import MessagesScreen from '../screens/parent/MessagesScreen';
 import ConversationDetailScreen from '../screens/parent/ConversationDetailScreen';
 import EditProfileScreen from '../screens/parent/EditProfileScreen';
 import EditChildScreen from '../screens/parent/EditChildScreen';
+import PaymentMethodsScreen from '../screens/parent/PaymentMethodsScreen';
 import NotificationSettingsScreen from '../screens/parent/NotificationSettingsScreen';
 import NotificationCenterScreen from '../screens/parent/NotificationCenterScreen';
 
@@ -179,6 +180,18 @@ const ParentStackNavigator: React.FC = () => {
         options={{
           headerShown: true,
           headerTitle: 'Player Profile',
+          headerTintColor: colors.inkBlack,
+          headerStyle: { backgroundColor: colors.offWhite },
+          headerTitleStyle: { fontFamily: fontFamily.semiBold },
+          headerBackTitle: 'Back',
+        }}
+      />
+      <Stack.Screen
+        name="PaymentMethods"
+        component={PaymentMethodsScreen}
+        options={{
+          headerShown: true,
+          headerTitle: 'Payment Methods',
           headerTintColor: colors.inkBlack,
           headerStyle: { backgroundColor: colors.offWhite },
           headerTitleStyle: { fontFamily: fontFamily.semiBold },

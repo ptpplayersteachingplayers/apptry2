@@ -49,13 +49,15 @@ export type ParentStackParamList = {
   ParentTabs: NavigatorScreenParams<ParentTabParamList>;
   ProgramDetail: { programId: number | string };
   TrainerDetail: { trainerId: number };
-  Checkout: { productId: number; returnUrl?: string };
+  Checkout: { productId: number; programName?: string; programDate?: string; programLocation?: string; returnUrl?: string };
+  NativeCheckout: { amount: number; productName: string; productDescription?: string; orderId?: number; programId?: number };
   SessionRequest: { trainerId: number };
   Messages: { conversationId?: number };
   ConversationDetail: { conversationId: number };
   OrderDetail: { orderId: number };
   EditProfile: undefined;
   EditChild: { childId?: number };
+  PaymentMethods: undefined;
   NotificationSettings: undefined;
   NotificationCenter: undefined;
 };

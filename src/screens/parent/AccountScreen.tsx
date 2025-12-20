@@ -350,6 +350,12 @@ const AccountScreen: React.FC = () => {
               onPress={handleEditProfile}
             />
             <MenuItem
+              iconName="card-outline"
+              title="Payment Methods"
+              subtitle="Manage your saved cards"
+              onPress={() => navigation.navigate('PaymentMethods')}
+            />
+            <MenuItem
               iconName="receipt-outline"
               title="Order History"
               subtitle="View past purchases"
