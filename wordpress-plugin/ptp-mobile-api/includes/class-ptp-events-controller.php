@@ -345,22 +345,37 @@ class PTP_Events_Controller {
 
         $table_name = $wpdb->prefix . 'ptp_training_sessions';
 
-        // Determine if user is parent or trainer
+        // Determine if user is parent or trainer - use explicit queries for security
         $is_trainer = in_array('ptp_trainer', $user->roles);
-        $user_column = $is_trainer ? 'trainer_id' : 'parent_id';
 
-        $sessions = $wpdb->get_results(
-            $wpdb->prepare(
-                "SELECT * FROM $table_name
-                 WHERE $user_column = %d
-                 AND session_date BETWEEN %s AND %s
-                 AND status IN ('confirmed', 'completed')",
-                $user->ID,
-                $start_date,
-                $end_date
-            ),
-            ARRAY_A
-        );
+        // Use explicit column names to prevent SQL injection
+        if ($is_trainer) {
+            $sessions = $wpdb->get_results(
+                $wpdb->prepare(
+                    "SELECT * FROM $table_name
+                     WHERE trainer_id = %d
+                     AND session_date BETWEEN %s AND %s
+                     AND status IN ('confirmed', 'completed')",
+                    $user->ID,
+                    $start_date,
+                    $end_date
+                ),
+                ARRAY_A
+            );
+        } else {
+            $sessions = $wpdb->get_results(
+                $wpdb->prepare(
+                    "SELECT * FROM $table_name
+                     WHERE parent_id = %d
+                     AND session_date BETWEEN %s AND %s
+                     AND status IN ('confirmed', 'completed')",
+                    $user->ID,
+                    $start_date,
+                    $end_date
+                ),
+                ARRAY_A
+            );
+        }
 
         foreach ($sessions as $session) {
             $trainer = get_user_by('ID', $session['trainer_id']);
@@ -494,8 +509,8 @@ class PTP_Events_Controller {
             );
         }
 
-        // Verify user has access
-        if ($session['parent_id'] != $user->ID && $session['trainer_id'] != $user->ID) {
+        // Verify user has access with strict type comparison
+        if ((int) $session['parent_id'] !== $user->ID && (int) $session['trainer_id'] !== $user->ID) {
             return new WP_Error(
                 'forbidden',
                 'You do not have access to this event',

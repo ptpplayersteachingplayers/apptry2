@@ -487,25 +487,31 @@ class PTP_Training_Controller {
 
         $table_name = $wpdb->prefix . 'ptp_training_sessions';
 
-        // Determine if user is parent or trainer
+        // Determine if user is parent or trainer - use explicit queries for security
         $is_trainer = in_array('ptp_trainer', $user->roles);
-        $user_column = $is_trainer ? 'trainer_id' : 'parent_id';
 
-        $query = "SELECT * FROM $table_name WHERE $user_column = %d";
-        $params = array($user->ID);
+        // Build status conditions
+        $status_condition = '';
+        $date_params = array();
 
-        // Filter by status
         if ($status === 'upcoming') {
-            $query .= " AND session_date >= %s AND status = 'confirmed'";
-            $params[] = date('Y-m-d');
+            $status_condition = " AND session_date >= %s AND status = 'confirmed'";
+            $date_params[] = date('Y-m-d');
         } elseif ($status === 'past') {
-            $query .= " AND session_date < %s";
-            $params[] = date('Y-m-d');
+            $status_condition = " AND session_date < %s";
+            $date_params[] = date('Y-m-d');
         } elseif ($status === 'pending') {
-            $query .= " AND status = 'requested'";
+            $status_condition = " AND status = 'requested'";
         }
 
-        $query .= " ORDER BY session_date ASC, start_time ASC";
+        // Use explicit column names in separate queries to prevent SQL injection
+        if ($is_trainer) {
+            $query = "SELECT * FROM $table_name WHERE trainer_id = %d" . $status_condition . " ORDER BY session_date ASC, start_time ASC";
+        } else {
+            $query = "SELECT * FROM $table_name WHERE parent_id = %d" . $status_condition . " ORDER BY session_date ASC, start_time ASC";
+        }
+
+        $params = array_merge(array($user->ID), $date_params);
 
         $sessions = $wpdb->get_results(
             $wpdb->prepare($query, $params),
@@ -542,8 +548,8 @@ class PTP_Training_Controller {
             );
         }
 
-        // Check permission
-        if ($session['parent_id'] != $user->ID && $session['trainer_id'] != $user->ID) {
+        // Check permission with strict type comparison
+        if ((int) $session['parent_id'] !== $user->ID && (int) $session['trainer_id'] !== $user->ID) {
             return new WP_Error(
                 'forbidden',
                 'You do not have access to this session',
@@ -578,8 +584,8 @@ class PTP_Training_Controller {
             );
         }
 
-        // Check permission
-        if ($session['parent_id'] != $user->ID && $session['trainer_id'] != $user->ID) {
+        // Check permission with strict type comparison
+        if ((int) $session['parent_id'] !== $user->ID && (int) $session['trainer_id'] !== $user->ID) {
             return new WP_Error(
                 'forbidden',
                 'You do not have access to this session',

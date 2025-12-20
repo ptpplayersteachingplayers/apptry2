@@ -23,6 +23,12 @@ class PTP_Auth_Controller {
     private $namespace = 'ptp/v1';
 
     /**
+     * Rate limit settings
+     */
+    private $rate_limit_attempts = 5;
+    private $rate_limit_window = 300; // 5 minutes
+
+    /**
      * Register routes
      */
     public function register_routes() {
@@ -144,16 +150,106 @@ class PTP_Auth_Controller {
     }
 
     /**
+     * Check rate limit for an action
+     *
+     * @param string $action The action being rate limited
+     * @param string $identifier Unique identifier (email, IP, etc.)
+     * @return true|WP_Error True if allowed, WP_Error if rate limited
+     */
+    private function check_rate_limit($action, $identifier) {
+        $key = 'ptp_rate_' . $action . '_' . md5($identifier);
+        $attempts = get_transient($key);
+
+        if ($attempts === false) {
+            $attempts = 0;
+        }
+
+        if ($attempts >= $this->rate_limit_attempts) {
+            ptp_log_activity(0, 'rate_limit_exceeded', array(
+                'action' => $action,
+                'identifier' => $identifier,
+                'ip' => $this->get_client_ip(),
+            ));
+
+            return new WP_Error(
+                'rate_limited',
+                'Too many attempts. Please try again in a few minutes.',
+                array('status' => 429)
+            );
+        }
+
+        return true;
+    }
+
+    /**
+     * Increment rate limit counter
+     *
+     * @param string $action The action being rate limited
+     * @param string $identifier Unique identifier
+     */
+    private function increment_rate_limit($action, $identifier) {
+        $key = 'ptp_rate_' . $action . '_' . md5($identifier);
+        $attempts = get_transient($key);
+
+        if ($attempts === false) {
+            $attempts = 0;
+        }
+
+        set_transient($key, $attempts + 1, $this->rate_limit_window);
+    }
+
+    /**
+     * Clear rate limit on successful action
+     *
+     * @param string $action The action
+     * @param string $identifier Unique identifier
+     */
+    private function clear_rate_limit($action, $identifier) {
+        $key = 'ptp_rate_' . $action . '_' . md5($identifier);
+        delete_transient($key);
+    }
+
+    /**
+     * Get client IP address
+     */
+    private function get_client_ip() {
+        $ip = '';
+        if (!empty($_SERVER['HTTP_CLIENT_IP'])) {
+            $ip = sanitize_text_field($_SERVER['HTTP_CLIENT_IP']);
+        } elseif (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+            $ip = sanitize_text_field(explode(',', $_SERVER['HTTP_X_FORWARDED_FOR'])[0]);
+        } elseif (!empty($_SERVER['REMOTE_ADDR'])) {
+            $ip = sanitize_text_field($_SERVER['REMOTE_ADDR']);
+        }
+        return $ip;
+    }
+
+    /**
      * Login endpoint
      */
     public function login($request) {
         $email = sanitize_email($request->get_param('email'));
         $password = $request->get_param('password');
+        $ip = $this->get_client_ip();
+
+        // Check rate limit by IP and email
+        $rate_check = $this->check_rate_limit('login', $ip . '_' . $email);
+        if (is_wp_error($rate_check)) {
+            return $rate_check;
+        }
 
         // Authenticate user
         $user = wp_authenticate($email, $password);
 
         if (is_wp_error($user)) {
+            // Increment rate limit on failed attempt
+            $this->increment_rate_limit('login', $ip . '_' . $email);
+
+            ptp_log_activity(0, 'login_failed', array(
+                'email' => $email,
+                'ip' => $ip,
+            ));
+
             return new WP_Error(
                 'invalid_credentials',
                 'Invalid email or password',
@@ -161,8 +257,15 @@ class PTP_Auth_Controller {
             );
         }
 
-        // Generate JWT token (requires JWT Auth plugin or custom implementation)
+        // Clear rate limit on success
+        $this->clear_rate_limit('login', $ip . '_' . $email);
+
+        // Generate JWT token
         $token = $this->generate_jwt_token($user);
+
+        ptp_log_activity($user->ID, 'login_success', array(
+            'ip' => $ip,
+        ));
 
         return rest_ensure_response(array(
             'token' => $token,
@@ -179,10 +282,26 @@ class PTP_Auth_Controller {
         $first_name = sanitize_text_field($request->get_param('first_name'));
         $last_name = sanitize_text_field($request->get_param('last_name'));
         $phone = sanitize_text_field($request->get_param('phone'));
-        $role = sanitize_text_field($request->get_param('role')) ?: 'ptp_parent';
+        $requested_role = sanitize_text_field($request->get_param('role')) ?: 'ptp_parent';
+        $ip = $this->get_client_ip();
+
+        // Check rate limit
+        $rate_check = $this->check_rate_limit('register', $ip);
+        if (is_wp_error($rate_check)) {
+            return $rate_check;
+        }
+
+        // Security: Only allow parent role from public registration
+        // Trainers must be approved by admin
+        $role = 'ptp_parent';
+        $pending_trainer = false;
+        if ($requested_role === 'ptp_trainer') {
+            $pending_trainer = true;
+        }
 
         // Check if email already exists
         if (email_exists($email)) {
+            $this->increment_rate_limit('register', $ip);
             return new WP_Error(
                 'email_exists',
                 'An account with this email already exists',
@@ -194,6 +313,7 @@ class PTP_Auth_Controller {
         $user_id = wp_create_user($email, $password, $email);
 
         if (is_wp_error($user_id)) {
+            $this->increment_rate_limit('register', $ip);
             return $user_id;
         }
 
@@ -205,9 +325,15 @@ class PTP_Auth_Controller {
             'display_name' => $first_name . ' ' . $last_name,
         ));
 
-        // Set role
+        // Set role (always parent for public registration)
         $user = new WP_User($user_id);
         $user->set_role($role);
+
+        // Mark as pending trainer if requested
+        if ($pending_trainer) {
+            update_user_meta($user_id, 'ptp_pending_trainer', true);
+            update_user_meta($user_id, 'ptp_trainer_request_date', current_time('mysql'));
+        }
 
         // Save phone number
         if ($phone) {
@@ -217,10 +343,21 @@ class PTP_Auth_Controller {
         // Generate JWT token
         $token = $this->generate_jwt_token($user);
 
-        return rest_ensure_response(array(
+        ptp_log_activity($user_id, 'user_registered', array(
+            'ip' => $ip,
+            'pending_trainer' => $pending_trainer,
+        ));
+
+        $response = array(
             'token' => $token,
             'user' => $this->format_user($user),
-        ));
+        );
+
+        if ($pending_trainer) {
+            $response['message'] = 'Account created. Your trainer application is pending approval.';
+        }
+
+        return rest_ensure_response($response);
     }
 
     /**
@@ -305,11 +442,22 @@ class PTP_Auth_Controller {
      */
     public function forgot_password($request) {
         $email = sanitize_email($request->get_param('email'));
+        $ip = $this->get_client_ip();
+
+        // Check rate limit (stricter for password reset)
+        $rate_check = $this->check_rate_limit('forgot_password', $ip);
+        if (is_wp_error($rate_check)) {
+            return $rate_check;
+        }
+
+        // Always increment to prevent enumeration via timing
+        $this->increment_rate_limit('forgot_password', $ip);
 
         $user = get_user_by('email', $email);
 
         if (!$user) {
-            // Don't reveal if email exists
+            // Don't reveal if email exists - add consistent delay
+            usleep(rand(100000, 300000)); // 100-300ms random delay
             return rest_ensure_response(array(
                 'success' => true,
                 'message' => 'If an account exists with this email, you will receive password reset instructions.',
@@ -320,11 +468,11 @@ class PTP_Auth_Controller {
         $key = get_password_reset_key($user);
 
         if (is_wp_error($key)) {
-            return new WP_Error(
-                'reset_error',
-                'Unable to generate password reset link',
-                array('status' => 500)
-            );
+            error_log('PTP Password Reset Error: ' . $key->get_error_message());
+            return rest_ensure_response(array(
+                'success' => true,
+                'message' => 'If an account exists with this email, you will receive password reset instructions.',
+            ));
         }
 
         // Send reset email
@@ -341,6 +489,10 @@ class PTP_Auth_Controller {
             'Reset your PTP Soccer password',
             $message
         );
+
+        ptp_log_activity($user->ID, 'password_reset_requested', array(
+            'ip' => $ip,
+        ));
 
         return rest_ensure_response(array(
             'success' => true,
@@ -376,25 +528,92 @@ class PTP_Auth_Controller {
             return $jwt->generate_token($user);
         }
 
-        // Simple token implementation (for development)
-        // In production, use a proper JWT library
-        $secret_key = defined('JWT_AUTH_SECRET_KEY') ? JWT_AUTH_SECRET_KEY : wp_salt('auth');
+        // Require explicit secret key configuration
+        if (!defined('JWT_AUTH_SECRET_KEY')) {
+            error_log('PTP Mobile API: JWT_AUTH_SECRET_KEY not defined in wp-config.php');
+            // Fall back to a site-specific key, but log warning
+            $secret_key = hash('sha256', wp_salt('auth') . wp_salt('secure_auth'));
+        } else {
+            $secret_key = JWT_AUTH_SECRET_KEY;
+        }
+
         $issued_at = time();
         $expires_at = $issued_at + (DAY_IN_SECONDS * 7); // 7 days
 
+        // Minimal payload - don't expose sensitive data
         $payload = array(
             'iss' => get_bloginfo('url'),
             'iat' => $issued_at,
             'exp' => $expires_at,
-            'user_id' => $user->ID,
-            'email' => $user->user_email,
+            'sub' => $user->ID, // Subject (user ID only)
+            'jti' => bin2hex(random_bytes(16)), // Unique token ID
         );
 
-        $header = base64_encode(json_encode(array('typ' => 'JWT', 'alg' => 'HS256')));
-        $payload_encoded = base64_encode(json_encode($payload));
-        $signature = hash_hmac('sha256', "$header.$payload_encoded", $secret_key);
+        // Use URL-safe base64 encoding (proper JWT spec)
+        $header = $this->base64url_encode(json_encode(array('typ' => 'JWT', 'alg' => 'HS256')));
+        $payload_encoded = $this->base64url_encode(json_encode($payload));
+
+        // Create signature with raw binary output then encode
+        $signature = $this->base64url_encode(
+            hash_hmac('sha256', "$header.$payload_encoded", $secret_key, true)
+        );
 
         return "$header.$payload_encoded.$signature";
+    }
+
+    /**
+     * URL-safe base64 encode (JWT spec compliant)
+     */
+    private function base64url_encode($data) {
+        return rtrim(strtr(base64_encode($data), '+/', '-_'), '=');
+    }
+
+    /**
+     * URL-safe base64 decode
+     */
+    private function base64url_decode($data) {
+        return base64_decode(strtr($data, '-_', '+/'));
+    }
+
+    /**
+     * Verify and decode JWT token
+     */
+    public function verify_jwt_token($token) {
+        $parts = explode('.', $token);
+        if (count($parts) !== 3) {
+            return false;
+        }
+
+        list($header, $payload, $signature) = $parts;
+
+        // Get secret key
+        if (!defined('JWT_AUTH_SECRET_KEY')) {
+            $secret_key = hash('sha256', wp_salt('auth') . wp_salt('secure_auth'));
+        } else {
+            $secret_key = JWT_AUTH_SECRET_KEY;
+        }
+
+        // Verify signature
+        $expected_signature = $this->base64url_encode(
+            hash_hmac('sha256', "$header.$payload", $secret_key, true)
+        );
+
+        if (!hash_equals($expected_signature, $signature)) {
+            return false;
+        }
+
+        // Decode payload
+        $payload_data = json_decode($this->base64url_decode($payload), true);
+        if (!$payload_data) {
+            return false;
+        }
+
+        // Check expiration
+        if (isset($payload_data['exp']) && $payload_data['exp'] < time()) {
+            return false;
+        }
+
+        return $payload_data;
     }
 
     /**

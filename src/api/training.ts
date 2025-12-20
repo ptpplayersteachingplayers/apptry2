@@ -114,49 +114,68 @@ export const getTrainer = async (trainerId: number): Promise<TrainerUser> => {
 };
 
 /**
- * Map WordPress trainer response to app TrainerUser type
+ * Map v2 API trainer response to app TrainerUser type
  */
-const mapWordPressTrainer = (wpTrainer: any): TrainerUser => ({
-  id: wpTrainer.id,
-  email: wpTrainer.email || '',
-  role: 'ptp_trainer',
-  firstName: wpTrainer.first_name,
-  lastName: wpTrainer.last_name,
-  phone: wpTrainer.phone,
-  avatarUrl: wpTrainer.avatar_url,
-  createdAt: wpTrainer.created_at || new Date().toISOString(),
-  updatedAt: wpTrainer.updated_at || new Date().toISOString(),
-  // Trainer specific
-  collegePro: wpTrainer.education || '',
-  position: 'midfielder', // Default, could be from specializations
-  bio: wpTrainer.bio || '',
-  teachingStyle: wpTrainer.teaching_style,
-  specialties: wpTrainer.specializations || [],
-  hourlyRate: wpTrainer.hourly_rate || 80,
-  serviceLocations: [{
-    id: 1,
-    name: wpTrainer.location || 'TBD',
-    city: wpTrainer.location?.split(',')[0] || 'Philadelphia',
-    state: 'PA' as const,
-    marketSlug: 'main-line',
-    isHomeBase: true,
-  }],
-  availability: {
-    monday: [],
-    tuesday: [],
-    wednesday: [],
-    thursday: [],
-    friday: [],
-    saturday: [],
-    sunday: [],
-  },
-  rating: wpTrainer.rating || 5.0,
-  reviewCount: wpTrainer.total_reviews || 0,
-  isVerified: true,
-  isBackgroundChecked: true,
-  headshotUrl: wpTrainer.avatar_url,
-  galleryUrls: wpTrainer.gallery || [],
-});
+const mapWordPressTrainer = (wpTrainer: any): TrainerUser => {
+  // Parse name into first/last
+  const nameParts = (wpTrainer.name || '').split(' ');
+  const firstName = nameParts[0] || '';
+  const lastName = nameParts.slice(1).join(' ') || '';
+
+  // Parse location
+  const locationParts = (wpTrainer.location || '').split(',').map((s: string) => s.trim());
+  const city = locationParts[0] || 'Philadelphia';
+  const state = locationParts[1] || 'PA';
+
+  return {
+    id: wpTrainer.id,
+    email: wpTrainer.email || '',
+    role: 'ptp_trainer',
+    firstName,
+    lastName,
+    phone: wpTrainer.phone || '',
+    avatarUrl: wpTrainer.photo,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    // Trainer specific
+    collegePro: wpTrainer.college || wpTrainer.playing_level || '',
+    position: wpTrainer.position || 'midfielder',
+    bio: wpTrainer.bio || wpTrainer.headline || '',
+    teachingStyle: '',
+    specialties: wpTrainer.specialties || [],
+    hourlyRate: wpTrainer.hourly_rate || 80,
+    serviceLocations: wpTrainer.training_locations?.map((loc: any, idx: number) => ({
+      id: idx + 1,
+      name: loc.name || loc,
+      city: loc.city || city,
+      state: loc.state || state,
+      marketSlug: 'main-line',
+      isHomeBase: idx === 0,
+    })) || [{
+      id: 1,
+      name: wpTrainer.location || 'TBD',
+      city,
+      state: state as any,
+      marketSlug: 'main-line',
+      isHomeBase: true,
+    }],
+    availability: {
+      monday: [],
+      tuesday: [],
+      wednesday: [],
+      thursday: [],
+      friday: [],
+      saturday: [],
+      sunday: [],
+    },
+    rating: wpTrainer.rating || 5.0,
+    reviewCount: wpTrainer.review_count || 0,
+    isVerified: wpTrainer.is_verified || true,
+    isBackgroundChecked: true,
+    headshotUrl: wpTrainer.photo,
+    galleryUrls: [],
+  };
+};
 
 /**
  * Get trainer reviews
@@ -256,10 +275,11 @@ export const getMySessions = async (status?: 'all' | 'upcoming' | 'past' | 'pend
     return mockSessions;
   }
 
+  // v2 API uses /bookings endpoint
   const params = status ? `?status=${status}` : '';
-  const response = await apiClient.get(`/training/my-sessions${params}`);
+  const response = await apiClient.get(`/bookings${params}`);
 
-  return (response.data.sessions || []).map(mapWordPressSession);
+  return (response.data.bookings || response.data || []).map(mapWordPressSession);
 };
 
 /**
@@ -274,7 +294,8 @@ export const getSession = async (sessionId: number): Promise<TrainingSession> =>
     return session;
   }
 
-  const response = await apiClient.get(`/training/sessions/${sessionId}`);
+  // v2 API uses /bookings endpoint
+  const response = await apiClient.get(`/bookings/${sessionId}`);
   return mapWordPressSession(response.data);
 };
 
@@ -289,7 +310,8 @@ export const cancelSession = async (sessionId: number, reason?: string): Promise
     return { success: true, message: 'Session cancelled' };
   }
 
-  const response = await apiClient.post(`/training/sessions/${sessionId}/cancel`, { reason });
+  // v2 API uses /bookings endpoint
+  const response = await apiClient.post(`/bookings/${sessionId}/cancel`, { reason });
   return response.data;
 };
 
