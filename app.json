@@ -20,6 +20,9 @@
         "NSLocationWhenInUseUsageDescription": "PTP Soccer uses your location to find camps and clinics near you.",
         "NSCameraUsageDescription": "PTP Soccer uses your camera to upload photos and videos.",
         "NSPhotoLibraryUsageDescription": "PTP Soccer accesses your photo library to upload images."
+      },
+      "entitlements": {
+        "com.apple.developer.in-app-payments": ["merchant.com.ptpsoccer.app"]
       }
     },
     "android": {
@@ -52,6 +55,13 @@
         "expo-location",
         {
           "locationWhenInUsePermission": "PTP Soccer uses your location to find camps and clinics near you."
+        }
+      ],
+      [
+        "@stripe/stripe-react-native",
+        {
+          "merchantIdentifier": "merchant.com.ptpsoccer.app",
+          "enableGooglePay": true
         }
       ]
     ],

@@ -3,9 +3,6 @@
  *
  * Provides native payment processing with Stripe.
  * Supports card payments, Apple Pay, and Google Pay.
- *
- * Note: Requires @stripe/stripe-react-native to be installed.
- * For now, this provides a mock implementation for demo mode.
  */
 
 import React, { useState, useCallback, useEffect } from 'react';
@@ -22,6 +19,14 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
+import {
+  useStripe,
+  CardField,
+  CardFieldInput,
+  PlatformPayButton,
+  isPlatformPaySupported,
+  PlatformPay,
+} from '@stripe/stripe-react-native';
 import { PTPText, PTPButton } from '../../components';
 import { colors } from '../../theme/colors';
 import { spacing, borderRadius, shadows } from '../../theme/spacing';
@@ -33,6 +38,7 @@ import {
   getPaymentMethods,
   createPaymentIntent,
   confirmPayment,
+  addPaymentMethod,
   getCardBrandName,
   formatCardExpiry,
   isCardExpired,
@@ -63,11 +69,24 @@ export const NativeCheckout: React.FC<NativeCheckoutProps> = ({
   onCancel,
   onError,
 }) => {
+  const { confirmPayment: stripeConfirmPayment, createPaymentMethod } = useStripe();
   const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([]);
   const [selectedMethodId, setSelectedMethodId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isProcessing, setIsProcessing] = useState(false);
   const [showAddCard, setShowAddCard] = useState(false);
+  const [cardDetails, setCardDetails] = useState<CardFieldInput.Details | null>(null);
+  const [isPlatformPayAvailable, setIsPlatformPayAvailable] = useState(false);
+  const [isSavingCard, setIsSavingCard] = useState(false);
+
+  // Check if Apple Pay / Google Pay is available
+  useEffect(() => {
+    const checkPlatformPay = async () => {
+      const isSupported = await isPlatformPaySupported();
+      setIsPlatformPayAvailable(isSupported);
+    };
+    checkPlatformPay();
+  }, []);
 
   // Load saved payment methods
   useEffect(() => {
@@ -100,7 +119,7 @@ export const NativeCheckout: React.FC<NativeCheckoutProps> = ({
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
 
     try {
-      // Create payment intent
+      // Create payment intent on backend
       const paymentIntent = await createPaymentIntent({
         amount: Math.round(amount * 100), // Convert to cents
         orderId,
@@ -108,39 +127,48 @@ export const NativeCheckout: React.FC<NativeCheckoutProps> = ({
         paymentMethodId: selectedMethodId,
       });
 
+      if (!paymentIntent.clientSecret) {
+        throw new Error('Payment setup failed. Please try again.');
+      }
+
       // In demo mode, simulate the payment confirmation
       if (apiConfig.demoMode) {
-        // Simulate processing delay
         await new Promise((resolve) => setTimeout(resolve, 1500));
-
         const result: PaymentResult = {
           success: true,
           paymentIntent,
           orderId: orderId || Date.now(),
         };
-
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
         onSuccess(result);
         return;
       }
 
-      // Confirm the payment
-      const result = await confirmPayment({
-        paymentIntentId: paymentIntent.id,
-        paymentMethodId: selectedMethodId,
-      });
+      // Confirm the payment with Stripe SDK
+      const { error, paymentIntent: confirmedIntent } = await stripeConfirmPayment(
+        paymentIntent.clientSecret,
+        {
+          paymentMethodType: 'Card',
+          paymentMethodData: {
+            paymentMethodId: selectedMethodId,
+          },
+        }
+      );
 
-      if (result.success) {
-        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-        onSuccess(result);
-      } else {
+      if (error) {
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-        Alert.alert(
-          'Payment Failed',
-          result.error?.message || 'Unable to process payment. Please try again.',
-          [{ text: 'OK' }]
-        );
-        onError?.(result.error?.message || 'Payment failed');
+        Alert.alert('Payment Failed', error.message || 'Unable to process payment.');
+        onError?.(error.message);
+      } else if (confirmedIntent) {
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+        onSuccess({
+          success: true,
+          paymentIntent: {
+            ...paymentIntent,
+            status: confirmedIntent.status,
+          },
+          orderId: orderId || Date.now(),
+        });
       }
     } catch (error: any) {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
@@ -151,14 +179,14 @@ export const NativeCheckout: React.FC<NativeCheckoutProps> = ({
     }
   };
 
-  const handleApplePay = async () => {
+  const handlePlatformPay = async () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
 
     if (apiConfig.demoMode) {
-      // Simulate Apple Pay in demo mode
+      const payType = Platform.OS === 'ios' ? 'Apple Pay' : 'Google Pay';
       Alert.alert(
-        'Apple Pay',
-        'Apple Pay would open here in production. For demo, we\'ll simulate a successful payment.',
+        payType,
+        `${payType} would open here in production. For demo, we'll simulate a successful payment.`,
         [
           { text: 'Cancel', style: 'cancel' },
           {
@@ -179,38 +207,87 @@ export const NativeCheckout: React.FC<NativeCheckoutProps> = ({
       return;
     }
 
-    // Real Apple Pay implementation would go here
-    // using Stripe's presentApplePay() or similar
+    setIsProcessing(true);
+
+    try {
+      // Create payment intent
+      const paymentIntent = await createPaymentIntent({
+        amount: Math.round(amount * 100),
+        orderId,
+        programId,
+      });
+
+      if (!paymentIntent.clientSecret) {
+        throw new Error('Payment setup failed.');
+      }
+
+      // Confirm with platform pay
+      const { error } = await stripeConfirmPayment(paymentIntent.clientSecret, {
+        paymentMethodType: 'Card',
+      });
+
+      if (error) {
+        Alert.alert('Payment Failed', error.message);
+        onError?.(error.message);
+      } else {
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+        onSuccess({
+          success: true,
+          paymentIntent,
+          orderId: orderId || Date.now(),
+        });
+      }
+    } catch (error: any) {
+      Alert.alert('Error', error.message || 'Payment failed.');
+      onError?.(error.message);
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
-  const handleGooglePay = async () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-
-    if (apiConfig.demoMode) {
-      Alert.alert(
-        'Google Pay',
-        'Google Pay would open here in production. For demo, we\'ll simulate a successful payment.',
-        [
-          { text: 'Cancel', style: 'cancel' },
-          {
-            text: 'Simulate Success',
-            onPress: async () => {
-              setIsProcessing(true);
-              await new Promise((resolve) => setTimeout(resolve, 1000));
-              setIsProcessing(false);
-              Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-              onSuccess({
-                success: true,
-                orderId: orderId || Date.now(),
-              });
-            },
-          },
-        ]
-      );
+  const handleAddCard = async () => {
+    if (!cardDetails?.complete) {
+      Alert.alert('Incomplete Card', 'Please enter all card details.');
       return;
     }
 
-    // Real Google Pay implementation would go here
+    setIsSavingCard(true);
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+
+    try {
+      // Create payment method with Stripe
+      const { paymentMethod, error } = await createPaymentMethod({
+        paymentMethodType: 'Card',
+        paymentMethodData: {
+          billingDetails: {},
+        },
+      });
+
+      if (error) {
+        Alert.alert('Error', error.message || 'Failed to add card.');
+        return;
+      }
+
+      if (paymentMethod) {
+        // Save to backend
+        if (apiConfig.demoMode) {
+          // In demo mode, add mock card
+          await new Promise((resolve) => setTimeout(resolve, 500));
+        } else {
+          await addPaymentMethod(paymentMethod.id);
+        }
+
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+        Alert.alert('Success', 'Card added successfully!');
+        await loadPaymentMethods();
+        setShowAddCard(false);
+        setCardDetails(null);
+      }
+    } catch (error: any) {
+      Alert.alert('Error', error.message || 'Failed to add card.');
+    } finally {
+      setIsSavingCard(false);
+    }
   };
 
   const renderPaymentMethod = (method: PaymentMethod) => {
@@ -298,34 +375,51 @@ export const NativeCheckout: React.FC<NativeCheckoutProps> = ({
           )}
         </View>
 
-        {/* Express Checkout */}
-        <View style={styles.section}>
-          <PTPText variant="label" color="gray500" style={styles.sectionTitle}>
-            EXPRESS CHECKOUT
-          </PTPText>
-          <View style={styles.expressButtons}>
-            {Platform.OS === 'ios' && (
-              <TouchableOpacity
-                style={styles.applePayButton}
-                onPress={handleApplePay}
-                disabled={isProcessing}
-              >
-                <Ionicons name="logo-apple" size={20} color={colors.white} />
-                <PTPText style={styles.applePayText}>Pay</PTPText>
-              </TouchableOpacity>
-            )}
-            {Platform.OS === 'android' && (
-              <TouchableOpacity
-                style={styles.googlePayButton}
-                onPress={handleGooglePay}
-                disabled={isProcessing}
-              >
-                <Ionicons name="logo-google" size={18} color={colors.inkBlack} />
-                <PTPText style={styles.googlePayText}>Pay</PTPText>
-              </TouchableOpacity>
-            )}
+        {/* Express Checkout - Platform Pay */}
+        {isPlatformPayAvailable && (
+          <View style={styles.section}>
+            <PTPText variant="label" color="gray500" style={styles.sectionTitle}>
+              EXPRESS CHECKOUT
+            </PTPText>
+            <PlatformPayButton
+              type={Platform.OS === 'ios' ? PlatformPay.ButtonType.Pay : PlatformPay.ButtonType.Pay}
+              onPress={handlePlatformPay}
+              disabled={isProcessing}
+              style={styles.platformPayButton}
+            />
           </View>
-        </View>
+        )}
+
+        {/* Manual Express Buttons as fallback */}
+        {!isPlatformPayAvailable && (
+          <View style={styles.section}>
+            <PTPText variant="label" color="gray500" style={styles.sectionTitle}>
+              EXPRESS CHECKOUT
+            </PTPText>
+            <View style={styles.expressButtons}>
+              {Platform.OS === 'ios' && (
+                <TouchableOpacity
+                  style={styles.applePayButton}
+                  onPress={handlePlatformPay}
+                  disabled={isProcessing}
+                >
+                  <Ionicons name="logo-apple" size={20} color={colors.white} />
+                  <PTPText style={styles.applePayText}>Pay</PTPText>
+                </TouchableOpacity>
+              )}
+              {Platform.OS === 'android' && (
+                <TouchableOpacity
+                  style={styles.googlePayButton}
+                  onPress={handlePlatformPay}
+                  disabled={isProcessing}
+                >
+                  <Ionicons name="logo-google" size={18} color={colors.inkBlack} />
+                  <PTPText style={styles.googlePayText}>Pay</PTPText>
+                </TouchableOpacity>
+              )}
+            </View>
+          </View>
+        )}
 
         {/* Divider */}
         <View style={styles.dividerContainer}>
@@ -404,7 +498,7 @@ export const NativeCheckout: React.FC<NativeCheckoutProps> = ({
         </View>
       </View>
 
-      {/* Add Card Modal - Would integrate with Stripe CardField */}
+      {/* Add Card Modal with Stripe CardField */}
       <Modal
         visible={showAddCard}
         animationType="slide"
@@ -419,32 +513,71 @@ export const NativeCheckout: React.FC<NativeCheckoutProps> = ({
             <PTPText variant="sectionTitle">Add Card</PTPText>
             <View style={{ width: 24 }} />
           </View>
+
           <View style={styles.addCardContent}>
-            <View style={styles.cardFieldPlaceholder}>
-              <Ionicons name="card" size={48} color={colors.gray300} />
-              <PTPText variant="body" color="gray500" center style={{ marginTop: spacing[3] }}>
-                Stripe CardField would appear here
+            <View style={styles.cardFieldContainer}>
+              <PTPText variant="label" color="gray600" style={styles.cardFieldLabel}>
+                CARD INFORMATION
               </PTPText>
-              <PTPText variant="caption" color="gray400" center style={{ marginTop: spacing[2] }}>
-                Install @stripe/stripe-react-native for card input
+              <CardField
+                postalCodeEnabled={true}
+                placeholders={{
+                  number: '4242 4242 4242 4242',
+                }}
+                cardStyle={cardFieldStyles}
+                style={styles.cardField}
+                onCardChange={(details) => setCardDetails(details)}
+              />
+            </View>
+
+            <View style={styles.cardFormInfo}>
+              <View style={styles.cardFormInfoRow}>
+                <Ionicons name="lock-closed" size={16} color={colors.success} />
+                <PTPText variant="caption" color="gray500">
+                  256-bit encryption
+                </PTPText>
+              </View>
+              <View style={styles.cardFormInfoRow}>
+                <Ionicons name="shield-checkmark" size={16} color={colors.success} />
+                <PTPText variant="caption" color="gray500">
+                  PCI DSS compliant
+                </PTPText>
+              </View>
+            </View>
+
+            <View style={styles.testCardNote}>
+              <Ionicons name="information-circle" size={18} color={colors.primary} />
+              <PTPText variant="caption" color="gray600">
+                Test card: 4242 4242 4242 4242, any future date, any CVC
               </PTPText>
             </View>
+          </View>
+
+          <View style={styles.addCardFooter}>
             <PTPButton
-              title="Add Card (Demo)"
+              title={isSavingCard ? 'Adding Card...' : 'Add Card'}
               variant="primary"
               fullWidth
-              onPress={() => {
-                // In demo mode, add a mock card
-                Alert.alert('Card Added', 'Demo card added successfully!');
-                loadPaymentMethods();
-                setShowAddCard(false);
-              }}
+              loading={isSavingCard}
+              disabled={!cardDetails?.complete || isSavingCard}
+              onPress={handleAddCard}
             />
           </View>
         </SafeAreaView>
       </Modal>
     </SafeAreaView>
   );
+};
+
+const cardFieldStyles = {
+  backgroundColor: colors.white,
+  textColor: colors.inkBlack,
+  fontSize: 16,
+  placeholderColor: colors.gray400,
+  cursorColor: colors.primary,
+  borderRadius: 8,
+  borderWidth: 1,
+  borderColor: colors.gray300,
 };
 
 const styles = StyleSheet.create({
@@ -483,6 +616,10 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     marginBottom: spacing[3],
+  },
+  platformPayButton: {
+    width: '100%',
+    height: 50,
   },
   expressButtons: {
     flexDirection: 'row',
@@ -636,16 +773,41 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: spacing[4],
   },
-  cardFieldPlaceholder: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: colors.gray50,
-    borderRadius: borderRadius.lg,
+  cardFieldContainer: {
     marginBottom: spacing[4],
-    borderWidth: 2,
-    borderColor: colors.gray200,
-    borderStyle: 'dashed',
+  },
+  cardFieldLabel: {
+    marginBottom: spacing[2],
+  },
+  cardField: {
+    width: '100%',
+    height: 50,
+    marginVertical: spacing[2],
+  },
+  cardFormInfo: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: spacing[6],
+    marginTop: spacing[4],
+  },
+  cardFormInfoRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing[1],
+  },
+  testCardNote: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing[2],
+    backgroundColor: colors.primaryLight,
+    padding: spacing[3],
+    borderRadius: borderRadius.md,
+    marginTop: spacing[6],
+  },
+  addCardFooter: {
+    padding: spacing[4],
+    borderTopWidth: 1,
+    borderTopColor: colors.gray200,
   },
 });
 
