@@ -25,8 +25,18 @@ import {
   StartConversationResponse,
 } from '../types';
 
-// Polling interval for new messages (in milliseconds)
-export const MESSAGE_POLL_INTERVAL = 10000; // 10 seconds
+// Polling intervals (in milliseconds)
+export const MESSAGE_POLL_INTERVAL = 5000; // 5 seconds for messages
+export const TYPING_INDICATOR_TIMEOUT = 3000; // 3 seconds to clear typing indicator
+export const ONLINE_STATUS_STALE = 60000; // 1 minute until considered offline
+
+// Real-time state for typing indicators (in-memory for demo)
+const typingState: { [conversationId: number]: { isTyping: boolean; lastTyped: number } } = {};
+const onlineStatus: { [participantId: number]: { isOnline: boolean; lastSeen: string } } = {
+  // Mock online status for trainers
+  101: { isOnline: true, lastSeen: new Date().toISOString() },
+  0: { isOnline: true, lastSeen: new Date().toISOString() }, // Support always online
+};
 
 /**
  * Get all conversations for the current user
@@ -180,6 +190,67 @@ export const deleteConversation = async (conversationId: number): Promise<{ succ
   // Not supported in current plugin - just return success
   console.warn('deleteConversation not supported in current plugin version');
   return { success: true };
+};
+
+/**
+ * Send typing indicator
+ * Notifies the other participant that user is typing
+ */
+export const sendTypingIndicator = async (conversationId: number): Promise<void> => {
+  if (apiConfig.demoMode) {
+    // In demo mode, simulate receiving a typing response after a short delay
+    setTimeout(() => {
+      typingState[conversationId] = { isTyping: true, lastTyped: Date.now() };
+      // Auto-clear typing after timeout
+      setTimeout(() => {
+        typingState[conversationId] = { isTyping: false, lastTyped: 0 };
+      }, TYPING_INDICATOR_TIMEOUT);
+    }, 500);
+    return;
+  }
+
+  await apiClient.post(`/conversations/${conversationId}/typing`);
+};
+
+/**
+ * Check if other participant is typing
+ */
+export const getTypingStatus = (conversationId: number): boolean => {
+  const state = typingState[conversationId];
+  if (!state) return false;
+
+  // Check if typing indicator has expired
+  if (Date.now() - state.lastTyped > TYPING_INDICATOR_TIMEOUT) {
+    return false;
+  }
+  return state.isTyping;
+};
+
+/**
+ * Get online status for a participant
+ */
+export const getOnlineStatus = (participantId: number): { isOnline: boolean; lastSeen: string } => {
+  return onlineStatus[participantId] || { isOnline: false, lastSeen: '' };
+};
+
+/**
+ * Format last seen time for display
+ */
+export const formatLastSeen = (lastSeenDate: string): string => {
+  if (!lastSeenDate) return 'Offline';
+
+  const date = new Date(lastSeenDate);
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  const diffMins = Math.floor(diffMs / 60000);
+  const diffHours = Math.floor(diffMs / 3600000);
+  const diffDays = Math.floor(diffMs / 86400000);
+
+  if (diffMins < 1) return 'Active now';
+  if (diffMins < 60) return `Active ${diffMins}m ago`;
+  if (diffHours < 24) return `Active ${diffHours}h ago`;
+  if (diffDays === 1) return 'Active yesterday';
+  return `Active ${diffDays}d ago`;
 };
 
 /**
