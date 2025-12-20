@@ -5,13 +5,13 @@
  * Wraps the app with providers for theme, auth, navigation, and data fetching.
  */
 
-import React, { useEffect } from 'react';
+import React, { useEffect, ReactNode } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { QueryClientProvider } from '@tanstack/react-query';
-import { StripeProvider } from '@stripe/stripe-react-native';
 import * as SplashScreen from 'expo-splash-screen';
+import Constants from 'expo-constants';
 
 import { PTPThemeProvider } from './src/theme';
 import { AuthProvider } from './src/hooks/useAuth';
@@ -23,6 +23,33 @@ import { stripeConfig } from './src/api/payments';
 
 // Prevent splash screen from auto-hiding
 SplashScreen.preventAutoHideAsync();
+
+// Check if running in Expo Go (no native modules available)
+const isExpoGo = Constants.appOwnership === 'expo';
+
+/**
+ * Conditional Stripe Provider
+ * Only loads Stripe in development/production builds, not Expo Go
+ */
+const ConditionalStripeProvider = ({ children }: { children: ReactNode }) => {
+  if (isExpoGo) {
+    // Skip Stripe in Expo Go - native module not available
+    console.log('Running in Expo Go - Stripe disabled');
+    return <>{children}</>;
+  }
+
+  // Dynamically import Stripe only when not in Expo Go
+  const { StripeProvider } = require('@stripe/stripe-react-native');
+  return (
+    <StripeProvider
+      publishableKey={stripeConfig.publishableKey}
+      merchantIdentifier={stripeConfig.merchantIdentifier}
+      urlScheme="ptp"
+    >
+      {children}
+    </StripeProvider>
+  );
+};
 
 /**
  * App - Root component
@@ -53,11 +80,7 @@ export default function App() {
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
         <QueryClientProvider client={queryClient}>
-          <StripeProvider
-            publishableKey={stripeConfig.publishableKey}
-            merchantIdentifier={stripeConfig.merchantIdentifier}
-            urlScheme="ptp"
-          >
+          <ConditionalStripeProvider>
             <PTPErrorBoundary>
               <PTPThemeProvider>
                 <AuthProvider>
@@ -68,7 +91,7 @@ export default function App() {
                 </AuthProvider>
               </PTPThemeProvider>
             </PTPErrorBoundary>
-          </StripeProvider>
+          </ConditionalStripeProvider>
         </QueryClientProvider>
       </SafeAreaProvider>
     </GestureHandlerRootView>
