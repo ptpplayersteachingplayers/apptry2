@@ -67,17 +67,22 @@ export const createPaymentIntent = async (
     return mockCreatePaymentIntent(data);
   }
 
-  const response = await apiClient.post('/payments/intent', {
+  const response = await apiClient.post('/payments/create-intent', {
     amount: data.amount,
     currency: data.currency || 'usd',
-    order_id: data.orderId,
-    program_id: data.programId,
-    payment_method_id: data.paymentMethodId,
-    save_payment_method: data.savePaymentMethod,
-    metadata: data.metadata,
+    orderId: data.orderId,
+    programId: data.programId,
+    paymentMethodId: data.paymentMethodId,
   });
 
-  return mapPaymentIntent(response.data);
+  return {
+    id: response.data.id,
+    clientSecret: response.data.clientSecret,
+    amount: response.data.amount,
+    currency: response.data.currency,
+    status: response.data.status,
+    createdAt: new Date().toISOString(),
+  };
 };
 
 /**
@@ -154,15 +159,14 @@ export const confirmPayment = async (
 
   try {
     const response = await apiClient.post('/payments/confirm', {
-      payment_intent_id: data.paymentIntentId,
-      payment_method_id: data.paymentMethodId,
-      return_url: data.returnUrl,
+      paymentIntentId: data.paymentIntentId,
+      paymentMethodId: data.paymentMethodId,
     });
 
     return {
-      success: response.data.status === 'succeeded',
-      paymentIntent: mapPaymentIntent(response.data),
-      orderId: response.data.order_id,
+      success: response.data.success,
+      paymentIntent: response.data.paymentIntent,
+      orderId: response.data.orderId,
     };
   } catch (error: any) {
     return {
@@ -188,8 +192,19 @@ export const getPaymentMethods = async (): Promise<PaymentMethodsResponse> => {
 
   const response = await apiClient.get('/payments/methods');
   return {
-    paymentMethods: (response.data.payment_methods || []).map(mapPaymentMethod),
-    defaultPaymentMethodId: response.data.default_payment_method_id,
+    paymentMethods: (response.data.paymentMethods || []).map((pm: any) => ({
+      id: pm.id,
+      type: pm.type || 'card',
+      isDefault: pm.isDefault || false,
+      card: pm.card ? {
+        brand: pm.card.brand || 'unknown',
+        last4: pm.card.last4,
+        expMonth: pm.card.expMonth,
+        expYear: pm.card.expYear,
+        funding: pm.card.funding || 'unknown',
+      } : undefined,
+    })),
+    defaultPaymentMethodId: response.data.defaultPaymentMethodId,
   };
 };
 
@@ -221,11 +236,23 @@ export const addPaymentMethod = async (
   }
 
   const response = await apiClient.post('/payments/methods', {
-    payment_method_id: paymentMethodId,
-    set_as_default: setAsDefault,
+    paymentMethodId: paymentMethodId,
+    setAsDefault: setAsDefault,
   });
 
-  return mapPaymentMethod(response.data);
+  const pm = response.data.paymentMethod;
+  return {
+    id: pm.id,
+    type: pm.type || 'card',
+    isDefault: pm.isDefault || false,
+    card: pm.card ? {
+      brand: pm.card.brand,
+      last4: pm.card.last4,
+      expMonth: pm.card.expMonth,
+      expYear: pm.card.expYear,
+      funding: pm.card.funding,
+    } : undefined,
+  };
 };
 
 /**
@@ -257,7 +284,7 @@ export const setDefaultPaymentMethod = async (paymentMethodId: string): Promise<
     return true;
   }
 
-  await apiClient.put(`/payments/methods/${paymentMethodId}/default`);
+  await apiClient.post(`/payments/methods/${paymentMethodId}/default`);
   return true;
 };
 
