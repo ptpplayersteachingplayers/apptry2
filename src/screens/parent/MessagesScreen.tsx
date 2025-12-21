@@ -183,7 +183,7 @@ const MessagesScreen: React.FC = () => {
     return (
       <SafeAreaView style={styles.container} edges={['top']}>
         <View style={styles.header}>
-          <PTPText variant="title" weight="bold">Messages</PTPText>
+          <PTPText variant="sectionTitle" weight="bold">Messages</PTPText>
         </View>
         <PTPListSkeleton count={6} style={{ padding: spacing[4] }} />
       </SafeAreaView>
@@ -194,7 +194,7 @@ const MessagesScreen: React.FC = () => {
     <SafeAreaView style={styles.container} edges={['top']}>
       {/* Header */}
       <View style={styles.header}>
-        <PTPText variant="title" weight="bold">Messages</PTPText>
+        <PTPText variant="sectionTitle" weight="bold">Messages</PTPText>
         <TouchableOpacity style={styles.composeButton}>
           <Ionicons name="create-outline" size={24} color={colors.primary} />
         </TouchableOpacity>

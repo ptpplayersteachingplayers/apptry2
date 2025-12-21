@@ -99,7 +99,7 @@ export interface SessionRequest {
   preferredSlots: PreferredSlot[];
 
   // Location preference
-  locationPreference: 'trainer' | 'custom';
+  locationPreference: 'trainer' | 'parent' | 'flexible' | 'custom';
   customLocation?: string;
 
   // Session details

@@ -370,45 +370,50 @@ const CheckoutScreen: React.FC = () => {
     );
   }
 
+  // Mode Toggle Component - defined outside of conditional branches
+  const isNativeMode = checkoutMode === 'native';
+  const renderModeToggle = () => (
+    <View style={styles.modeToggle}>
+      <TouchableOpacity
+        style={[styles.modeButton, isNativeMode && styles.modeButtonActive]}
+        onPress={() => setCheckoutMode('native')}
+      >
+        <Ionicons
+          name="card"
+          size={16}
+          color={isNativeMode ? colors.inkBlack : colors.gray500}
+        />
+        <PTPText
+          variant="caption"
+          color={isNativeMode ? 'inkBlack' : 'gray500'}
+        >
+          Card / {Platform.OS === 'ios' ? 'Apple Pay' : 'Google Pay'}
+        </PTPText>
+      </TouchableOpacity>
+      <TouchableOpacity
+        style={[styles.modeButton, !isNativeMode && styles.modeButtonActive]}
+        onPress={() => setCheckoutMode('webview')}
+      >
+        <Ionicons
+          name="globe-outline"
+          size={16}
+          color={!isNativeMode ? colors.inkBlack : colors.gray500}
+        />
+        <PTPText
+          variant="caption"
+          color={!isNativeMode ? 'inkBlack' : 'gray500'}
+        >
+          Web Checkout
+        </PTPText>
+      </TouchableOpacity>
+    </View>
+  );
+
   // Native checkout mode
-  if (checkoutMode === 'native') {
+  if (isNativeMode) {
     return (
       <View style={styles.container}>
-        {/* Checkout Mode Toggle */}
-        <View style={styles.modeToggle}>
-          <TouchableOpacity
-            style={[styles.modeButton, checkoutMode === 'native' && styles.modeButtonActive]}
-            onPress={() => setCheckoutMode('native')}
-          >
-            <Ionicons
-              name="card"
-              size={16}
-              color={checkoutMode === 'native' ? colors.inkBlack : colors.gray500}
-            />
-            <PTPText
-              variant="caption"
-              color={checkoutMode === 'native' ? 'inkBlack' : 'gray500'}
-            >
-              Card / {Platform.OS === 'ios' ? 'Apple Pay' : 'Google Pay'}
-            </PTPText>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.modeButton, checkoutMode === 'webview' && styles.modeButtonActive]}
-            onPress={() => setCheckoutMode('webview')}
-          >
-            <Ionicons
-              name="globe-outline"
-              size={16}
-              color={checkoutMode === 'webview' ? colors.inkBlack : colors.gray500}
-            />
-            <PTPText
-              variant="caption"
-              color={checkoutMode === 'webview' ? 'inkBlack' : 'gray500'}
-            >
-              Web Checkout
-            </PTPText>
-          </TouchableOpacity>
-        </View>
+        {renderModeToggle()}
 
         <NativeCheckout
           amount={DEMO_PRICE}
@@ -425,41 +430,7 @@ const CheckoutScreen: React.FC = () => {
   // WebView checkout mode
   return (
     <View style={styles.container}>
-      {/* Checkout Mode Toggle */}
-      <View style={styles.modeToggle}>
-        <TouchableOpacity
-          style={[styles.modeButton, checkoutMode === 'native' && styles.modeButtonActive]}
-          onPress={() => setCheckoutMode('native')}
-        >
-          <Ionicons
-            name="card"
-            size={16}
-            color={checkoutMode === 'native' ? colors.inkBlack : colors.gray500}
-          />
-          <PTPText
-            variant="caption"
-            color={checkoutMode === 'native' ? 'inkBlack' : 'gray500'}
-          >
-            Card / {Platform.OS === 'ios' ? 'Apple Pay' : 'Google Pay'}
-          </PTPText>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.modeButton, checkoutMode === 'webview' && styles.modeButtonActive]}
-          onPress={() => setCheckoutMode('webview')}
-        >
-          <Ionicons
-            name="globe-outline"
-            size={16}
-            color={checkoutMode === 'webview' ? colors.inkBlack : colors.gray500}
-          />
-          <PTPText
-            variant="caption"
-            color={checkoutMode === 'webview' ? 'inkBlack' : 'gray500'}
-          >
-            Web Checkout
-          </PTPText>
-        </TouchableOpacity>
-      </View>
+      {renderModeToggle()}
 
       {isLoading && (
         <View style={styles.loadingOverlay}>
