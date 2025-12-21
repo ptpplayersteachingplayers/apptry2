@@ -71,3 +71,21 @@ coverage/
 *.zip
 # Keep plugin zip for easy download
 !wordpress-plugin/ptp-mobile-api.zip
+
+# Windows
+AppData/
+AppData/**
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Temp files
+*.tmp
+*.temp
+*.bak
+
+# Downloads folder (if accidentally included)
+Downloads/
+
+# EAS/Expo build
+.easignore

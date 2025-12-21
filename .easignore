@@ -1,37 +1,50 @@
-# EAS Build ignore file
-# IMPORTANT: package-lock.json MUST be included for npm to be used
+# EAS Build Ignore File
+# Excludes files from being uploaded to EAS Build
 
-# Explicitly include the lockfile (negate any potential ignore)
-!package-lock.json
-!package.json
+# Windows user profile folders
+AppData/
+AppData/**
+Downloads/
+Documents/
+Desktop/
+Pictures/
+Videos/
+Music/
 
-# Ignore development files
-.git
-.github
-.vscode
+# Windows system files
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+*.tmp
+*.temp
+*.bak
 
-# Ignore documentation (except README)
-*.md
-!README.md
+# Browser caches
+**/Cache/**
+**/Cache_Data/**
+**/Code Cache/**
 
-# Ignore test files
-__tests__
-*.test.ts
-*.test.tsx
-*.spec.ts
-*.spec.tsx
-coverage
+# Sessions and temp
+**/Sessions/**
 
-# Ignore local environment files
-.env.local
-.env.development
-
-# Ignore IDE files
-.idea
+# IDE and editor files
+.vscode/
+.idea/
 *.swp
 *.swo
+*~
 
-# Ignore large unnecessary files
-*.zip
-PTP_iOS_Audit.md
-wordpress-plugin
+# Git internals
+.git/
+
+# Test outputs
+coverage/
+__tests__/
+
+# Documentation (not needed for build)
+docs/
+
+# Development configs
+.env
+.env.local
+.env.*.local
