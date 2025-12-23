@@ -21,7 +21,7 @@ class PTP_Push_Controller {
     /**
      * REST namespace
      */
-    const NAMESPACE = 'ptp/v1';
+    const NAMESPACE = 'ptp/v2';
 
     /**
      * Expo Push API URL

@@ -20,7 +20,7 @@ class PTP_Messages_Controller {
     /**
      * REST namespace
      */
-    private $namespace = 'ptp/v1';
+    private $namespace = 'ptp/v2';
 
     /**
      * Register routes

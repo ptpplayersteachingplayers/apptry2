@@ -20,7 +20,7 @@ class PTP_Auth_Controller {
     /**
      * REST namespace
      */
-    private $namespace = 'ptp/v1';
+    private $namespace = 'ptp/v2';
 
     /**
      * Rate limit settings
