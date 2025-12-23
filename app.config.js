@@ -104,8 +104,13 @@ export default ({ config }) => {
     extra: {
       // API Configuration
       API_BASE_URL: process.env.API_BASE_URL || 'https://ptpsummercamps.com',
-      MOBILE_API_NAMESPACE: process.env.MOBILE_API_NAMESPACE || '/wp-json/ptp/v1',
+      MOBILE_API_NAMESPACE: process.env.MOBILE_API_NAMESPACE || '/wp-json/ptp/v2',
       DEMO_MODE: process.env.DEMO_MODE || 'false',
+      // Stripe Configuration
+      STRIPE_PUBLISHABLE_KEY:
+        process.env.EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY ||
+        process.env.STRIPE_PUBLISHABLE_KEY ||
+        'pk_test_placeholder',
       // EAS Configuration
       eas: {
         projectId: easProjectId,

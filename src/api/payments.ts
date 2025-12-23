@@ -23,12 +23,24 @@ import {
   CardBrand,
 } from '../types';
 
+import Constants from 'expo-constants';
+
+// Get environment variables from Expo config
+const expoConfig = Constants.expoConfig?.extra || {};
+
 /**
  * Stripe configuration
- * In production, publishable key should come from environment
+ *
+ * For production deployment:
+ * - Set EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY in your .env file
+ * - Use pk_live_* keys for production, pk_test_* for testing
  */
 export const stripeConfig: StripeConfig = {
-  publishableKey: process.env.STRIPE_PUBLISHABLE_KEY || 'pk_test_placeholder',
+  publishableKey:
+    expoConfig.STRIPE_PUBLISHABLE_KEY ||
+    process.env.EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY ||
+    process.env.STRIPE_PUBLISHABLE_KEY ||
+    'pk_test_placeholder',
   merchantIdentifier: 'merchant.com.ptpsoccer.app',
   urlScheme: 'ptpsoccer',
 };
