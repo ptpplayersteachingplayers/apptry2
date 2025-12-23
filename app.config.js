@@ -47,6 +47,8 @@ export default ({ config }) => {
     ios: {
       supportsTablet: true,
       bundleIdentifier: getBundleIdentifier(),
+      // Explicitly disable Sign in with Apple to avoid capability sync issues
+      usesAppleSignIn: false,
       infoPlist: {
         ITSAppUsesNonExemptEncryption: false,
         NSLocationWhenInUseUsageDescription:
