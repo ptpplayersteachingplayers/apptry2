@@ -24,9 +24,9 @@ export const apiConfig = {
   jwtAuthEndpoint: '/wp-json/jwt-auth/v1/token',
 
   // Demo mode - use mock data instead of real API
-  // Set DEMO_MODE=true in environment to enable mock data
-  // Default is FALSE to use live data from WordPress
-  demoMode: expoConfig.DEMO_MODE === 'true' || process.env.DEMO_MODE === 'true' || false,
+  // Set DEMO_MODE=false in environment to use live WordPress data
+  // Default is TRUE to show demo data for app store review/testing
+  demoMode: expoConfig.DEMO_MODE === 'false' || process.env.DEMO_MODE === 'false' ? false : true,
 
   // Request timeout in milliseconds
   timeout: 30000,
