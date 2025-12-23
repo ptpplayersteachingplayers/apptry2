@@ -137,15 +137,17 @@ const LoginScreen: React.FC = () => {
               style={styles.submitButton}
             />
 
-            {/* Demo mode hint */}
-            <View style={styles.demoHint}>
-              <PTPText variant="caption" color="gray400" center>
-                Demo mode: Use any email/password to log in.
-              </PTPText>
-              <PTPText variant="caption" color="gray400" center>
-                Use "trainer@" in email to log in as trainer.
-              </PTPText>
-            </View>
+            {/* Demo mode hint - only show in development */}
+            {__DEV__ && (
+              <View style={styles.demoHint}>
+                <PTPText variant="caption" color="gray400" center>
+                  Demo mode: Use any email/password to log in.
+                </PTPText>
+                <PTPText variant="caption" color="gray400" center>
+                  Use "trainer@" in email to log in as trainer.
+                </PTPText>
+              </View>
+            )}
           </View>
 
           {/* Footer */}

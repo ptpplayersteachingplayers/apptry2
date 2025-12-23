@@ -126,13 +126,25 @@ const formatDate = (dateString: string): string => {
 // MOCK DATA FOR DEMO MODE
 // ============================================================
 
-const mockEvents: ScheduleEvent[] = [
+/**
+ * Get a date relative to today
+ */
+const getRelativeDate = (daysFromNow: number): string => {
+  const date = new Date();
+  date.setDate(date.getDate() + daysFromNow);
+  return date.toISOString().split('T')[0];
+};
+
+/**
+ * Generate mock events with dynamic dates
+ */
+const generateMockEvents = (): ScheduleEvent[] => [
   {
     id: 1,
     type: 'clinic',
     title: 'Winter Skills Intensive',
     subtitle: 'Steelyard Sports',
-    date: '2024-12-28',
+    date: getRelativeDate(7), // Next week
     startTime: '09:00',
     endTime: '12:00',
     location: 'Steelyard Sports – KOP, PA',
@@ -152,7 +164,7 @@ const mockEvents: ScheduleEvent[] = [
     type: 'training',
     title: 'Private Training Session',
     subtitle: 'Marcus Williams',
-    date: '2024-12-05',
+    date: getRelativeDate(2), // In 2 days
     startTime: '16:00',
     endTime: '17:00',
     location: 'Steelyard Sports',
@@ -161,7 +173,7 @@ const mockEvents: ScheduleEvent[] = [
     sessionStatus: 'confirmed',
     trainerId: 101,
     trainerName: 'Marcus Williams',
-    trainerHeadshotUrl: heroImages[15],
+    trainerHeadshotUrl: heroImages[15] || heroImages[0],
     childId: 1,
     childName: 'Jake',
     notes: 'Focus on weak foot finishing',
@@ -172,11 +184,11 @@ const mockEvents: ScheduleEvent[] = [
     type: 'camp',
     title: 'PTP Summer Soccer Camp',
     subtitle: 'Haverford School',
-    date: '2025-06-23',
+    date: getRelativeDate(14), // In 2 weeks
     startTime: '09:00',
     endTime: '15:00',
     isMultiDay: true,
-    endDate: '2025-06-27',
+    endDate: getRelativeDate(18), // 5 day camp
     location: 'Haverford School, PA',
     address: '450 Lancaster Ave, Haverford, PA',
     status: 'upcoming',
@@ -185,10 +197,12 @@ const mockEvents: ScheduleEvent[] = [
     childId: 1,
     childName: 'Jake',
     whatToBring: ['Cleats', 'Shin guards', 'Water bottle', 'Lunch', 'Sunscreen'],
-    imageUrl: heroImages[10],
+    imageUrl: heroImages[10] || heroImages[0],
     color: '#FCB900',
   },
 ];
+
+const mockEvents: ScheduleEvent[] = generateMockEvents();
 
 const getMockEvents = async (filters?: EventFilters): Promise<EventsResponse> => {
   await new Promise((resolve) => setTimeout(resolve, 200));

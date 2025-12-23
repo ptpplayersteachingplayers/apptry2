@@ -47,14 +47,14 @@ export default function App() {
   }, []);
 
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
+    <GestureHandlerRootView style={{ flex: 1, backgroundColor: '#F4F3F0' }}>
       <SafeAreaProvider>
         <QueryClientProvider client={queryClient}>
           <PTPErrorBoundary>
             <PTPThemeProvider>
               <AuthProvider>
                 <NotificationProvider>
-                  <StatusBar style="light" />
+                  <StatusBar style="dark" />
                   <AppNavigator />
                 </NotificationProvider>
               </AuthProvider>
