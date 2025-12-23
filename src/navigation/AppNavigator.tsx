@@ -100,6 +100,8 @@ const ParentStackNavigator: React.FC = () => {
       screenOptions={{
         headerShown: false,
         contentStyle: { backgroundColor: colors.offWhite },
+        gestureEnabled: true,
+        fullScreenGestureEnabled: false,
       }}
     >
       <Stack.Screen name="ParentTabs" component={ParentTabNavigator} />
@@ -235,6 +237,8 @@ const TrainerStackNavigator: React.FC = () => {
       screenOptions={{
         headerShown: false,
         contentStyle: { backgroundColor: colors.offWhite },
+        gestureEnabled: true,
+        fullScreenGestureEnabled: false,
       }}
     >
       <Stack.Screen name="TrainerTabs" component={TrainerTabNavigator} />
@@ -330,7 +334,13 @@ export const AppNavigator: React.FC = () => {
 
   return (
     <NavigationContainer ref={navigationRef} linking={linking}>
-      <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Navigator
+        screenOptions={{
+          headerShown: false,
+          contentStyle: { backgroundColor: colors.offWhite },
+          gestureEnabled: false,
+        }}
+      >
         {isGuest ? (
           // Guest user - can browse but not checkout
           <Stack.Screen name="Parent" component={ParentStackNavigator} />
