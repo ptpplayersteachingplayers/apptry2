@@ -2,6 +2,7 @@
  * PTP Soccer API Layer
  *
  * Central export for all API modules.
+ * Updated for v49 Training Platform endpoints.
  */
 
 // Client and configuration
@@ -18,3 +19,5 @@ export * from './events';
 export * from './orders';
 export * from './payments';
 export * from './push';
+export * from './favorites';
+export * from './content';

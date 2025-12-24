@@ -601,7 +601,7 @@ export const getTrainerStudents = async (): Promise<any[]> => {
 /**
  * Apply to become a trainer
  *
- * POST /wp-json/ptp/v1/trainer/apply
+ * POST /wp-json/ptp/v2/trainer/apply
  */
 export const applyAsTrainer = async (
   data: Partial<TrainerUser>
@@ -615,6 +615,213 @@ export const applyAsTrainer = async (
 
   const response = await apiClient.post('/trainer/apply', data);
   return response.data;
+};
+
+// ============================================================
+// TRAINER STRIPE CONNECT (v49)
+// ============================================================
+
+/**
+ * Stripe Connect response
+ */
+export interface StripeConnectResponse {
+  success: boolean;
+  accountId?: string;
+  onboardingUrl?: string;
+  dashboardUrl?: string;
+  chargesEnabled?: boolean;
+  payoutsEnabled?: boolean;
+  message?: string;
+}
+
+/**
+ * Connect trainer Stripe account
+ * Creates a Stripe Connect account or returns onboarding URL
+ *
+ * POST /wp-json/ptp/v2/trainer/stripe/connect
+ */
+export const connectTrainerStripe = async (): Promise<StripeConnectResponse> => {
+  if (apiConfig.demoMode) {
+    return {
+      success: true,
+      accountId: 'acct_demo123',
+      onboardingUrl: 'https://connect.stripe.com/setup/demo',
+      chargesEnabled: false,
+      payoutsEnabled: false,
+      message: 'Demo mode: Stripe Connect would redirect to onboarding',
+    };
+  }
+
+  const response = await apiClient.post('/trainer/stripe/connect');
+  return {
+    success: response.data.success,
+    accountId: response.data.account_id,
+    onboardingUrl: response.data.onboarding_url,
+    chargesEnabled: response.data.charges_enabled,
+    payoutsEnabled: response.data.payouts_enabled,
+    message: response.data.message,
+  };
+};
+
+/**
+ * Get trainer Stripe dashboard link
+ *
+ * GET /wp-json/ptp/v2/trainer/stripe/dashboard
+ */
+export const getTrainerStripeDashboard = async (): Promise<{ url: string }> => {
+  if (apiConfig.demoMode) {
+    return { url: 'https://dashboard.stripe.com/demo' };
+  }
+
+  const response = await apiClient.get('/trainer/stripe/dashboard');
+  return { url: response.data.url };
+};
+
+// ============================================================
+// SESSION NOTES (v49)
+// ============================================================
+
+/**
+ * Session notes data
+ */
+export interface SessionNotes {
+  skillsWorked: string[];
+  progressNotes: string;
+  homework?: string;
+  nextFocus?: string;
+  effortRating?: number;
+  attitudeRating?: number;
+}
+
+/**
+ * Add session notes after completing a session
+ *
+ * POST /wp-json/ptp/v2/bookings/:id/notes
+ */
+export const addSessionNotes = async (
+  sessionId: number,
+  notes: SessionNotes
+): Promise<{ success: boolean; message: string }> => {
+  if (apiConfig.demoMode) {
+    return { success: true, message: 'Session notes saved' };
+  }
+
+  const response = await apiClient.post(`/bookings/${sessionId}/notes`, {
+    skills_worked: notes.skillsWorked.join(', '),
+    progress_notes: notes.progressNotes,
+    homework: notes.homework,
+    next_focus: notes.nextFocus,
+    effort_rating: notes.effortRating,
+    attitude_rating: notes.attitudeRating,
+  });
+  return response.data;
+};
+
+/**
+ * Submit a review for a completed session
+ *
+ * POST /wp-json/ptp/v2/bookings/:id/review
+ */
+export const submitSessionReview = async (
+  sessionId: number,
+  rating: number,
+  comment: string
+): Promise<{ success: boolean; message: string }> => {
+  if (apiConfig.demoMode) {
+    return { success: true, message: 'Review submitted. Thank you!' };
+  }
+
+  const response = await apiClient.post(`/bookings/${sessionId}/review`, {
+    rating,
+    comment,
+  });
+  return response.data;
+};
+
+// ============================================================
+// TRAINER GALLERY (v49)
+// ============================================================
+
+/**
+ * Get trainer gallery images
+ *
+ * GET /wp-json/ptp/v2/trainers/:id/gallery
+ */
+export const getTrainerGallery = async (trainerId: number): Promise<string[]> => {
+  if (apiConfig.demoMode) {
+    return [
+      'https://ptpsummercamps.com/wp-content/uploads/2025/12/BG7A1915.jpg',
+      'https://ptpsummercamps.com/wp-content/uploads/2025/12/BG7A1920.jpg',
+    ];
+  }
+
+  const response = await apiClient.get(`/trainers/${trainerId}/gallery`);
+  return response.data.images || response.data || [];
+};
+
+// ============================================================
+// FEATURED & NEARBY TRAINERS (v49)
+// ============================================================
+
+/**
+ * Get featured trainers
+ *
+ * GET /wp-json/ptp/v2/trainers/featured
+ */
+export const getFeaturedTrainers = async (limit = 5): Promise<TrainerUser[]> => {
+  if (apiConfig.demoMode) {
+    return mockTrainers.slice(0, limit);
+  }
+
+  const response = await apiClient.get(`/trainers/featured?limit=${limit}`);
+  return (response.data.trainers || response.data || []).map(mapWordPressTrainer);
+};
+
+/**
+ * Get nearby trainers based on location
+ *
+ * GET /wp-json/ptp/v2/trainers/nearby
+ */
+export const getNearbyTrainers = async (
+  lat: number,
+  lng: number,
+  radius = 25
+): Promise<TrainerUser[]> => {
+  if (apiConfig.demoMode) {
+    return mockTrainers;
+  }
+
+  const response = await apiClient.get(
+    `/trainers/nearby?lat=${lat}&lng=${lng}&radius=${radius}`
+  );
+  return (response.data.trainers || response.data || []).map(mapWordPressTrainer);
+};
+
+/**
+ * Search trainers by query
+ *
+ * GET /wp-json/ptp/v2/trainers/search
+ */
+export const searchTrainers = async (
+  query: string,
+  filters?: TrainerFilters
+): Promise<TrainerUser[]> => {
+  if (apiConfig.demoMode) {
+    const q = query.toLowerCase();
+    return mockTrainers.filter(t =>
+      t.firstName.toLowerCase().includes(q) ||
+      t.lastName.toLowerCase().includes(q) ||
+      t.specialties.some(s => s.toLowerCase().includes(q))
+    );
+  }
+
+  const params = new URLSearchParams();
+  params.append('q', query);
+  if (filters?.state) params.append('location', filters.state);
+  if (filters?.specialty) params.append('specialty', filters.specialty);
+
+  const response = await apiClient.get(`/trainers/search?${params.toString()}`);
+  return (response.data.trainers || response.data || []).map(mapWordPressTrainer);
 };
 
 // ============================================================
