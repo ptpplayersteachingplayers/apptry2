@@ -64,6 +64,12 @@ coverage/
 .DS_Store
 *.pem
 
+# Windows
+AppData/
+Thumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
 # Typescript
 *.tsbuildinfo
 
@@ -71,3 +77,7 @@ coverage/
 *.zip
 # Keep plugin zip for easy download
 !wordpress-plugin/ptp-mobile-api.zip
+
+# Extracted plugins (dev only)
+v49-extracted/
+dist-test/
