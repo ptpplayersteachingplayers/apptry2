@@ -171,7 +171,7 @@ export const logout = async (): Promise<void> => {
 /**
  * Request password reset
  *
- * POST /wp-json/ptp/v1/auth/forgot-password
+ * POST /wp-json/ptp/v2/auth/forgot-password
  */
 export const requestPasswordReset = async (email: string): Promise<void> => {
   if (apiConfig.demoMode) {
@@ -181,6 +181,81 @@ export const requestPasswordReset = async (email: string): Promise<void> => {
 
   // No auth needed for password reset
   await authClient.post(`${apiConfig.namespace}/auth/forgot-password`, { email });
+};
+
+/**
+ * Social login request
+ */
+export interface SocialLoginRequest {
+  idToken: string;
+  provider: 'google' | 'apple';
+  firstName?: string;
+  lastName?: string;
+  email?: string;
+}
+
+/**
+ * Login with Google
+ *
+ * POST /wp-json/ptp/v2/auth/google
+ */
+export const loginWithGoogle = async (idToken: string): Promise<LoginResponse> => {
+  if (apiConfig.demoMode) {
+    return mockSocialLogin('google');
+  }
+
+  const response = await authClient.post(`${apiConfig.namespace}/auth/google`, {
+    id_token: idToken,
+  });
+
+  const { user, auth } = response.data;
+  const token = auth?.access_token || response.data.token;
+
+  await storeToken(token);
+
+  return {
+    token,
+    user: mapV2User(user),
+  };
+};
+
+/**
+ * Login with Apple
+ *
+ * POST /wp-json/ptp/v2/auth/apple
+ */
+export const loginWithApple = async (
+  idToken: string,
+  firstName?: string,
+  lastName?: string
+): Promise<LoginResponse> => {
+  if (apiConfig.demoMode) {
+    return mockSocialLogin('apple');
+  }
+
+  const response = await authClient.post(`${apiConfig.namespace}/auth/apple`, {
+    id_token: idToken,
+    first_name: firstName,
+    last_name: lastName,
+  });
+
+  const { user, auth } = response.data;
+  const token = auth?.access_token || response.data.token;
+
+  await storeToken(token);
+
+  return {
+    token,
+    user: mapV2User(user),
+  };
+};
+
+const mockSocialLogin = async (provider: 'google' | 'apple'): Promise<LoginResponse> => {
+  await new Promise((resolve) => setTimeout(resolve, 500));
+  return {
+    token: `demo_${provider}_token_12345`,
+    user: getMockParentUser(),
+  };
 };
 
 /**

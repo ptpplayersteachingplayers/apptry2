@@ -151,7 +151,7 @@ export const updateChild = async (
 /**
  * Delete a player profile
  *
- * DELETE /wp-json/ptp/v1/players/:id
+ * DELETE /wp-json/ptp/v2/players/:id
  */
 export const deleteChild = async (childId: number): Promise<{ success: boolean; message: string }> => {
   if (apiConfig.demoMode) {
@@ -165,6 +165,112 @@ export const deleteChild = async (childId: number): Promise<{ success: boolean; 
   const response = await apiClient.delete(`/players/${childId}`);
   return response.data;
 };
+
+/**
+ * Player progress response from v49 API
+ */
+export interface PlayerProgress {
+  playerId: number;
+  sessionsCompleted: number;
+  totalHours: number;
+  skillsWorked: string[];
+  recentNotes: SessionNote[];
+  improvements: string[];
+  trainersWorkedWith: { id: number; name: string; sessionsCount: number }[];
+}
+
+export interface SessionNote {
+  id: number;
+  sessionId: number;
+  trainerName: string;
+  date: string;
+  skillsWorked: string[];
+  progressNotes: string;
+  homework?: string;
+  nextFocus?: string;
+  effortRating?: number;
+  attitudeRating?: number;
+}
+
+/**
+ * Get player progress and session notes
+ *
+ * GET /wp-json/ptp/v2/players/:id/progress
+ */
+export const getPlayerProgress = async (childId: number): Promise<PlayerProgress> => {
+  if (apiConfig.demoMode) {
+    return getMockPlayerProgress(childId);
+  }
+
+  const response = await apiClient.get(`/players/${childId}/progress`);
+  const data = response.data;
+
+  return {
+    playerId: childId,
+    sessionsCompleted: data.sessions_completed || 0,
+    totalHours: data.total_hours || 0,
+    skillsWorked: data.skills_worked || [],
+    recentNotes: (data.recent_notes || []).map((note: any) => ({
+      id: note.id,
+      sessionId: note.booking_id,
+      trainerName: note.trainer_name,
+      date: note.created_at,
+      skillsWorked: note.skills_worked?.split(',').map((s: string) => s.trim()) || [],
+      progressNotes: note.progress_notes,
+      homework: note.homework,
+      nextFocus: note.next_focus,
+      effortRating: note.effort_rating,
+      attitudeRating: note.attitude_rating,
+    })),
+    improvements: data.improvements || [],
+    trainersWorkedWith: (data.trainers || []).map((t: any) => ({
+      id: t.id,
+      name: t.name,
+      sessionsCount: t.sessions_count,
+    })),
+  };
+};
+
+const getMockPlayerProgress = (childId: number): PlayerProgress => ({
+  playerId: childId,
+  sessionsCompleted: 8,
+  totalHours: 8,
+  skillsWorked: ['1v1', 'finishing', 'dribbling', 'passing', 'weak foot'],
+  recentNotes: [
+    {
+      id: 1,
+      sessionId: 101,
+      trainerName: 'Marcus Williams',
+      date: '2024-12-20T17:00:00Z',
+      skillsWorked: ['1v1', 'finishing'],
+      progressNotes: 'Jake showed great improvement in his weak foot finishing today. He was hitting the corners consistently by the end of the session.',
+      homework: 'Practice 20 weak foot shots against a wall daily',
+      nextFocus: 'Game situation finishing under pressure',
+      effortRating: 5,
+      attitudeRating: 5,
+    },
+    {
+      id: 2,
+      sessionId: 100,
+      trainerName: 'Marcus Williams',
+      date: '2024-12-13T17:00:00Z',
+      skillsWorked: ['dribbling', '1v1'],
+      progressNotes: 'Worked on close ball control and shielding. Jake is getting more confident taking on defenders.',
+      homework: 'Dribble through cones at home',
+      effortRating: 4,
+      attitudeRating: 5,
+    },
+  ],
+  improvements: [
+    'Weak foot accuracy improved 40%',
+    'More confident in 1v1 situations',
+    'Better decision-making on when to shoot',
+  ],
+  trainersWorkedWith: [
+    { id: 101, name: 'Marcus Williams', sessionsCount: 6 },
+    { id: 102, name: 'Alex Chen', sessionsCount: 2 },
+  ],
+});
 
 /**
  * Map WordPress child response to app ChildProfile type
