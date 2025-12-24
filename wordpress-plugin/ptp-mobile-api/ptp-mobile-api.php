@@ -88,7 +88,7 @@ class PTP_Mobile_API {
     /**
      * REST namespace
      */
-    const REST_NAMESPACE = 'ptp/v1';
+    const REST_NAMESPACE = 'ptp/v2';
 
     /**
      * Get instance
@@ -120,6 +120,7 @@ class PTP_Mobile_API {
         require_once PTP_MOBILE_API_PLUGIN_DIR . 'includes/class-ptp-events-controller.php';
         require_once PTP_MOBILE_API_PLUGIN_DIR . 'includes/class-ptp-trainer-controller.php';
         require_once PTP_MOBILE_API_PLUGIN_DIR . 'includes/class-ptp-push-controller.php';
+        require_once PTP_MOBILE_API_PLUGIN_DIR . 'includes/class-ptp-payments-controller.php';
     }
 
     /**
@@ -164,6 +165,10 @@ class PTP_Mobile_API {
         // Push notification routes
         $push_controller = new PTP_Push_Controller();
         $push_controller->register_routes();
+
+        // Payments routes (Stripe)
+        $payments_controller = new PTP_Payments_Controller();
+        $payments_controller->register_routes();
     }
 
     /**

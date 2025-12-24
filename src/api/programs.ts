@@ -150,17 +150,25 @@ export const getPrograms = async (
   if (filters?.dateFrom) params.append('date_from', filters.dateFrom);
   if (filters?.dateTo) params.append('date_to', filters.dateTo);
 
-  // v2 API uses /camps endpoint
-  const response = await apiClient.get(`/camps?${params.toString()}`);
+  // v2 API uses /programs endpoint
+  const response = await apiClient.get(`/programs?${params.toString()}`);
 
-  // Map v2 response format to app format
-  const { camps, pagination } = response.data;
+  // Handle multiple response formats from different plugin versions
+  const data = response.data;
+  const programsList = data.programs || data.camps || [];
+  const pagination = data.pagination || {
+    total: data.total || programsList.length,
+    pages: data.pages || 1,
+    page: data.page || page,
+    per_page: data.per_page || perPage,
+  };
+
   return {
-    programs: camps.map(mapCampToProgram),
-    total: pagination?.total || camps.length,
-    page: pagination?.page || page,
-    perPage: pagination?.per_page || perPage,
-    hasMore: pagination ? pagination.page < pagination.pages : false,
+    programs: programsList.map(mapCampToProgram),
+    total: pagination.total || programsList.length,
+    page: pagination.page || page,
+    perPage: pagination.per_page || perPage,
+    hasMore: pagination.page < pagination.pages,
   };
 };
 
@@ -176,9 +184,12 @@ export const getProgram = async (programId: number): Promise<Program> => {
     return program;
   }
 
-  // v2 API uses /camps endpoint
-  const response = await apiClient.get(`/camps/${programId}`);
-  return mapCampToProgram(response.data);
+  // v2 API uses /programs endpoint
+  const response = await apiClient.get(`/programs/${programId}`);
+  const data = response.data;
+  // Handle both {program: {...}} and direct object responses
+  const programData = data.program || data.camp || data;
+  return mapCampToProgram(programData);
 };
 
 /**
@@ -205,9 +216,12 @@ export const getFeaturedPrograms = async (): Promise<Program[]> => {
     return mockPrograms.filter((p) => p.bestseller).slice(0, 3);
   }
 
-  // v2 API uses /camps/featured endpoint
-  const response = await apiClient.get('/camps/featured');
-  return (response.data || []).map(mapCampToProgram);
+  // v2 API uses /programs/featured endpoint
+  const response = await apiClient.get('/programs/featured');
+  const data = response.data;
+  // Handle both {programs: [...]} and direct array responses
+  const programsList = data.programs || data.camps || (Array.isArray(data) ? data : []);
+  return programsList.map(mapCampToProgram);
 };
 
 /**
