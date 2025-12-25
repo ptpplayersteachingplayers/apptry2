@@ -1,8 +1,8 @@
 /**
  * Parent Tab Navigator
  *
- * Bottom tab navigator for parent/family users.
- * Tabs: Home, Camps & Clinics, Private Training, Schedule, Account
+ * Dark themed bottom tab navigator for parent/family users.
+ * Tabs: Home, Trainers, Camps, Bookings, Profile
  */
 
 import React from 'react';
@@ -10,10 +10,10 @@ import { StyleSheet, View, Text } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
 import { ParentTabParamList } from '../types/navigation';
-import { useNotificationContext } from '../providers';
+import { useAppStore } from '../stores';
 import { colors } from '../theme/colors';
 import { fontFamily, fontSize } from '../theme/typography';
-import { spacing, layoutSpacing } from '../theme/spacing';
+import { spacing, layoutSpacing, borderRadius } from '../theme/spacing';
 
 // Parent Screens
 import HomeScreen from '../screens/parent/HomeScreen';
@@ -29,17 +29,17 @@ type IconName = React.ComponentProps<typeof Ionicons>['name'];
 
 const TAB_ICONS: { [key: string]: { outline: IconName; filled: IconName } } = {
   Home: { outline: 'home-outline', filled: 'home' },
-  CampsClinics: { outline: 'football-outline', filled: 'football' },
-  PrivateTraining: { outline: 'fitness-outline', filled: 'fitness' },
-  Schedule: { outline: 'calendar-outline', filled: 'calendar' },
-  Account: { outline: 'person-outline', filled: 'person' },
+  Trainers: { outline: 'people-outline', filled: 'people' },
+  Camps: { outline: 'football-outline', filled: 'football' },
+  Bookings: { outline: 'calendar-outline', filled: 'calendar' },
+  Profile: { outline: 'person-outline', filled: 'person' },
 };
 
 /**
- * ParentTabNavigator - Bottom tabs for parent users
+ * ParentTabNavigator - Dark themed bottom tabs
  */
 export const ParentTabNavigator: React.FC = () => {
-  const { unreadCount } = useNotificationContext();
+  const { unreadCount } = useAppStore();
 
   return (
     <Tab.Navigator
@@ -49,8 +49,8 @@ export const ParentTabNavigator: React.FC = () => {
           const icons = TAB_ICONS[route.name] || { outline: 'ellipse-outline', filled: 'ellipse' };
           const iconName = focused ? icons.filled : icons.outline;
 
-          // Show badge on Account tab
-          if (route.name === 'Account' && unreadCount > 0) {
+          // Show badge on Profile tab for notifications
+          if (route.name === 'Profile' && unreadCount > 0) {
             return (
               <View>
                 <Ionicons name={iconName} size={size} color={color} />
@@ -76,40 +76,40 @@ export const ParentTabNavigator: React.FC = () => {
         name="Home"
         component={HomeScreen}
         options={{
-          tabBarLabel: 'Home',
+          tabBarLabel: 'HOME',
           tabBarAccessibilityLabel: 'Home tab',
         }}
       />
       <Tab.Screen
-        name="CampsClinics"
+        name="Trainers"
+        component={PrivateTrainingScreen}
+        options={{
+          tabBarLabel: 'TRAINERS',
+          tabBarAccessibilityLabel: 'Browse Trainers tab',
+        }}
+      />
+      <Tab.Screen
+        name="Camps"
         component={CampsClinicsScreen}
         options={{
-          tabBarLabel: 'Camps',
+          tabBarLabel: 'CAMPS',
           tabBarAccessibilityLabel: 'Camps and Clinics tab',
         }}
       />
       <Tab.Screen
-        name="PrivateTraining"
-        component={PrivateTrainingScreen}
-        options={{
-          tabBarLabel: 'Training',
-          tabBarAccessibilityLabel: 'Private Training tab',
-        }}
-      />
-      <Tab.Screen
-        name="Schedule"
+        name="Bookings"
         component={ScheduleScreen}
         options={{
-          tabBarLabel: 'Schedule',
-          tabBarAccessibilityLabel: 'Schedule tab',
+          tabBarLabel: 'BOOKINGS',
+          tabBarAccessibilityLabel: 'My Bookings tab',
         }}
       />
       <Tab.Screen
-        name="Account"
+        name="Profile"
         component={AccountScreen}
         options={{
-          tabBarLabel: 'Account',
-          tabBarAccessibilityLabel: 'Account tab',
+          tabBarLabel: 'PROFILE',
+          tabBarAccessibilityLabel: 'Profile tab',
         }}
       />
     </Tab.Navigator>
@@ -118,32 +118,34 @@ export const ParentTabNavigator: React.FC = () => {
 
 const styles = StyleSheet.create({
   tabBar: {
-    backgroundColor: colors.white,
-    borderTopColor: colors.gray200,
+    backgroundColor: colors.black,
+    borderTopColor: colors.gray700,
     borderTopWidth: 1,
     height: layoutSpacing.tabBarHeight,
     paddingTop: spacing[2],
     paddingBottom: spacing[5],
   },
   tabBarLabel: {
-    fontFamily: fontFamily.medium,
+    fontFamily: fontFamily.heading,
     fontSize: fontSize.xs,
+    letterSpacing: 0.5,
   },
   badge: {
     position: 'absolute',
-    right: -6,
-    top: -3,
-    backgroundColor: colors.error,
-    borderRadius: 8,
-    minWidth: 16,
-    height: 16,
+    right: -8,
+    top: -4,
+    backgroundColor: colors.primary,
+    borderRadius: borderRadius.full,
+    minWidth: 18,
+    height: 18,
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: 4,
   },
   badgeText: {
-    color: colors.white,
+    color: colors.black,
     fontSize: 10,
+    fontFamily: fontFamily.heading,
     fontWeight: '700',
   },
 });

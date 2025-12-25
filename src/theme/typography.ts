@@ -1,17 +1,20 @@
 /**
  * PTP Soccer Typography System
  *
- * Uses Inter font family for all text.
- * Font sizes follow a consistent scale for mobile readability.
+ * Headings: Oswald (Bold, Uppercase, Wide letter-spacing)
+ * Body: Inter (Regular weight for readability)
  *
- * Guidelines:
- * - Body text: 16-18px for optimal mobile readability
- * - Section headings: 20-24px
- * - Hero titles: 28-32px
- * - Minimum touch target text: 14px
+ * Design: Bold, athletic, high-energy
  */
 
+// Font families
 export const fontFamily = {
+  // Headings - Oswald
+  heading: 'Oswald_700Bold',
+  headingMedium: 'Oswald_500Medium',
+  headingLight: 'Oswald_400Regular',
+
+  // Body - Inter
   regular: 'Inter_400Regular',
   medium: 'Inter_500Medium',
   semiBold: 'Inter_600SemiBold',
@@ -20,63 +23,76 @@ export const fontFamily = {
   black: 'Inter_900Black',
 } as const;
 
+// Font size scale (in pixels)
 export const fontSize = {
   xs: 12,
   sm: 14,
   base: 16,
-  md: 18,
-  lg: 20,
-  xl: 24,
-  '2xl': 28,
-  '3xl': 32,
+  lg: 18,
+  xl: 20,
+  '2xl': 24,
+  '3xl': 30,
   '4xl': 36,
   '5xl': 48,
 } as const;
 
+// Line heights
 export const lineHeight = {
+  none: 1,
   tight: 1.25,
   normal: 1.5,
   relaxed: 1.75,
 } as const;
 
+// Letter spacing
 export const letterSpacing = {
+  tighter: -1,
   tight: -0.5,
   normal: 0,
   wide: 0.5,
+  wider: 1,
+  widest: 2,
+  heading: 0.05 * 16, // 0.05em for headings
+  button: 0.1 * 16,   // 0.1em for buttons
 } as const;
 
-// Predefined text styles for common use cases
+// Predefined text styles
 export const textStyles = {
-  // Hero and display text
+  // Hero and display - Oswald uppercase
   heroTitle: {
-    fontFamily: fontFamily.bold,
-    fontSize: fontSize['3xl'],
-    lineHeight: fontSize['3xl'] * lineHeight.tight,
-    letterSpacing: letterSpacing.tight,
+    fontFamily: fontFamily.heading,
+    fontSize: fontSize['5xl'],
+    lineHeight: fontSize['5xl'] * lineHeight.tight,
+    letterSpacing: letterSpacing.heading,
+    textTransform: 'uppercase' as const,
   },
   heroSubtitle: {
+    fontFamily: fontFamily.medium,
+    fontSize: fontSize.xl,
+    lineHeight: fontSize.xl * lineHeight.normal,
+  },
+
+  // Section headers - Oswald uppercase
+  sectionTitle: {
+    fontFamily: fontFamily.heading,
+    fontSize: fontSize['2xl'],
+    lineHeight: fontSize['2xl'] * lineHeight.tight,
+    letterSpacing: letterSpacing.heading,
+    textTransform: 'uppercase' as const,
+  },
+  sectionSubtitle: {
     fontFamily: fontFamily.medium,
     fontSize: fontSize.lg,
     lineHeight: fontSize.lg * lineHeight.normal,
   },
 
-  // Section headers
-  sectionTitle: {
-    fontFamily: fontFamily.bold,
-    fontSize: fontSize.xl,
-    lineHeight: fontSize.xl * lineHeight.tight,
-  },
-  sectionSubtitle: {
-    fontFamily: fontFamily.medium,
-    fontSize: fontSize.md,
-    lineHeight: fontSize.md * lineHeight.normal,
-  },
-
   // Card text
   cardTitle: {
-    fontFamily: fontFamily.semiBold,
-    fontSize: fontSize.md,
-    lineHeight: fontSize.md * lineHeight.tight,
+    fontFamily: fontFamily.heading,
+    fontSize: fontSize.lg,
+    lineHeight: fontSize.lg * lineHeight.tight,
+    letterSpacing: letterSpacing.heading,
+    textTransform: 'uppercase' as const,
   },
   cardSubtitle: {
     fontFamily: fontFamily.regular,
@@ -84,7 +100,7 @@ export const textStyles = {
     lineHeight: fontSize.sm * lineHeight.normal,
   },
 
-  // Body text
+  // Body text - Inter
   body: {
     fontFamily: fontFamily.regular,
     fontSize: fontSize.base,
@@ -97,16 +113,17 @@ export const textStyles = {
   },
   bodyLarge: {
     fontFamily: fontFamily.regular,
-    fontSize: fontSize.md,
-    lineHeight: fontSize.md * lineHeight.relaxed,
+    fontSize: fontSize.lg,
+    lineHeight: fontSize.lg * lineHeight.relaxed,
   },
 
-  // Labels and captions
+  // Labels - Oswald uppercase small
   label: {
-    fontFamily: fontFamily.medium,
+    fontFamily: fontFamily.heading,
     fontSize: fontSize.sm,
     lineHeight: fontSize.sm * lineHeight.normal,
-    letterSpacing: letterSpacing.wide,
+    letterSpacing: letterSpacing.button,
+    textTransform: 'uppercase' as const,
   },
   caption: {
     fontFamily: fontFamily.regular,
@@ -114,21 +131,27 @@ export const textStyles = {
     lineHeight: fontSize.xs * lineHeight.normal,
   },
 
-  // Buttons
+  // Buttons - Oswald bold uppercase
   buttonLarge: {
-    fontFamily: fontFamily.semiBold,
-    fontSize: fontSize.md,
-    lineHeight: fontSize.md * lineHeight.tight,
+    fontFamily: fontFamily.heading,
+    fontSize: fontSize.lg,
+    lineHeight: fontSize.lg * lineHeight.tight,
+    letterSpacing: letterSpacing.button,
+    textTransform: 'uppercase' as const,
   },
   buttonMedium: {
-    fontFamily: fontFamily.semiBold,
+    fontFamily: fontFamily.heading,
     fontSize: fontSize.base,
     lineHeight: fontSize.base * lineHeight.tight,
+    letterSpacing: letterSpacing.button,
+    textTransform: 'uppercase' as const,
   },
   buttonSmall: {
-    fontFamily: fontFamily.semiBold,
+    fontFamily: fontFamily.heading,
     fontSize: fontSize.sm,
     lineHeight: fontSize.sm * lineHeight.tight,
+    letterSpacing: letterSpacing.button,
+    textTransform: 'uppercase' as const,
   },
 
   // Navigation
@@ -138,9 +161,38 @@ export const textStyles = {
     lineHeight: fontSize.xs * lineHeight.normal,
   },
   navTitle: {
-    fontFamily: fontFamily.semiBold,
-    fontSize: fontSize.md,
-    lineHeight: fontSize.md * lineHeight.tight,
+    fontFamily: fontFamily.heading,
+    fontSize: fontSize.lg,
+    lineHeight: fontSize.lg * lineHeight.tight,
+    letterSpacing: letterSpacing.heading,
+    textTransform: 'uppercase' as const,
+  },
+
+  // Stats and numbers
+  statNumber: {
+    fontFamily: fontFamily.heading,
+    fontSize: fontSize['4xl'],
+    lineHeight: fontSize['4xl'] * lineHeight.none,
+    letterSpacing: letterSpacing.tight,
+  },
+  statLabel: {
+    fontFamily: fontFamily.heading,
+    fontSize: fontSize.xs,
+    lineHeight: fontSize.xs * lineHeight.normal,
+    letterSpacing: letterSpacing.button,
+    textTransform: 'uppercase' as const,
+  },
+
+  // Price
+  price: {
+    fontFamily: fontFamily.heading,
+    fontSize: fontSize['2xl'],
+    lineHeight: fontSize['2xl'] * lineHeight.tight,
+  },
+  priceSmall: {
+    fontFamily: fontFamily.heading,
+    fontSize: fontSize.lg,
+    lineHeight: fontSize.lg * lineHeight.tight,
   },
 } as const;
 

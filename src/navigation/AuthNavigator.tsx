@@ -33,7 +33,7 @@ export const AuthNavigator: React.FC = () => {
       <Stack.Navigator
         screenOptions={{
           headerShown: false,
-          contentStyle: { backgroundColor: colors.offWhite },
+          contentStyle: { backgroundColor: colors.black },
           animation: 'slide_from_right',
         }}
       >
@@ -45,11 +45,11 @@ export const AuthNavigator: React.FC = () => {
           component={ForgotPasswordScreen}
           options={{
             headerShown: true,
-            headerTitle: 'Reset Password',
+            headerTitle: 'RESET PASSWORD',
             headerBackTitle: 'Back',
-            headerTintColor: colors.inkBlack,
-            headerStyle: { backgroundColor: colors.offWhite },
-            headerTitleStyle: { fontFamily: fontFamily.semiBold },
+            headerTintColor: colors.white,
+            headerStyle: { backgroundColor: colors.blackCard },
+            headerTitleStyle: { fontFamily: fontFamily.heading },
           }}
         />
         <Stack.Screen name="OnboardingLocation" component={OnboardingLocationScreen} />

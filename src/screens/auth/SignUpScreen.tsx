@@ -141,9 +141,9 @@ const SignUpScreen: React.FC = () => {
               resizeMode="contain"
             />
             <PTPText variant="heroTitle" style={styles.title}>
-              Join PTP Soccer
+              JOIN PTP SOCCER
             </PTPText>
-            <PTPText variant="body" color="gray500" center>
+            <PTPText variant="body" color="gray300" center>
               Create your account to register for camps, clinics, and private training.
             </PTPText>
           </View>
@@ -220,14 +220,14 @@ const SignUpScreen: React.FC = () => {
               style={styles.submitButton}
             />
 
-            <PTPText variant="caption" color="gray500" center style={styles.terms}>
+            <PTPText variant="caption" color="gray300" center style={styles.terms}>
               By creating an account, you agree to our Terms of Service and Privacy Policy.
             </PTPText>
           </View>
 
           {/* Footer */}
           <View style={styles.footer}>
-            <PTPText variant="body" color="gray500">
+            <PTPText variant="body" color="gray300">
               Already have an account?{' '}
             </PTPText>
             <TouchableOpacity
@@ -235,7 +235,7 @@ const SignUpScreen: React.FC = () => {
               accessibilityLabel="Sign in to existing account"
             >
               <PTPText variant="label" color="primary">
-                Sign In
+                SIGN IN
               </PTPText>
             </TouchableOpacity>
           </View>
@@ -248,7 +248,7 @@ const SignUpScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.offWhite,
+    backgroundColor: colors.black,
   },
   keyboardView: {
     flex: 1,
@@ -263,8 +263,8 @@ const styles = StyleSheet.create({
     paddingBottom: spacing[6],
   },
   logo: {
-    width: 100,
-    height: 40,
+    width: 120,
+    height: 48,
     marginBottom: spacing[4],
   },
   title: {

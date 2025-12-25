@@ -1,12 +1,12 @@
 /**
  * PTPText Component
  *
- * Custom text component that applies Inter font family
- * and PTP brand typography consistently.
+ * Custom text component with Oswald headings and Inter body text.
+ * Dark theme by default with white text.
  */
 
 import React from 'react';
-import { Text, TextProps, StyleSheet, TextStyle } from 'react-native';
+import { Text, TextProps, StyleSheet } from 'react-native';
 import { colors } from '../theme/colors';
 import { fontFamily, textStyles, TextStyleName } from '../theme/typography';
 
@@ -16,7 +16,7 @@ interface PTPTextProps extends TextProps {
    */
   variant?: TextStyleName;
   /**
-   * Text color (defaults to inkBlack)
+   * Text color (defaults to white for dark theme)
    */
   color?: keyof typeof colors | string;
   /**
@@ -34,16 +34,16 @@ interface PTPTextProps extends TextProps {
 }
 
 /**
- * PTPText - Branded text component with Inter font
+ * PTPText - Branded text component with Oswald headings + Inter body
  *
  * @example
- * <PTPText variant="heroTitle" color="primary">Welcome to PTP</PTPText>
+ * <PTPText variant="heroTitle" color="primary">WELCOME TO PTP</PTPText>
  * <PTPText variant="body">Regular body text</PTPText>
- * <PTPText variant="caption" color="gray500">Small caption</PTPText>
+ * <PTPText variant="caption" color="gray300">Small caption</PTPText>
  */
 export const PTPText: React.FC<PTPTextProps> = ({
   variant = 'body',
-  color = 'inkBlack',
+  color = 'white',
   center = false,
   weight,
   style,
@@ -87,7 +87,7 @@ export const PTPHeading: React.FC<Omit<PTPTextProps, 'variant'>> = (props) => (
 );
 
 export const PTPSubheading: React.FC<Omit<PTPTextProps, 'variant'>> = (props) => (
-  <PTPText variant="sectionSubtitle" color="gray500" {...props} />
+  <PTPText variant="sectionSubtitle" color="gray300" {...props} />
 );
 
 export const PTPBody: React.FC<Omit<PTPTextProps, 'variant'>> = (props) => (
@@ -95,11 +95,15 @@ export const PTPBody: React.FC<Omit<PTPTextProps, 'variant'>> = (props) => (
 );
 
 export const PTPCaption: React.FC<Omit<PTPTextProps, 'variant'>> = (props) => (
-  <PTPText variant="caption" color="gray500" {...props} />
+  <PTPText variant="caption" color="gray300" {...props} />
 );
 
 export const PTPLabel: React.FC<Omit<PTPTextProps, 'variant'>> = (props) => (
-  <PTPText variant="label" {...props} />
+  <PTPText variant="label" color="gray300" {...props} />
+);
+
+export const PTPPrice: React.FC<Omit<PTPTextProps, 'variant'>> = (props) => (
+  <PTPText variant="price" color="primary" {...props} />
 );
 
 const styles = StyleSheet.create({

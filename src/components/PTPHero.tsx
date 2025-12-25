@@ -1,7 +1,7 @@
 /**
  * PTPHero Component
  *
- * Hero section with background image, overlay, and content.
+ * Bold hero section with background image, dark overlay, and Oswald typography.
  * Used for screen headers and featured sections.
  */
 
@@ -13,62 +13,40 @@ import {
   Dimensions,
   ViewStyle,
   Image,
+  Pressable,
 } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { PTPText } from './PTPText';
+import { PTPButton } from './PTPButton';
 import { colors } from '../theme/colors';
-import { spacing } from '../theme/spacing';
+import { spacing, borderRadius } from '../theme/spacing';
 import { LOGO_URL } from '../assets/logo';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 interface PTPHeroProps {
-  /**
-   * Background image URL
-   */
   imageUrl: string;
-  /**
-   * Hero title
-   */
   title?: string;
-  /**
-   * Hero subtitle
-   */
   subtitle?: string;
-  /**
-   * Show PTP logo
-   */
   showLogo?: boolean;
-  /**
-   * Height of the hero section
-   */
   height?: number;
-  /**
-   * Custom overlay content
-   */
+  actionText?: string;
+  onAction?: () => void;
   children?: React.ReactNode;
-  /**
-   * Custom style
-   */
   style?: ViewStyle;
 }
 
 /**
- * PTPHero - Hero section with background image
- *
- * @example
- * <PTPHero
- *   imageUrl={featureImages.homeHero}
- *   title="Train with NCAA mentors"
- *   subtitle="No lines. All reps."
- *   showLogo
- * />
+ * PTPHero - Bold hero section with gradient overlay
  */
 export const PTPHero: React.FC<PTPHeroProps> = ({
   imageUrl,
   title,
   subtitle,
   showLogo = false,
-  height = 280,
+  height = 320,
+  actionText,
+  onAction,
   children,
   style,
 }) => {
@@ -79,7 +57,11 @@ export const PTPHero: React.FC<PTPHeroProps> = ({
         style={styles.background}
         resizeMode="cover"
       >
-        <View style={styles.overlay}>
+        <LinearGradient
+          colors={['transparent', 'rgba(10, 10, 10, 0.6)', 'rgba(10, 10, 10, 0.95)']}
+          locations={[0, 0.5, 1]}
+          style={styles.gradient}
+        >
           <View style={styles.content}>
             {showLogo && (
               <Image
@@ -89,7 +71,7 @@ export const PTPHero: React.FC<PTPHeroProps> = ({
               />
             )}
             {title && (
-              <PTPText variant="heroTitle" color="white" style={styles.title}>
+              <PTPText variant="heroTitle" style={styles.title}>
                 {title}
               </PTPText>
             )}
@@ -98,16 +80,23 @@ export const PTPHero: React.FC<PTPHeroProps> = ({
                 {subtitle}
               </PTPText>
             )}
+            {actionText && onAction && (
+              <PTPButton
+                title={actionText}
+                onPress={onAction}
+                style={styles.actionButton}
+              />
+            )}
             {children}
           </View>
-        </View>
+        </LinearGradient>
       </ImageBackground>
     </View>
   );
 };
 
 /**
- * PTPHeroCard - Hero card with gradient overlay
+ * PTPHeroCard - Sharp-edged hero card with gradient overlay
  */
 interface PTPHeroCardProps {
   imageUrl: string;
@@ -126,39 +115,45 @@ export const PTPHeroCard: React.FC<PTPHeroCardProps> = ({
   onPress,
   style,
 }) => {
-  const Wrapper = onPress ? require('react-native').TouchableOpacity : View;
-
-  return (
-    <Wrapper
-      onPress={onPress}
-      activeOpacity={0.9}
-      style={[styles.heroCard, { height }, style]}
+  const content = (
+    <ImageBackground
+      source={{ uri: imageUrl }}
+      style={[styles.heroCardBackground, { height }]}
+      imageStyle={styles.heroCardImage}
     >
-      <ImageBackground
-        source={{ uri: imageUrl }}
-        style={styles.heroCardBackground}
-        imageStyle={styles.heroCardImage}
+      <LinearGradient
+        colors={['transparent', 'rgba(10, 10, 10, 0.9)']}
+        locations={[0.3, 1]}
+        style={styles.heroCardGradient}
       >
-        <View style={styles.heroCardGradient}>
-          <View style={styles.heroCardContent}>
-            <PTPText variant="cardTitle" color="white" numberOfLines={2}>
-              {title}
+        <View style={styles.heroCardContent}>
+          <PTPText variant="cardTitle" numberOfLines={2}>
+            {title}
+          </PTPText>
+          {subtitle && (
+            <PTPText
+              variant="cardSubtitle"
+              color="gray300"
+              numberOfLines={1}
+              style={styles.heroCardSubtitle}
+            >
+              {subtitle}
             </PTPText>
-            {subtitle && (
-              <PTPText
-                variant="cardSubtitle"
-                color="gray300"
-                numberOfLines={1}
-                style={styles.heroCardSubtitle}
-              >
-                {subtitle}
-              </PTPText>
-            )}
-          </View>
+          )}
         </View>
-      </ImageBackground>
-    </Wrapper>
+      </LinearGradient>
+    </ImageBackground>
   );
+
+  if (onPress) {
+    return (
+      <Pressable onPress={onPress} style={[styles.heroCard, style]}>
+        {content}
+      </Pressable>
+    );
+  }
+
+  return <View style={[styles.heroCard, style]}>{content}</View>;
 };
 
 /**
@@ -183,9 +178,53 @@ export const PTPScreenHero: React.FC<PTPScreenHeroProps> = ({
       title={title}
       subtitle={subtitle}
       showLogo
-      height={320}
+      height={360}
       style={style}
     />
+  );
+};
+
+/**
+ * PTPStatHero - Hero with stats display
+ */
+interface PTPStatHeroProps {
+  imageUrl: string;
+  stats: { value: string; label: string }[];
+  style?: ViewStyle;
+}
+
+export const PTPStatHero: React.FC<PTPStatHeroProps> = ({
+  imageUrl,
+  stats,
+  style,
+}) => {
+  return (
+    <View style={[styles.container, { height: 280 }, style]}>
+      <ImageBackground
+        source={{ uri: imageUrl }}
+        style={styles.background}
+        resizeMode="cover"
+      >
+        <LinearGradient
+          colors={['transparent', 'rgba(10, 10, 10, 0.95)']}
+          locations={[0.3, 1]}
+          style={styles.gradient}
+        >
+          <View style={styles.statsContainer}>
+            {stats.map((stat, index) => (
+              <View key={index} style={styles.stat}>
+                <PTPText variant="statNumber" color="primary">
+                  {stat.value}
+                </PTPText>
+                <PTPText variant="statLabel" color="gray300">
+                  {stat.label}
+                </PTPText>
+              </View>
+            ))}
+          </View>
+        </LinearGradient>
+      </ImageBackground>
+    </View>
   );
 };
 
@@ -198,39 +237,44 @@ const styles = StyleSheet.create({
     flex: 1,
     width: '100%',
   },
-  overlay: {
+  gradient: {
     flex: 1,
-    backgroundColor: colors.overlayDark,
     justifyContent: 'flex-end',
   },
   content: {
     padding: spacing[4],
-    paddingBottom: spacing[6],
+    paddingBottom: spacing[8],
   },
   logo: {
-    width: 120,
-    height: 48,
+    width: 140,
+    height: 56,
     marginBottom: spacing[4],
   },
   title: {
     marginBottom: spacing[2],
   },
   subtitle: {
-    maxWidth: '80%',
+    maxWidth: '85%',
   },
+  actionButton: {
+    marginTop: spacing[6],
+    alignSelf: 'flex-start',
+  },
+  // Hero Card styles
   heroCard: {
-    borderRadius: 16,
+    borderRadius: borderRadius.none,
     overflow: 'hidden',
+    borderWidth: 2,
+    borderColor: colors.gray700,
   },
   heroCardBackground: {
     flex: 1,
   },
   heroCardImage: {
-    borderRadius: 16,
+    borderRadius: borderRadius.none,
   },
   heroCardGradient: {
     flex: 1,
-    backgroundColor: colors.overlayDark,
     justifyContent: 'flex-end',
   },
   heroCardContent: {
@@ -238,6 +282,16 @@ const styles = StyleSheet.create({
   },
   heroCardSubtitle: {
     marginTop: spacing[1],
+  },
+  // Stats
+  statsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    padding: spacing[6],
+    paddingBottom: spacing[8],
+  },
+  stat: {
+    alignItems: 'center',
   },
 });
 

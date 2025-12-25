@@ -2,22 +2,46 @@
  * PTP Soccer Components
  *
  * Central export for all reusable UI components.
+ * Dark theme with sharp edges and gold accents.
  */
 
 // Text
-export { PTPText, PTPTitle, PTPHeading, PTPSubheading, PTPBody, PTPCaption, PTPLabel } from './PTPText';
+export {
+  PTPText,
+  PTPTitle,
+  PTPHeading,
+  PTPSubheading,
+  PTPBody,
+  PTPCaption,
+  PTPLabel,
+  PTPPrice,
+} from './PTPText';
 
 // Buttons
 export { PTPButton } from './PTPButton';
 
 // Cards
-export { PTPCard, PTPProgramCard, PTPTrainerCard } from './PTPCard';
+export {
+  PTPCard,
+  PTPSimpleCard,
+  PTPProgramCard,
+  PTPTrainerCard,
+} from './PTPCard';
 
-// Tags
-export { PTPTag } from './PTPTag';
+// Tags and Badges
+export {
+  PTPTag,
+  PTPBadge,
+  PTPStatusIndicator,
+} from './PTPTag';
 
 // Inputs
-export { PTPInput, PTPPasswordInput, PTPSearchInput } from './PTPInput';
+export {
+  PTPInput,
+  PTPPasswordInput,
+  PTPSearchInput,
+  PTPTextArea,
+} from './PTPInput';
 
 // Search Bar
 export { PTPSearchBar } from './PTPSearchBar';
@@ -29,12 +53,14 @@ export { PTPSectionHeader } from './PTPSectionHeader';
 export {
   PTPLoading,
   PTPLoadingOverlay,
+  PTPLoadingInline,
   PTPSkeleton,
   PTPCardSkeleton,
+  PTPTrainerCardSkeleton,
   PTPListSkeleton,
 } from './PTPLoading';
 
-// Skeleton Loaders
+// Skeleton Loaders (legacy compatibility)
 export {
   Skeleton,
   ProgramCardSkeleton,
@@ -49,14 +75,25 @@ export {
 // Empty States
 export {
   PTPEmptyState,
+  NoTrainersEmptyState,
   NoProgramsEmptyState,
+  NoBookingsEmptyState,
   NoSessionsEmptyState,
   NoMessagesEmptyState,
-  NoOrdersEmptyState,
+  NoChildrenEmptyState,
+  NoEarningsEmptyState,
+  NoReviewsEmptyState,
+  ErrorEmptyState,
+  OfflineEmptyState,
 } from './PTPEmptyState';
 
 // Hero Sections
-export { PTPHero, PTPHeroCard, PTPScreenHero } from './PTPHero';
+export {
+  PTPHero,
+  PTPHeroCard,
+  PTPScreenHero,
+  PTPStatHero,
+} from './PTPHero';
 
 // Images
 export { PTPImage, PTPAvatar, PTPHeroImage, PTPGallery } from './PTPImage';

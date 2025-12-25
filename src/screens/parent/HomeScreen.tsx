@@ -34,7 +34,7 @@ import {
   StaggeredItem,
 } from '../../components';
 import { colors } from '../../theme/colors';
-import { spacing, borderRadius } from '../../theme/spacing';
+import { spacing } from '../../theme/spacing';
 import { featureImages, cardBackgrounds } from '../../assets/media';
 import { LOGO_URL } from '../../assets/logo';
 import { getPrograms } from '../../api/programs';
@@ -137,9 +137,9 @@ const HomeScreen: React.FC = memo(() => {
                 }}
               >
                 <View style={styles.quickActionIcon}>
-                  <Ionicons name="football-outline" size={28} color={colors.inkBlack} />
+                  <Ionicons name="football-outline" size={28} color={colors.black} />
                 </View>
-                <PTPText variant="label">Camps & Clinics</PTPText>
+                <PTPText variant="label">CAMPS</PTPText>
               </AnimatedPressable>
 
               <AnimatedPressable
@@ -150,9 +150,9 @@ const HomeScreen: React.FC = memo(() => {
                 }}
               >
                 <View style={styles.quickActionIcon}>
-                  <Ionicons name="fitness-outline" size={28} color={colors.inkBlack} />
+                  <Ionicons name="fitness-outline" size={28} color={colors.black} />
                 </View>
-                <PTPText variant="label">Private Training</PTPText>
+                <PTPText variant="label">TRAINING</PTPText>
               </AnimatedPressable>
 
               <AnimatedPressable
@@ -163,9 +163,9 @@ const HomeScreen: React.FC = memo(() => {
                 }}
               >
                 <View style={styles.quickActionIcon}>
-                  <Ionicons name="calendar-outline" size={28} color={colors.inkBlack} />
+                  <Ionicons name="calendar-outline" size={28} color={colors.black} />
                 </View>
-                <PTPText variant="label">My Schedule</PTPText>
+                <PTPText variant="label">SCHEDULE</PTPText>
               </AnimatedPressable>
             </View>
           </View>
@@ -229,8 +229,8 @@ const HomeScreen: React.FC = memo(() => {
               onPress={() => navigation.navigate('ParentTabs', { screen: 'PrivateTraining' })}
             >
               <View style={styles.trainingPromoContent}>
-                <PTPText variant="sectionTitle">Personalized Training</PTPText>
-                <PTPText variant="body" color="gray500" style={styles.trainingPromoText}>
+                <PTPText variant="sectionTitle">PERSONALIZED TRAINING</PTPText>
+                <PTPText variant="body" color="gray300" style={styles.trainingPromoText}>
                   Work 1-on-1 with college athletes who know what it takes to level up.
                 </PTPText>
                 <View style={styles.trainingFeatures}>
@@ -248,7 +248,7 @@ const HomeScreen: React.FC = memo(() => {
                   </View>
                 </View>
                 <PTPButton
-                  title="Find a Trainer"
+                  title="FIND A TRAINER"
                   variant="primary"
                   size="medium"
                   onPress={() => navigation.navigate('ParentTabs', { screen: 'PrivateTraining' })}
@@ -263,21 +263,21 @@ const HomeScreen: React.FC = memo(() => {
         <FadeInView delay={500}>
           <View style={styles.trustSection}>
             <View style={styles.trustLogoContainer}>
-              <PTPText variant="body" color="gray500">Why</PTPText>
+              <PTPText variant="body" color="gray300">Why</PTPText>
               <Image
                 source={{ uri: LOGO_URL }}
                 style={styles.trustLogo}
                 resizeMode="contain"
               />
-              <PTPText variant="body" color="gray500">?</PTPText>
+              <PTPText variant="body" color="gray300">?</PTPText>
             </View>
             <View style={styles.trustBadges}>
               <View style={styles.trustBadge}>
                 <View style={styles.trustIconContainer}>
                   <Ionicons name="school-outline" size={28} color={colors.primary} />
                 </View>
-                <PTPText variant="label" center>NCAA Mentors</PTPText>
-                <PTPText variant="caption" color="gray500" center>
+                <PTPText variant="label" center>NCAA</PTPText>
+                <PTPText variant="caption" color="gray300" center>
                   Real role models
                 </PTPText>
               </View>
@@ -285,8 +285,8 @@ const HomeScreen: React.FC = memo(() => {
                 <View style={styles.trustIconContainer}>
                   <Ionicons name="checkmark-circle-outline" size={28} color={colors.primary} />
                 </View>
-                <PTPText variant="label" center>Background Checked</PTPText>
-                <PTPText variant="caption" color="gray500" center>
+                <PTPText variant="label" center>VERIFIED</PTPText>
+                <PTPText variant="caption" color="gray300" center>
                   Safety first
                 </PTPText>
               </View>
@@ -294,8 +294,8 @@ const HomeScreen: React.FC = memo(() => {
                 <View style={styles.trustIconContainer}>
                   <Ionicons name="shield-checkmark-outline" size={28} color={colors.primary} />
                 </View>
-                <PTPText variant="label" center>Fully Insured</PTPText>
-                <PTPText variant="caption" color="gray500" center>
+                <PTPText variant="label" center>INSURED</PTPText>
+                <PTPText variant="caption" color="gray300" center>
                   Peace of mind
                 </PTPText>
               </View>
@@ -312,7 +312,7 @@ HomeScreen.displayName = 'HomeScreen';
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.offWhite,
+    backgroundColor: colors.black,
   },
   scrollView: {
     flex: 1,
@@ -323,6 +323,8 @@ const styles = StyleSheet.create({
   heroTitle: {
     marginTop: spacing[4],
     marginBottom: spacing[2],
+    textTransform: 'uppercase',
+    letterSpacing: 1,
   },
   section: {
     paddingHorizontal: spacing[4],
@@ -331,15 +333,12 @@ const styles = StyleSheet.create({
   quickActions: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    backgroundColor: colors.white,
-    borderRadius: borderRadius.lg,
+    backgroundColor: colors.blackCard,
+    borderRadius: 0,
+    borderWidth: 2,
+    borderColor: colors.gray700,
     padding: spacing[4],
     marginTop: -spacing[10],
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 12,
-    elevation: 4,
   },
   quickAction: {
     alignItems: 'center',
@@ -348,8 +347,8 @@ const styles = StyleSheet.create({
   quickActionIcon: {
     width: 56,
     height: 56,
-    borderRadius: 28,
-    backgroundColor: colors.gray100,
+    borderRadius: 0,
+    backgroundColor: colors.primary,
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: spacing[2],
@@ -362,8 +361,10 @@ const styles = StyleSheet.create({
     marginRight: spacing[3],
   },
   trainingPromo: {
-    backgroundColor: colors.white,
-    borderRadius: borderRadius.lg,
+    backgroundColor: colors.blackCard,
+    borderRadius: 0,
+    borderWidth: 2,
+    borderColor: colors.gray700,
     overflow: 'hidden',
     flexDirection: 'row',
   },
@@ -392,7 +393,7 @@ const styles = StyleSheet.create({
     marginTop: spacing[8],
     paddingTop: spacing[6],
     borderTopWidth: 1,
-    borderTopColor: colors.gray200,
+    borderTopColor: colors.gray700,
   },
   trustLogoContainer: {
     flexDirection: 'row',
@@ -416,8 +417,10 @@ const styles = StyleSheet.create({
   trustIconContainer: {
     width: 48,
     height: 48,
-    borderRadius: 24,
-    backgroundColor: colors.gray100,
+    borderRadius: 0,
+    backgroundColor: colors.blackCard,
+    borderWidth: 1,
+    borderColor: colors.primary,
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: spacing[2],

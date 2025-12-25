@@ -88,9 +88,9 @@ const LoginScreen: React.FC = () => {
               resizeMode="contain"
             />
             <PTPText variant="heroTitle" style={styles.title}>
-              Welcome Back
+              WELCOME BACK
             </PTPText>
-            <PTPText variant="body" color="gray500">
+            <PTPText variant="body" color="gray300">
               Sign in to continue to PTP Soccer
             </PTPText>
           </View>
@@ -152,7 +152,7 @@ const LoginScreen: React.FC = () => {
 
           {/* Footer */}
           <View style={styles.footer}>
-            <PTPText variant="body" color="gray500">
+            <PTPText variant="body" color="gray300">
               Don't have an account?{' '}
             </PTPText>
             <TouchableOpacity
@@ -160,7 +160,7 @@ const LoginScreen: React.FC = () => {
               accessibilityLabel="Create new account"
             >
               <PTPText variant="label" color="primary">
-                Sign Up
+                SIGN UP
               </PTPText>
             </TouchableOpacity>
           </View>
@@ -173,7 +173,7 @@ const LoginScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.offWhite,
+    backgroundColor: colors.black,
   },
   keyboardView: {
     flex: 1,
@@ -188,8 +188,8 @@ const styles = StyleSheet.create({
     paddingBottom: spacing[8],
   },
   logo: {
-    width: 120,
-    height: 48,
+    width: 140,
+    height: 56,
     marginBottom: spacing[6],
   },
   title: {
@@ -209,8 +209,10 @@ const styles = StyleSheet.create({
   demoHint: {
     marginTop: spacing[4],
     padding: spacing[3],
-    backgroundColor: colors.gray100,
-    borderRadius: 8,
+    backgroundColor: colors.blackCard,
+    borderRadius: 0,
+    borderWidth: 1,
+    borderColor: colors.gray700,
   },
   footer: {
     flexDirection: 'row',

@@ -1,9 +1,8 @@
 /**
  * PTPButton Component
  *
- * Branded button component with multiple variants.
- * Includes haptic feedback and animated press state.
- * Ensures minimum touch target of 44x44 points.
+ * Bold, athletic button with sharp edges and gold accents.
+ * Uses Oswald font with uppercase styling.
  */
 
 import React, { useCallback, memo, useRef } from 'react';
@@ -18,62 +17,31 @@ import {
 } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import { PTPText } from './PTPText';
-import { colors } from '../theme/colors';
-import { spacing, borderRadius } from '../theme/spacing';
+import { colors, semanticColors } from '../theme/colors';
+import { spacing, borderRadius, borderWidth } from '../theme/spacing';
 
 type ButtonVariant = 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger';
 type ButtonSize = 'small' | 'medium' | 'large';
 
 interface PTPButtonProps extends Omit<PressableProps, 'style'> {
-  /**
-   * Button text
-   */
   title: string;
-  /**
-   * Button variant
-   */
   variant?: ButtonVariant;
-  /**
-   * Button size
-   */
   size?: ButtonSize;
-  /**
-   * Show loading indicator
-   */
   loading?: boolean;
-  /**
-   * Disable the button
-   */
   disabled?: boolean;
-  /**
-   * Full width button
-   */
   fullWidth?: boolean;
-  /**
-   * Left icon component
-   */
   leftIcon?: React.ReactNode;
-  /**
-   * Right icon component
-   */
   rightIcon?: React.ReactNode;
-  /**
-   * Enable haptic feedback
-   */
   haptic?: boolean;
-  /**
-   * Custom style
-   */
   style?: ViewStyle;
 }
 
 /**
- * PTPButton - Branded button with PTP colors
+ * PTPButton - Bold, sharp-edged button with gold accents
  *
  * @example
- * <PTPButton title="Register" onPress={handleRegister} />
- * <PTPButton title="Cancel" variant="outline" onPress={handleCancel} />
- * <PTPButton title="Loading..." loading />
+ * <PTPButton title="BOOK NOW" onPress={handleBook} />
+ * <PTPButton title="CANCEL" variant="secondary" onPress={handleCancel} />
  */
 export const PTPButton: React.FC<PTPButtonProps> = memo(({
   title,
@@ -95,8 +63,10 @@ export const PTPButton: React.FC<PTPButtonProps> = memo(({
 
   const handlePressIn = useCallback(() => {
     Animated.spring(scale, {
-      toValue: 0.97,
+      toValue: 0.98,
       useNativeDriver: true,
+      tension: 100,
+      friction: 10,
     }).start();
   }, [scale]);
 
@@ -104,12 +74,14 @@ export const PTPButton: React.FC<PTPButtonProps> = memo(({
     Animated.spring(scale, {
       toValue: 1,
       useNativeDriver: true,
+      tension: 100,
+      friction: 10,
     }).start();
   }, [scale]);
 
   const handlePress = useCallback((event: any) => {
     if (haptic) {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     }
     onPress?.(event);
   }, [haptic, onPress]);
@@ -120,6 +92,8 @@ export const PTPButton: React.FC<PTPButtonProps> = memo(({
     styles[size],
     fullWidth && styles.fullWidth,
     isDisabled && styles.disabled,
+    isDisabled && variant === 'primary' && styles.disabledPrimary,
+    isDisabled && variant === 'secondary' && styles.disabledSecondary,
     style,
   ];
 
@@ -157,20 +131,20 @@ export const PTPButton: React.FC<PTPButtonProps> = memo(({
 PTPButton.displayName = 'PTPButton';
 
 const getTextColor = (variant: ButtonVariant, disabled: boolean): string => {
-  if (disabled) return colors.gray400;
+  if (disabled) return colors.gray500;
 
   switch (variant) {
     case 'primary':
-      return colors.inkBlack;
+      return colors.black;
     case 'secondary':
-      return colors.white;
     case 'outline':
+      return colors.white;
     case 'ghost':
-      return colors.inkBlack;
+      return colors.primary;
     case 'danger':
       return colors.white;
     default:
-      return colors.inkBlack;
+      return colors.black;
   }
 };
 
@@ -179,8 +153,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: borderRadius.md,
-    minHeight: 44, // Minimum touch target
+    borderRadius: borderRadius.none, // Sharp edges
+    minHeight: 44,
   },
 
   // Variants
@@ -188,12 +162,14 @@ const styles = StyleSheet.create({
     backgroundColor: colors.primary,
   },
   secondary: {
-    backgroundColor: colors.inkBlack,
+    backgroundColor: colors.transparent,
+    borderWidth: borderWidth.base,
+    borderColor: colors.primary,
   },
   outline: {
     backgroundColor: colors.transparent,
-    borderWidth: 2,
-    borderColor: colors.inkBlack,
+    borderWidth: borderWidth.base,
+    borderColor: colors.gray700,
   },
   ghost: {
     backgroundColor: colors.transparent,
@@ -206,17 +182,17 @@ const styles = StyleSheet.create({
   small: {
     paddingHorizontal: spacing[4],
     paddingVertical: spacing[2],
-    minHeight: 36,
+    minHeight: 40,
   },
   medium: {
     paddingHorizontal: spacing[6],
-    paddingVertical: spacing[3],
-    minHeight: 48,
+    paddingVertical: spacing[4],
+    minHeight: 52,
   },
   large: {
     paddingHorizontal: spacing[8],
-    paddingVertical: spacing[4],
-    minHeight: 56,
+    paddingVertical: spacing[5],
+    minHeight: 60,
   },
 
   // States
@@ -224,8 +200,13 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   disabled: {
-    backgroundColor: colors.gray200,
-    borderColor: colors.gray200,
+    opacity: 0.5,
+  },
+  disabledPrimary: {
+    backgroundColor: colors.gray700,
+  },
+  disabledSecondary: {
+    borderColor: colors.gray700,
   },
 
   // Content

@@ -1,7 +1,8 @@
 /**
  * PTPInput Component
  *
- * Branded text input with label and error handling.
+ * Dark themed input with sharp edges and gold focus states.
+ * Includes Oswald label styling.
  */
 
 import React, { useState } from 'react';
@@ -10,53 +11,27 @@ import {
   TextInput,
   TextInputProps,
   StyleSheet,
-  TouchableOpacity,
+  Pressable,
   ViewStyle,
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { PTPText } from './PTPText';
-import { colors } from '../theme/colors';
+import { colors, semanticColors } from '../theme/colors';
 import { fontFamily, fontSize } from '../theme/typography';
-import { spacing, borderRadius } from '../theme/spacing';
+import { spacing, borderRadius, borderWidth } from '../theme/spacing';
 
 interface PTPInputProps extends TextInputProps {
-  /**
-   * Input label
-   */
   label?: string;
-  /**
-   * Error message
-   */
   error?: string;
-  /**
-   * Helper text
-   */
   helperText?: string;
-  /**
-   * Left icon component
-   */
   leftIcon?: React.ReactNode;
-  /**
-   * Right icon component or toggle button
-   */
   rightIcon?: React.ReactNode;
-  /**
-   * Container style
-   */
   containerStyle?: ViewStyle;
+  required?: boolean;
 }
 
 /**
- * PTPInput - Branded text input
- *
- * @example
- * <PTPInput
- *   label="Email"
- *   placeholder="Enter your email"
- *   value={email}
- *   onChangeText={setEmail}
- *   keyboardType="email-address"
- *   error={errors.email}
- * />
+ * PTPInput - Dark themed input with gold focus
  */
 export const PTPInput: React.FC<PTPInputProps> = ({
   label,
@@ -68,6 +43,7 @@ export const PTPInput: React.FC<PTPInputProps> = ({
   style,
   onFocus,
   onBlur,
+  required,
   ...props
 }) => {
   const [isFocused, setIsFocused] = useState(false);
@@ -91,15 +67,25 @@ export const PTPInput: React.FC<PTPInputProps> = ({
   return (
     <View style={[styles.container, containerStyle]}>
       {label && (
-        <PTPText variant="label" style={styles.label}>
-          {label}
-        </PTPText>
+        <View style={styles.labelRow}>
+          <PTPText variant="label" color="gray300">
+            {label}
+          </PTPText>
+          {required && (
+            <PTPText variant="label" color="error"> *</PTPText>
+          )}
+        </View>
       )}
       <View style={inputContainerStyle}>
         {leftIcon && <View style={styles.leftIcon}>{leftIcon}</View>}
         <TextInput
-          style={[styles.input, leftIcon ? styles.inputWithLeftIcon : undefined, style]}
-          placeholderTextColor={colors.gray400}
+          style={[
+            styles.input,
+            leftIcon && styles.inputWithLeftIcon,
+            rightIcon && styles.inputWithRightIcon,
+            style,
+          ]}
+          placeholderTextColor={colors.gray500}
           onFocus={handleFocus}
           onBlur={handleBlur}
           {...props}
@@ -133,15 +119,17 @@ export const PTPPasswordInput: React.FC<PTPPasswordInputProps> = (props) => {
       {...props}
       secureTextEntry={!showPassword}
       rightIcon={
-        <TouchableOpacity
+        <Pressable
           onPress={() => setShowPassword(!showPassword)}
           hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
           accessibilityLabel={showPassword ? 'Hide password' : 'Show password'}
         >
-          <PTPText variant="caption" color="gray500">
-            {showPassword ? 'Hide' : 'Show'}
-          </PTPText>
-        </TouchableOpacity>
+          <Ionicons
+            name={showPassword ? 'eye-off' : 'eye'}
+            size={20}
+            color={colors.gray500}
+          />
+        </Pressable>
       }
     />
   );
@@ -150,13 +138,16 @@ export const PTPPasswordInput: React.FC<PTPPasswordInputProps> = (props) => {
 /**
  * PTPSearchInput - Search input with icon
  */
-interface PTPSearchInputProps extends Omit<PTPInputProps, 'leftIcon'> {
+interface PTPSearchInputProps extends Omit<PTPInputProps, 'leftIcon' | 'label'> {
   onSearch?: (query: string) => void;
+  onClear?: () => void;
 }
 
 export const PTPSearchInput: React.FC<PTPSearchInputProps> = ({
   onSearch,
+  onClear,
   onChangeText,
+  value,
   ...props
 }) => {
   const handleChangeText = (text: string) => {
@@ -164,15 +155,54 @@ export const PTPSearchInput: React.FC<PTPSearchInputProps> = ({
     onSearch?.(text);
   };
 
+  const handleClear = () => {
+    onChangeText?.('');
+    onClear?.();
+    onSearch?.('');
+  };
+
   return (
     <PTPInput
       {...props}
+      value={value}
       onChangeText={handleChangeText}
       leftIcon={
-        <PTPText color="gray400">🔍</PTPText>
+        <Ionicons name="search" size={20} color={colors.gray500} />
+      }
+      rightIcon={
+        value ? (
+          <Pressable onPress={handleClear} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+            <Ionicons name="close-circle" size={20} color={colors.gray500} />
+          </Pressable>
+        ) : undefined
       }
       placeholder={props.placeholder || 'Search...'}
       returnKeyType="search"
+    />
+  );
+};
+
+/**
+ * PTPTextArea - Multi-line text input
+ */
+interface PTPTextAreaProps extends Omit<PTPInputProps, 'multiline' | 'numberOfLines'> {
+  rows?: number;
+}
+
+export const PTPTextArea: React.FC<PTPTextAreaProps> = ({
+  rows = 4,
+  style,
+  ...props
+}) => {
+  return (
+    <PTPInput
+      {...props}
+      multiline
+      numberOfLines={rows}
+      style={[
+        { minHeight: rows * 24, textAlignVertical: 'top' },
+        style,
+      ]}
     />
   );
 };
@@ -181,21 +211,21 @@ const styles = StyleSheet.create({
   container: {
     marginBottom: spacing[4],
   },
-  label: {
+  labelRow: {
+    flexDirection: 'row',
     marginBottom: spacing[2],
   },
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: colors.white,
-    borderWidth: 1,
-    borderColor: colors.gray200,
-    borderRadius: borderRadius.md,
-    minHeight: 48,
+    backgroundColor: colors.blackLight,
+    borderWidth: borderWidth.base,
+    borderColor: colors.gray700,
+    borderRadius: borderRadius.none,
+    minHeight: 52,
   },
   inputContainerFocused: {
     borderColor: colors.primary,
-    borderWidth: 2,
   },
   inputContainerError: {
     borderColor: colors.error,
@@ -204,13 +234,16 @@ const styles = StyleSheet.create({
     flex: 1,
     fontFamily: fontFamily.regular,
     fontSize: fontSize.base,
-    color: colors.inkBlack,
+    color: colors.white,
     paddingHorizontal: spacing[4],
-    paddingVertical: spacing[3],
-    minHeight: 48,
+    paddingVertical: spacing[4],
+    minHeight: 52,
   },
   inputWithLeftIcon: {
     paddingLeft: spacing[2],
+  },
+  inputWithRightIcon: {
+    paddingRight: spacing[2],
   },
   leftIcon: {
     paddingLeft: spacing[4],
