@@ -22,7 +22,8 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
-import { PTPText, PTPButton } from '../../components';
+import { PTPText } from '../PTPText';
+import { PTPButton } from '../PTPButton';
 import { colors } from '../../theme/colors';
 import { spacing, borderRadius, shadows } from '../../theme/spacing';
 import {

@@ -623,20 +623,16 @@ export const joinWaitlist = async (data: WaitlistRequest): Promise<WaitlistRespo
 /**
  * Check waitlist status for a program
  *
- * GET /wp-json/ptp/v1/programs/:id/waitlist/status
+ * Note: This endpoint is not yet implemented in the v1 WordPress plugin.
+ * Currently returns mock data. Will use API when available.
  */
 export const getWaitlistStatus = async (programId: number): Promise<{
   isOnWaitlist: boolean;
   position?: number;
   totalWaiting?: number;
 }> => {
-  if (apiConfig.demoMode) {
-    await new Promise((resolve) => setTimeout(resolve, 200));
-    return { isOnWaitlist: false };
-  }
-
-  const response = await apiClient.get(`/programs/${programId}/waitlist/status`);
-  return response.data;
+  // Waitlist endpoint not yet available in v1 plugin - use mock data
+  return { isOnWaitlist: false };
 };
 
 export { mockPrograms, mockMarkets };

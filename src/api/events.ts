@@ -20,68 +20,53 @@ import { heroImages } from '../assets/media';
 /**
  * Get user's events (camps, clinics, training sessions)
  *
- * GET /wp-json/ptp/v1/me/events
+ * Note: This endpoint is not yet implemented in the v1 WordPress plugin.
+ * Currently returns mock data. Will use API when available.
  */
 export const getMyEvents = async (filters?: EventFilters): Promise<EventsResponse> => {
-  if (apiConfig.demoMode) {
-    return getMockEvents(filters);
-  }
-
-  const params = new URLSearchParams();
-  if (filters?.type) params.append('type', filters.type);
-  if (filters?.status) params.append('status', filters.status);
-  if (filters?.dateFrom) params.append('date_from', filters.dateFrom);
-  if (filters?.dateTo) params.append('date_to', filters.dateTo);
-  if (filters?.childId) params.append('child_id', filters.childId.toString());
-
-  const response = await apiClient.get(`/me/events?${params.toString()}`);
-  return response.data;
+  // Events endpoint not yet available in v1 plugin - use mock data
+  return getMockEvents(filters);
 };
 
 /**
  * Get event details
  *
- * GET /wp-json/ptp/v1/me/events/:id
+ * Note: This endpoint is not yet implemented in the v1 WordPress plugin.
+ * Currently returns mock data. Will use API when available.
  */
 export const getEvent = async (eventId: number): Promise<ScheduleEvent> => {
-  if (apiConfig.demoMode) {
-    const event = mockEvents.find((e) => e.id === eventId);
-    if (!event) throw new Error('Event not found');
-    return event;
-  }
-
-  const response = await apiClient.get(`/me/events/${eventId}`);
-  return response.data;
+  // Events endpoint not yet available in v1 plugin - use mock data
+  const event = mockEvents.find((e) => e.id === eventId);
+  if (!event) throw new Error('Event not found');
+  return event;
 };
 
 /**
  * Get calendar data (dots/markers for each day)
+ *
+ * Note: This endpoint is not yet implemented in the v1 WordPress plugin.
+ * Currently returns mock data. Will use API when available.
  */
 export const getCalendarData = async (
   year: number,
   month: number
 ): Promise<CalendarDayData[]> => {
-  if (apiConfig.demoMode) {
-    return getMockCalendarData(year, month);
-  }
-
-  const response = await apiClient.get(`/me/events/calendar?year=${year}&month=${month}`);
-  return response.data;
+  // Events endpoint not yet available in v1 plugin - use mock data
+  return getMockCalendarData(year, month);
 };
 
 /**
  * Get post-event recommendations
  * Shows upsell for private training after camp/clinic
+ *
+ * Note: This endpoint is not yet implemented in the v1 WordPress plugin.
+ * Currently returns mock data. Will use API when available.
  */
 export const getPostEventRecommendations = async (
   eventId: number
 ): Promise<PostEventRecommendation | null> => {
-  if (apiConfig.demoMode) {
-    return getMockRecommendation(eventId);
-  }
-
-  const response = await apiClient.get(`/me/events/${eventId}/recommendations`);
-  return response.data;
+  // Events endpoint not yet available in v1 plugin - use mock data
+  return getMockRecommendation(eventId);
 };
 
 /**

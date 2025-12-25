@@ -172,10 +172,10 @@ const PrivateTrainingScreen: React.FC = () => {
           </PTPText>
 
           <View style={styles.trainerSpecialties}>
-            {(item.specialties || []).slice(0, 3).map((specialty) => (
+            {(Array.isArray(item.specialties) ? item.specialties : []).slice(0, 3).map((specialty) => (
               <PTPTag
                 key={specialty}
-                label={specialty.replace(/-/g, ' ')}
+                label={String(specialty).replace(/-/g, ' ')}
                 size="small"
               />
             ))}
