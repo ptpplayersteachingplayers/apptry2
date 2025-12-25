@@ -38,8 +38,8 @@ export const apiConfig = {
   // Base URL for the WordPress site
   baseUrl: expoConfig.API_BASE_URL || process.env.API_BASE_URL || 'https://ptpsummercamps.com',
 
-  // API namespace for PTP endpoints (v2 for new training platform)
-  namespace: expoConfig.MOBILE_API_NAMESPACE || process.env.MOBILE_API_NAMESPACE || '/wp-json/ptp/v2',
+  // API namespace for PTP endpoints (v1 for WordPress plugin)
+  namespace: expoConfig.MOBILE_API_NAMESPACE || process.env.MOBILE_API_NAMESPACE || '/wp-json/ptp/v1',
 
   // JWT Auth endpoint (WordPress JWT plugin)
   jwtAuthEndpoint: '/wp-json/jwt-auth/v1/token',

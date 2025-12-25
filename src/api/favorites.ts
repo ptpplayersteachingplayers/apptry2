@@ -33,63 +33,53 @@ export interface FavoriteTrainer {
 /**
  * Get all favorite trainers for the current user
  *
- * GET /wp-json/ptp/v2/favorites
+ * Note: Favorites endpoint is not yet implemented in the v1 WordPress plugin.
+ * Currently returns mock data. Will use API when available.
  */
 export const getFavorites = async (): Promise<FavoriteTrainer[]> => {
-  if (apiConfig.demoMode) {
-    return mockFavorites;
-  }
-
-  const response = await apiClient.get('/favorites');
-  return (response.data.favorites || response.data || []).map(mapFavorite);
+  // Favorites endpoints not yet available in v1 plugin - use mock data
+  return mockFavorites;
 };
 
 /**
  * Add a trainer to favorites
  *
- * POST /wp-json/ptp/v2/favorites/:trainer_id
+ * Note: Favorites endpoint is not yet implemented in the v1 WordPress plugin.
+ * Currently uses local mock data. Will use API when available.
  */
 export const addFavorite = async (trainerId: number): Promise<{ success: boolean; message: string }> => {
-  if (apiConfig.demoMode) {
-    // Add to mock if not already there
-    const exists = mockFavorites.find(f => f.trainerId === trainerId);
-    if (!exists) {
-      mockFavorites.push({
-        id: Date.now(),
-        trainerId,
-        name: 'Trainer',
-        photo: '',
-        location: 'Philadelphia, PA',
-        rating: 5.0,
-        reviewCount: 0,
-        hourlyRate: 80,
-        specialties: [],
-        addedAt: new Date().toISOString(),
-      });
-    }
-    return { success: true, message: 'Trainer added to favorites' };
+  // Favorites endpoints not yet available in v1 plugin - use mock data
+  const exists = mockFavorites.find(f => f.trainerId === trainerId);
+  if (!exists) {
+    mockFavorites.push({
+      id: Date.now(),
+      trainerId,
+      name: 'Trainer',
+      photo: '',
+      location: 'Philadelphia, PA',
+      rating: 5.0,
+      reviewCount: 0,
+      hourlyRate: 80,
+      specialties: [],
+      addedAt: new Date().toISOString(),
+    });
   }
-
-  const response = await apiClient.post(`/favorites/${trainerId}`);
-  return response.data;
+  return { success: true, message: 'Trainer added to favorites' };
 };
 
 /**
  * Remove a trainer from favorites
  *
- * DELETE /wp-json/ptp/v2/favorites/:trainer_id
+ * Note: Favorites endpoint is not yet implemented in the v1 WordPress plugin.
+ * Currently uses local mock data. Will use API when available.
  */
 export const removeFavorite = async (trainerId: number): Promise<{ success: boolean; message: string }> => {
-  if (apiConfig.demoMode) {
-    const index = mockFavorites.findIndex(f => f.trainerId === trainerId);
-    if (index !== -1) {
-      mockFavorites.splice(index, 1);
-    }
-    return { success: true, message: 'Trainer removed from favorites' };
+  // Favorites endpoints not yet available in v1 plugin - use mock data
+  const index = mockFavorites.findIndex(f => f.trainerId === trainerId);
+  if (index !== -1) {
+    mockFavorites.splice(index, 1);
   }
-
-  const response = await apiClient.delete(`/favorites/${trainerId}`);
-  return response.data;
+  return { success: true, message: 'Trainer removed from favorites' };
 };
 
 /**

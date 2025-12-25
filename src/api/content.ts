@@ -50,65 +50,36 @@ export interface ServiceLocation {
 /**
  * Get FAQ content
  *
- * GET /wp-json/ptp/v2/content/faq
+ * Note: This endpoint is not yet implemented in the v1 WordPress plugin.
+ * Currently returns mock data. Will use API when available.
  */
 export const getFAQ = async (category?: string): Promise<FAQItem[]> => {
-  if (apiConfig.demoMode) {
-    return category
-      ? mockFAQ.filter(f => f.category === category)
-      : mockFAQ;
-  }
-
-  const params = category ? `?category=${category}` : '';
-  const response = await apiClient.get(`/content/faq${params}`);
-  return (response.data.faq || response.data || []).map((item: any) => ({
-    id: item.id,
-    question: item.question,
-    answer: item.answer,
-    category: item.category,
-    order: item.order || 0,
-  }));
+  // Content endpoints not yet available in v1 plugin - use mock data
+  return category
+    ? mockFAQ.filter(f => f.category === category)
+    : mockFAQ;
 };
 
 /**
  * Get training specialties
  *
- * GET /wp-json/ptp/v2/content/specialties
+ * Note: This endpoint is not yet implemented in the v1 WordPress plugin.
+ * Currently returns mock data. Will use API when available.
  */
 export const getSpecialties = async (): Promise<Specialty[]> => {
-  if (apiConfig.demoMode) {
-    return mockSpecialties;
-  }
-
-  const response = await apiClient.get('/content/specialties');
-  return (response.data.specialties || response.data || []).map((item: any) => ({
-    id: item.id || item.slug,
-    name: item.name,
-    description: item.description,
-    icon: item.icon,
-  }));
+  // Content endpoints not yet available in v1 plugin - use mock data
+  return mockSpecialties;
 };
 
 /**
  * Get service locations/markets
  *
- * GET /wp-json/ptp/v2/content/locations
+ * Note: This endpoint is not yet implemented in the v1 WordPress plugin.
+ * Currently returns mock data. Will use API when available.
  */
 export const getServiceLocations = async (): Promise<ServiceLocation[]> => {
-  if (apiConfig.demoMode) {
-    return mockLocations;
-  }
-
-  const response = await apiClient.get('/content/locations');
-  return (response.data.locations || response.data || []).map((item: any) => ({
-    id: item.id,
-    name: item.name,
-    slug: item.slug,
-    city: item.city,
-    state: item.state,
-    zipCodes: item.zip_codes,
-    isActive: item.is_active !== false,
-  }));
+  // Content endpoints not yet available in v1 plugin - use mock data
+  return mockLocations;
 };
 
 // ============================================================
