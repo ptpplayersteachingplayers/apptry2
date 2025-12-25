@@ -2,6 +2,7 @@
  * PTP Soccer Theme System
  *
  * Central export for all theme-related values and components.
+ * Design: Nike Training Club x Flex Work x Uber-style booking
  */
 
 export * from './colors';

@@ -24,7 +24,7 @@ import { useAuth, useParentUser } from '../../hooks/useAuth';
 import { useNotificationContext } from '../../providers';
 import { PTPText, PTPButton } from '../../components';
 import { colors } from '../../theme/colors';
-import { spacing, borderRadius, shadows } from '../../theme/spacing';
+import { spacing } from '../../theme/spacing';
 import { deleteAccount } from '../../api/auth';
 
 type AccountNavigationProp = NativeStackNavigationProp<ParentStackParamList>;
@@ -57,18 +57,18 @@ const MenuItem: React.FC<MenuItemProps> = ({
       <Ionicons
         name={iconName}
         size={20}
-        color={danger ? colors.error : colors.inkBlack}
+        color={danger ? colors.error : colors.white}
       />
     </View>
     <View style={styles.menuItemContent}>
       <PTPText
         variant="buttonMedium"
-        color={danger ? 'error' : 'inkBlack'}
+        color={danger ? 'error' : 'white'}
       >
         {title}
       </PTPText>
       {subtitle && (
-        <PTPText variant="caption" color="gray500">
+        <PTPText variant="caption" color="gray300">
           {subtitle}
         </PTPText>
       )}
@@ -81,7 +81,7 @@ const MenuItem: React.FC<MenuItemProps> = ({
       </View>
     )}
     {showArrow && (
-      <Ionicons name="chevron-forward" size={18} color={colors.gray400} />
+      <Ionicons name="chevron-forward" size={18} color={colors.gray500} />
     )}
   </TouchableOpacity>
 );
@@ -245,9 +245,9 @@ const AccountScreen: React.FC = () => {
             </TouchableOpacity>
           </View>
           <PTPText variant="sectionTitle">
-            {parentUser?.firstName || 'User'} {parentUser?.lastName || ''}
+            {parentUser?.firstName?.toUpperCase() || 'USER'} {parentUser?.lastName?.toUpperCase() || ''}
           </PTPText>
-          <PTPText variant="body" color="gray500">
+          <PTPText variant="body" color="gray300">
             {parentUser?.email || 'No email'}
           </PTPText>
 
@@ -257,8 +257,8 @@ const AccountScreen: React.FC = () => {
               <PTPText variant="sectionTitle" color="primary">
                 {childCount}
               </PTPText>
-              <PTPText variant="caption" color="gray500">
-                {childCount === 1 ? 'Player' : 'Players'}
+              <PTPText variant="caption" color="gray300">
+                {childCount === 1 ? 'PLAYER' : 'PLAYERS'}
               </PTPText>
             </View>
             <View style={styles.statDivider} />
@@ -266,14 +266,14 @@ const AccountScreen: React.FC = () => {
               <PTPText variant="sectionTitle" color={unreadCount > 0 ? 'error' : 'primary'}>
                 {unreadCount}
               </PTPText>
-              <PTPText variant="caption" color="gray500">
-                Unread
+              <PTPText variant="caption" color="gray300">
+                UNREAD
               </PTPText>
             </TouchableOpacity>
             <View style={styles.statDivider} />
             <TouchableOpacity style={styles.statItem} onPress={handleLocationSettings}>
               <Ionicons name="location" size={20} color={colors.primary} />
-              <PTPText variant="caption" color="gray500" numberOfLines={1}>
+              <PTPText variant="caption" color="gray300" numberOfLines={1}>
                 {locationText || 'Set location'}
               </PTPText>
             </TouchableOpacity>
@@ -307,8 +307,8 @@ const AccountScreen: React.FC = () => {
                     </PTPText>
                   </View>
                   <View style={styles.childInfo}>
-                    <PTPText variant="buttonMedium">{child.firstName || 'Player'}</PTPText>
-                    <PTPText variant="caption" color="gray500">
+                    <PTPText variant="buttonMedium">{child.firstName?.toUpperCase() || 'PLAYER'}</PTPText>
+                    <PTPText variant="caption" color="gray300">
                       {[child.ageBand, child.skillLevel, child.position].filter(Boolean).join(' • ') || 'Tap to edit'}
                     </PTPText>
                   </View>
@@ -318,16 +318,16 @@ const AccountScreen: React.FC = () => {
             ) : (
               <View style={styles.emptyChildren}>
                 <View style={styles.emptyIcon}>
-                  <Ionicons name="people-outline" size={32} color={colors.gray300} />
+                  <Ionicons name="people-outline" size={32} color={colors.gray500} />
                 </View>
-                <PTPText variant="body" color="gray500" center>
-                  No players added yet
+                <PTPText variant="body" color="gray300" center>
+                  NO PLAYERS ADDED YET
                 </PTPText>
-                <PTPText variant="caption" color="gray400" center style={styles.emptyHint}>
+                <PTPText variant="caption" color="gray500" center style={styles.emptyHint}>
                   Add your players to register for camps and training
                 </PTPText>
                 <PTPButton
-                  title="Add Player"
+                  title="ADD PLAYER"
                   variant="primary"
                   size="small"
                   onPress={handleAddChild}
@@ -473,12 +473,12 @@ const AccountScreen: React.FC = () => {
 // Helper function to get different colors for child avatars
 const getAvatarColor = (index: number): string => {
   const colorPalette = [
-    colors.inkBlack,
     colors.primary,
     colors.info,
     colors.success,
     '#8B5CF6', // purple
     '#EC4899', // pink
+    colors.gray500,
   ];
   return colorPalette[index % colorPalette.length];
 };
@@ -486,7 +486,7 @@ const getAvatarColor = (index: number): string => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.offWhite,
+    backgroundColor: colors.black,
   },
   scrollView: {
     flex: 1,
@@ -498,9 +498,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: spacing[6],
     paddingHorizontal: spacing[4],
-    backgroundColor: colors.white,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.gray100,
+    backgroundColor: colors.blackCard,
+    borderBottomWidth: 2,
+    borderBottomColor: colors.gray700,
   },
   profileHeaderTop: {
     position: 'relative',
@@ -509,7 +509,7 @@ const styles = StyleSheet.create({
   avatar: {
     width: 88,
     height: 88,
-    borderRadius: 44,
+    borderRadius: 0,
     backgroundColor: colors.primary,
     justifyContent: 'center',
     alignItems: 'center',
@@ -517,7 +517,7 @@ const styles = StyleSheet.create({
   avatarText: {
     fontSize: 32,
     fontWeight: '700',
-    color: colors.inkBlack,
+    color: colors.black,
   },
   avatarEditBadge: {
     position: 'absolute',
@@ -525,12 +525,12 @@ const styles = StyleSheet.create({
     right: 0,
     width: 28,
     height: 28,
-    borderRadius: 14,
-    backgroundColor: colors.inkBlack,
+    borderRadius: 0,
+    backgroundColor: colors.white,
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 2,
-    borderColor: colors.white,
+    borderColor: colors.black,
   },
   statsRow: {
     flexDirection: 'row',
@@ -544,7 +544,7 @@ const styles = StyleSheet.create({
   },
   statDivider: {
     width: 1,
-    backgroundColor: colors.gray200,
+    backgroundColor: colors.gray700,
     marginVertical: spacing[1],
   },
   section: {
@@ -563,29 +563,30 @@ const styles = StyleSheet.create({
     marginLeft: spacing[1],
   },
   card: {
-    backgroundColor: colors.white,
-    borderRadius: borderRadius.lg,
+    backgroundColor: colors.blackCard,
+    borderRadius: 0,
+    borderWidth: 2,
+    borderColor: colors.gray700,
     overflow: 'hidden',
-    ...shadows.sm,
   },
   menuItem: {
     flexDirection: 'row',
     alignItems: 'center',
     padding: spacing[4],
     borderBottomWidth: 1,
-    borderBottomColor: colors.gray100,
+    borderBottomColor: colors.gray700,
   },
   menuItemIcon: {
     width: 36,
     height: 36,
-    borderRadius: 18,
-    backgroundColor: colors.gray100,
+    borderRadius: 0,
+    backgroundColor: colors.gray700,
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: spacing[3],
   },
   menuItemIconDanger: {
-    backgroundColor: colors.errorLight,
+    backgroundColor: 'rgba(239, 68, 68, 0.2)',
   },
   menuItemContent: {
     flex: 1,
@@ -597,13 +598,13 @@ const styles = StyleSheet.create({
   },
   childItemBorder: {
     borderBottomWidth: 1,
-    borderBottomColor: colors.gray100,
+    borderBottomColor: colors.gray700,
   },
   childAvatar: {
     width: 44,
     height: 44,
-    borderRadius: 22,
-    backgroundColor: colors.inkBlack,
+    borderRadius: 0,
+    backgroundColor: colors.primary,
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: spacing[3],
@@ -618,8 +619,8 @@ const styles = StyleSheet.create({
   emptyIcon: {
     width: 64,
     height: 64,
-    borderRadius: 32,
-    backgroundColor: colors.gray100,
+    borderRadius: 0,
+    backgroundColor: colors.gray700,
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: spacing[3],
@@ -635,7 +636,7 @@ const styles = StyleSheet.create({
     padding: spacing[4],
     alignItems: 'center',
     borderTopWidth: 1,
-    borderTopColor: colors.gray100,
+    borderTopColor: colors.gray700,
   },
   versionInfo: {
     marginTop: spacing[6],
@@ -644,7 +645,7 @@ const styles = StyleSheet.create({
   },
   badge: {
     backgroundColor: colors.error,
-    borderRadius: 10,
+    borderRadius: 0,
     minWidth: 20,
     height: 20,
     justifyContent: 'center',

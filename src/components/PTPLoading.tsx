@@ -1,7 +1,7 @@
 /**
  * PTPLoading Components
  *
- * Loading indicators and skeleton loaders for the app.
+ * Dark themed loading indicators and skeleton loaders.
  */
 
 import React from 'react';
@@ -19,17 +19,8 @@ import { colors } from '../theme/colors';
 import { spacing, borderRadius } from '../theme/spacing';
 
 interface PTPLoadingProps {
-  /**
-   * Loading message
-   */
   message?: string;
-  /**
-   * Size of the indicator
-   */
   size?: 'small' | 'large';
-  /**
-   * Custom style
-   */
   style?: ViewStyle;
 }
 
@@ -45,7 +36,7 @@ export const PTPLoading: React.FC<PTPLoadingProps> = ({
     <View style={[styles.container, style]}>
       <ActivityIndicator size={size} color={colors.primary} />
       {message && (
-        <PTPText variant="body" color="gray500" style={styles.message}>
+        <PTPText variant="body" color="gray300" style={styles.message}>
           {message}
         </PTPText>
       )}
@@ -62,13 +53,28 @@ export const PTPLoadingOverlay: React.FC<PTPLoadingProps> = ({ message }) => {
       <View style={styles.overlayContent}>
         <ActivityIndicator size="large" color={colors.primary} />
         {message && (
-          <PTPText variant="body" color="white" style={styles.message}>
+          <PTPText variant="body" style={styles.message}>
             {message}
           </PTPText>
         )}
       </View>
     </View>
   );
+};
+
+/**
+ * PTPLoadingInline - Inline loading for buttons/sections
+ */
+interface PTPLoadingInlineProps {
+  size?: 'small' | 'large';
+  color?: string;
+}
+
+export const PTPLoadingInline: React.FC<PTPLoadingInlineProps> = ({
+  size = 'small',
+  color = colors.primary,
+}) => {
+  return <ActivityIndicator size={size} color={color} />;
 };
 
 /**
@@ -84,7 +90,7 @@ interface PTPSkeletonProps {
 export const PTPSkeleton: React.FC<PTPSkeletonProps> = ({
   width = '100%',
   height = 20,
-  borderRadius: customBorderRadius = borderRadius.base,
+  borderRadius: customBorderRadius = borderRadius.none,
   style,
 }) => {
   const animatedValue = React.useRef(new Animated.Value(0)).current;
@@ -112,7 +118,7 @@ export const PTPSkeleton: React.FC<PTPSkeletonProps> = ({
 
   const opacity = animatedValue.interpolate({
     inputRange: [0, 1],
-    outputRange: [0.3, 0.7],
+    outputRange: [0.3, 0.6],
   });
 
   return (
@@ -137,7 +143,7 @@ export const PTPSkeleton: React.FC<PTPSkeletonProps> = ({
 export const PTPCardSkeleton: React.FC<{ style?: ViewStyle }> = ({ style }) => {
   return (
     <View style={[styles.cardSkeleton, style]}>
-      <PTPSkeleton height={160} borderRadius={borderRadius.lg} />
+      <PTPSkeleton height={160} />
       <View style={styles.cardSkeletonContent}>
         <PTPSkeleton width="80%" height={20} />
         <PTPSkeleton width="60%" height={16} style={{ marginTop: spacing[2] }} />
@@ -148,21 +154,49 @@ export const PTPCardSkeleton: React.FC<{ style?: ViewStyle }> = ({ style }) => {
 };
 
 /**
+ * PTPTrainerCardSkeleton - Skeleton for trainer cards
+ */
+export const PTPTrainerCardSkeleton: React.FC<{ style?: ViewStyle }> = ({ style }) => {
+  return (
+    <View style={[styles.trainerCardSkeleton, style]}>
+      <PTPSkeleton width={100} height={120} />
+      <View style={styles.trainerSkeletonContent}>
+        <PTPSkeleton width="70%" height={20} />
+        <PTPSkeleton width="50%" height={14} style={{ marginTop: spacing[2] }} />
+        <View style={styles.trainerSkeletonTags}>
+          <PTPSkeleton width={60} height={20} />
+          <PTPSkeleton width={60} height={20} />
+          <PTPSkeleton width={60} height={20} />
+        </View>
+        <View style={styles.trainerSkeletonFooter}>
+          <PTPSkeleton width={80} height={16} />
+          <PTPSkeleton width={60} height={20} />
+        </View>
+      </View>
+    </View>
+  );
+};
+
+/**
  * PTPListSkeleton - Skeleton for list loading state
  */
 interface PTPListSkeletonProps {
   count?: number;
+  type?: 'card' | 'trainer';
   style?: ViewStyle;
 }
 
 export const PTPListSkeleton: React.FC<PTPListSkeletonProps> = ({
   count = 3,
+  type = 'card',
   style,
 }) => {
+  const SkeletonComponent = type === 'trainer' ? PTPTrainerCardSkeleton : PTPCardSkeleton;
+
   return (
     <View style={style}>
       {Array.from({ length: count }).map((_, index) => (
-        <PTPCardSkeleton key={index} style={{ marginBottom: spacing[3] }} />
+        <SkeletonComponent key={index} style={{ marginBottom: spacing[3] }} />
       ))}
     </View>
   );
@@ -173,7 +207,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: colors.offWhite,
+    backgroundColor: colors.black,
   },
   message: {
     marginTop: spacing[4],
@@ -181,26 +215,52 @@ const styles = StyleSheet.create({
   },
   overlay: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    backgroundColor: colors.overlayDark,
     justifyContent: 'center',
     alignItems: 'center',
   },
   overlayContent: {
-    backgroundColor: colors.inkBlack,
+    backgroundColor: colors.blackCard,
     padding: spacing[6],
-    borderRadius: borderRadius.lg,
+    borderRadius: borderRadius.none,
+    borderWidth: 2,
+    borderColor: colors.gray700,
     alignItems: 'center',
   },
   skeleton: {
-    backgroundColor: colors.gray200,
+    backgroundColor: colors.gray700,
   },
   cardSkeleton: {
-    backgroundColor: colors.white,
-    borderRadius: borderRadius.lg,
+    backgroundColor: colors.blackCard,
+    borderRadius: borderRadius.none,
+    borderWidth: 2,
+    borderColor: colors.gray700,
     overflow: 'hidden',
   },
   cardSkeletonContent: {
     padding: spacing[4],
+  },
+  trainerCardSkeleton: {
+    backgroundColor: colors.blackCard,
+    borderRadius: borderRadius.none,
+    borderWidth: 2,
+    borderColor: colors.gray700,
+    flexDirection: 'row',
+    overflow: 'hidden',
+  },
+  trainerSkeletonContent: {
+    flex: 1,
+    padding: spacing[4],
+  },
+  trainerSkeletonTags: {
+    flexDirection: 'row',
+    gap: spacing[2],
+    marginTop: spacing[3],
+  },
+  trainerSkeletonFooter: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: spacing[3],
   },
 });
 

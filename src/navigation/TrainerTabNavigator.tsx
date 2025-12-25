@@ -58,7 +58,7 @@ export const TrainerTabNavigator: React.FC = () => {
         name="TrainerDashboard"
         component={TrainerDashboardScreen}
         options={{
-          tabBarLabel: 'Dashboard',
+          tabBarLabel: 'DASHBOARD',
           tabBarAccessibilityLabel: 'Dashboard tab',
         }}
       />
@@ -66,7 +66,7 @@ export const TrainerTabNavigator: React.FC = () => {
         name="TrainerSchedule"
         component={TrainerScheduleScreen}
         options={{
-          tabBarLabel: 'Schedule',
+          tabBarLabel: 'SCHEDULE',
           tabBarAccessibilityLabel: 'Schedule tab',
         }}
       />
@@ -74,7 +74,7 @@ export const TrainerTabNavigator: React.FC = () => {
         name="TrainerStudents"
         component={TrainerStudentsScreen}
         options={{
-          tabBarLabel: 'Students',
+          tabBarLabel: 'STUDENTS',
           tabBarAccessibilityLabel: 'Students tab',
         }}
       />
@@ -82,7 +82,7 @@ export const TrainerTabNavigator: React.FC = () => {
         name="TrainerMessages"
         component={TrainerMessagesScreen}
         options={{
-          tabBarLabel: 'Messages',
+          tabBarLabel: 'MESSAGES',
           tabBarAccessibilityLabel: 'Messages tab',
         }}
       />
@@ -90,7 +90,7 @@ export const TrainerTabNavigator: React.FC = () => {
         name="TrainerProfile"
         component={TrainerProfileScreen}
         options={{
-          tabBarLabel: 'Profile',
+          tabBarLabel: 'PROFILE',
           tabBarAccessibilityLabel: 'Profile and Settings tab',
         }}
       />
@@ -100,16 +100,18 @@ export const TrainerTabNavigator: React.FC = () => {
 
 const styles = StyleSheet.create({
   tabBar: {
-    backgroundColor: colors.white,
-    borderTopColor: colors.gray200,
+    backgroundColor: colors.black,
+    borderTopColor: colors.gray700,
     borderTopWidth: 1,
     height: layoutSpacing.tabBarHeight,
     paddingTop: spacing[2],
     paddingBottom: spacing[5],
   },
   tabBarLabel: {
-    fontFamily: fontFamily.medium,
+    fontFamily: fontFamily.heading,
     fontSize: fontSize.xs,
+    letterSpacing: 0.5,
+    textTransform: 'uppercase',
   },
 });
 

@@ -1,92 +1,134 @@
 /**
  * PTP Soccer Brand Colors
  *
- * Use these colors consistently across all screens and components.
- * Primary colors create the high-energy soccer feel with bold accents.
+ * Design inspiration: Nike Training Club x Flex Work x Uber-style booking
+ * Dark mode first with bold gold accents
  */
 
 export const colors = {
-  // Primary Brand Colors
-  primary: '#FCB900', // PTP Yellow - main accent color
-  primaryDark: '#D9A000', // Darker yellow for pressed states
-  primaryLight: '#FFD54F', // Lighter yellow for highlights
+  // Primary - PTP Gold
+  primary: '#FCB900',
+  primaryHover: '#E5A800',
+  primaryLight: 'rgba(252, 185, 0, 0.1)',
+  primaryGlow: 'rgba(252, 185, 0, 0.3)',
 
-  // Neutrals
-  inkBlack: '#0E0F11', // Primary dark background
-  offWhite: '#F4F3F0', // Primary light background
+  // Backgrounds - Dark Mode First
+  black: '#0A0A0A',
+  blackLight: '#111111',
+  blackCard: '#1A1A1A',
+  blackElevated: '#222222',
+
+  // Text Colors
   white: '#FFFFFF',
-  black: '#000000',
+  gray100: '#F5F5F5',
+  gray300: '#A0A0A0',
+  gray500: '#6B6B6B',
+  gray700: '#333333',
 
-  // Grays
-  gray50: '#F9FAFB',
-  gray100: '#F3F4F6',
-  gray200: '#E5E7EB', // Border Gray
-  gray300: '#D1D5DB',
-  gray400: '#9CA3AF',
-  gray500: '#6B7280', // Muted Gray - secondary text
-  gray600: '#4B5563',
-  gray700: '#374151',
-  gray800: '#1F2937',
-  gray900: '#111827',
-
-  // Semantic Colors
-  success: '#10B981',
-  successLight: '#D1FAE5',
-  warning: '#F59E0B',
-  warningLight: '#FEF3C7',
+  // Status Colors
+  success: '#22C55E',
+  successLight: 'rgba(34, 197, 94, 0.1)',
   error: '#EF4444',
-  errorLight: '#FEE2E2',
+  errorLight: 'rgba(239, 68, 68, 0.1)',
+  warning: '#F59E0B',
+  warningLight: 'rgba(245, 158, 11, 0.1)',
   info: '#3B82F6',
-  infoLight: '#DBEAFE',
+  infoLight: 'rgba(59, 130, 246, 0.1)',
 
-  // Camp/Clinic Status Colors
-  almostFull: '#F97316', // Orange for urgency
-  bestseller: '#8B5CF6', // Purple for bestseller badge
-  available: '#10B981', // Green for available
+  // Camp/Clinic Status
+  almostFull: '#F97316',
+  bestseller: '#8B5CF6',
+  available: '#22C55E',
 
-  // Overlay Colors (for hero images)
-  overlayDark: 'rgba(14, 15, 17, 0.6)',
-  overlayLight: 'rgba(14, 15, 17, 0.3)',
-  overlayGradientStart: 'rgba(14, 15, 17, 0.8)',
-  overlayGradientEnd: 'rgba(14, 15, 17, 0)',
+  // Overlays
+  overlay: 'rgba(0, 0, 0, 0.5)',
+  overlayDark: 'rgba(10, 10, 10, 0.8)',
+  overlayLight: 'rgba(10, 10, 10, 0.4)',
 
   // Transparent
   transparent: 'transparent',
 } as const;
 
-// Type for accessing color keys
 export type ColorName = keyof typeof colors;
 
-// Semantic color mappings for common use cases
+// Semantic color mappings for the dark theme
 export const semanticColors = {
   // Backgrounds
-  backgroundPrimary: colors.offWhite,
-  backgroundSecondary: colors.white,
-  backgroundDark: colors.inkBlack,
+  backgroundPrimary: colors.black,
+  backgroundSecondary: colors.blackLight,
+  backgroundCard: colors.blackCard,
+  backgroundElevated: colors.blackElevated,
 
   // Text
-  textPrimary: colors.inkBlack,
-  textSecondary: colors.gray500,
-  textInverse: colors.white,
+  textPrimary: colors.white,
+  textSecondary: colors.gray300,
+  textMuted: colors.gray500,
   textAccent: colors.primary,
+  textInverse: colors.black,
 
   // Borders
-  border: colors.gray200,
+  border: colors.gray700,
   borderFocused: colors.primary,
+  borderCard: colors.gray700,
 
   // Buttons
   buttonPrimary: colors.primary,
-  buttonPrimaryText: colors.inkBlack,
-  buttonSecondary: colors.inkBlack,
+  buttonPrimaryHover: colors.primaryHover,
+  buttonPrimaryText: colors.black,
+  buttonSecondary: colors.transparent,
+  buttonSecondaryBorder: colors.primary,
   buttonSecondaryText: colors.white,
-  buttonDisabled: colors.gray300,
+  buttonDisabled: colors.gray700,
+  buttonDisabledText: colors.gray500,
+
+  // Inputs
+  inputBackground: colors.blackLight,
+  inputBorder: colors.gray700,
+  inputBorderFocus: colors.primary,
+  inputText: colors.white,
+  inputPlaceholder: colors.gray500,
 
   // Cards
-  cardBackground: colors.white,
-  cardBorder: colors.gray200,
+  cardBackground: colors.blackCard,
+  cardBorder: colors.gray700,
+  cardBorderHover: colors.primary,
 
   // Tab Bar
   tabBarActive: colors.primary,
   tabBarInactive: colors.gray500,
-  tabBarBackground: colors.white,
+  tabBarBackground: colors.black,
+
+  // Navigation
+  navBackground: colors.black,
+  navBorder: colors.gray700,
 } as const;
+
+// CSS-style color tokens for reference
+export const cssColors = `
+:root {
+  /* Primary */
+  --ptp-gold: #FCB900;
+  --ptp-gold-hover: #E5A800;
+  --ptp-gold-light: rgba(252, 185, 0, 0.1);
+  --ptp-gold-glow: rgba(252, 185, 0, 0.3);
+
+  /* Backgrounds */
+  --ptp-black: #0A0A0A;
+  --ptp-black-light: #111111;
+  --ptp-black-card: #1A1A1A;
+  --ptp-black-elevated: #222222;
+
+  /* Text */
+  --ptp-white: #FFFFFF;
+  --ptp-gray-100: #F5F5F5;
+  --ptp-gray-300: #A0A0A0;
+  --ptp-gray-500: #6B6B6B;
+  --ptp-gray-700: #333333;
+
+  /* Status */
+  --ptp-success: #22C55E;
+  --ptp-error: #EF4444;
+  --ptp-warning: #F59E0B;
+  --ptp-info: #3B82F6;
+}
+`;

@@ -1,144 +1,142 @@
 /**
  * PTPCard Component
  *
- * Branded card component for displaying content with optional image.
- * Used for program cards, trainer cards, and event cards.
+ * Sharp-edged card with 2px borders and gold hover states.
+ * Dark theme with elevated surfaces.
  */
 
-import React from 'react';
+import React, { useRef } from 'react';
 import {
   View,
-  TouchableOpacity,
+  Pressable,
   StyleSheet,
   Image,
   ImageBackground,
   ViewStyle,
+  Animated,
 } from 'react-native';
 import { PTPText } from './PTPText';
 import { PTPTag } from './PTPTag';
-import { colors } from '../theme/colors';
-import { spacing, borderRadius, shadows } from '../theme/spacing';
+import { colors, semanticColors } from '../theme/colors';
+import { spacing, borderRadius, borderWidth, shadows } from '../theme/spacing';
 
 interface PTPCardProps {
-  /**
-   * Card title
-   */
-  title: string;
-  /**
-   * Card subtitle
-   */
+  title?: string;
   subtitle?: string;
-  /**
-   * Image URL for card header
-   */
   imageUrl?: string;
-  /**
-   * Use image as full background
-   */
   imageBackground?: boolean;
-  /**
-   * Card footer content
-   */
+  imageHeight?: number;
   footer?: React.ReactNode;
-  /**
-   * Tags to display
-   */
   tags?: { label: string; variant?: 'default' | 'primary' | 'success' | 'warning' | 'danger' }[];
-  /**
-   * Right side content (e.g., price)
-   */
   rightContent?: React.ReactNode;
-  /**
-   * Press handler
-   */
   onPress?: () => void;
-  /**
-   * Custom style
-   */
   style?: ViewStyle;
-  /**
-   * Children content
-   */
   children?: React.ReactNode;
+  elevated?: boolean;
 }
 
 /**
- * PTPCard - Branded card component
- *
- * @example
- * <PTPCard
- *   title="Winter Skills Intensive"
- *   subtitle="Dec 28 • 9:00 AM – 12:00 PM"
- *   imageUrl={heroImage}
- *   tags={[{ label: 'Almost Full', variant: 'warning' }]}
- *   onPress={() => navigate('ProgramDetail', { programId: 1 })}
- * />
+ * PTPCard - Sharp-edged card with dark theme
  */
 export const PTPCard: React.FC<PTPCardProps> = ({
   title,
   subtitle,
   imageUrl,
   imageBackground = false,
+  imageHeight = 200,
   footer,
   tags,
   rightContent,
   onPress,
   style,
   children,
+  elevated = false,
 }) => {
-  const Wrapper = onPress ? TouchableOpacity : View;
+  const scale = useRef(new Animated.Value(1)).current;
+  const borderColor = useRef(new Animated.Value(0)).current;
+
+  const handlePressIn = () => {
+    Animated.parallel([
+      Animated.spring(scale, {
+        toValue: 0.98,
+        useNativeDriver: true,
+        tension: 100,
+        friction: 10,
+      }),
+    ]).start();
+  };
+
+  const handlePressOut = () => {
+    Animated.parallel([
+      Animated.spring(scale, {
+        toValue: 1,
+        useNativeDriver: true,
+        tension: 100,
+        friction: 10,
+      }),
+    ]).start();
+  };
+
+  const cardStyle = [
+    styles.card,
+    elevated && styles.elevated,
+    style,
+  ];
 
   if (imageBackground && imageUrl) {
     return (
-      <Wrapper
+      <Pressable
         onPress={onPress}
-        activeOpacity={0.9}
-        style={[styles.card, style]}
+        onPressIn={onPress ? handlePressIn : undefined}
+        onPressOut={onPress ? handlePressOut : undefined}
+        disabled={!onPress}
         accessibilityRole={onPress ? 'button' : undefined}
         accessibilityLabel={title}
       >
-        <ImageBackground
-          source={{ uri: imageUrl }}
-          style={styles.backgroundImage}
-          imageStyle={styles.backgroundImageStyle}
-        >
-          <View style={styles.overlay}>
-            <View style={styles.backgroundContent}>
-              {tags && tags.length > 0 && (
-                <View style={styles.tagsRow}>
-                  {tags.map((tag, index) => (
-                    <PTPTag key={index} label={tag.label} variant={tag.variant} size="small" />
-                  ))}
-                </View>
-              )}
-              <View style={styles.textContent}>
-                <PTPText variant="cardTitle" color="white" numberOfLines={2}>
-                  {title}
-                </PTPText>
-                {subtitle && (
-                  <PTPText variant="cardSubtitle" color="gray300" numberOfLines={1} style={styles.subtitle}>
-                    {subtitle}
-                  </PTPText>
+        <Animated.View style={[cardStyle, { transform: [{ scale }] }]}>
+          <ImageBackground
+            source={{ uri: imageUrl }}
+            style={[styles.backgroundImage, { height: imageHeight }]}
+            imageStyle={styles.backgroundImageStyle}
+          >
+            <View style={styles.overlay}>
+              <View style={styles.backgroundContent}>
+                {tags && tags.length > 0 && (
+                  <View style={styles.tagsRow}>
+                    {tags.map((tag, index) => (
+                      <PTPTag key={index} label={tag.label} variant={tag.variant} size="small" />
+                    ))}
+                  </View>
                 )}
+                <View style={styles.textContent}>
+                  {title && (
+                    <PTPText variant="cardTitle" numberOfLines={2}>
+                      {title}
+                    </PTPText>
+                  )}
+                  {subtitle && (
+                    <PTPText variant="cardSubtitle" color="gray300" numberOfLines={2} style={styles.subtitle}>
+                      {subtitle}
+                    </PTPText>
+                  )}
+                </View>
+                {rightContent && <View style={styles.rightContent}>{rightContent}</View>}
               </View>
-              {rightContent && <View style={styles.rightContent}>{rightContent}</View>}
             </View>
-          </View>
-        </ImageBackground>
-      </Wrapper>
+          </ImageBackground>
+        </Animated.View>
+      </Pressable>
     );
   }
 
-  return (
-    <Wrapper
-      onPress={onPress}
-      activeOpacity={0.9}
-      style={[styles.card, styles.cardWithShadow, style]}
-      accessibilityRole={onPress ? 'button' : undefined}
-      accessibilityLabel={title}
-    >
+  const content = (
+    <Animated.View style={[cardStyle, { transform: [{ scale }] }]}>
       {imageUrl && (
-        <Image source={{ uri: imageUrl }} style={styles.image} resizeMode="cover" />
+        <Image
+          source={{ uri: imageUrl }}
+          style={[styles.image, { height: imageHeight }]}
+          resizeMode="cover"
+        />
       )}
       <View style={styles.content}>
         {tags && tags.length > 0 && (
@@ -148,28 +146,182 @@ export const PTPCard: React.FC<PTPCardProps> = ({
             ))}
           </View>
         )}
-        <View style={styles.header}>
-          <View style={styles.textContent}>
-            <PTPText variant="cardTitle" numberOfLines={2}>
-              {title}
-            </PTPText>
-            {subtitle && (
-              <PTPText variant="cardSubtitle" color="gray500" numberOfLines={2} style={styles.subtitle}>
-                {subtitle}
-              </PTPText>
-            )}
+        {(title || rightContent) && (
+          <View style={styles.header}>
+            <View style={styles.textContent}>
+              {title && (
+                <PTPText variant="cardTitle" numberOfLines={2}>
+                  {title}
+                </PTPText>
+              )}
+              {subtitle && (
+                <PTPText variant="cardSubtitle" color="gray300" numberOfLines={2} style={styles.subtitle}>
+                  {subtitle}
+                </PTPText>
+              )}
+            </View>
+            {rightContent && <View style={styles.rightContent}>{rightContent}</View>}
           </View>
-          {rightContent && <View style={styles.rightContent}>{rightContent}</View>}
-        </View>
+        )}
         {children}
         {footer && <View style={styles.footer}>{footer}</View>}
       </View>
-    </Wrapper>
+    </Animated.View>
+  );
+
+  if (onPress) {
+    return (
+      <Pressable
+        onPress={onPress}
+        onPressIn={handlePressIn}
+        onPressOut={handlePressOut}
+        accessibilityRole="button"
+        accessibilityLabel={title}
+      >
+        {content}
+      </Pressable>
+    );
+  }
+
+  return content;
+};
+
+/**
+ * PTPSimpleCard - Basic card container without header
+ */
+interface PTPSimpleCardProps {
+  children: React.ReactNode;
+  onPress?: () => void;
+  style?: ViewStyle;
+  elevated?: boolean;
+}
+
+export const PTPSimpleCard: React.FC<PTPSimpleCardProps> = ({
+  children,
+  onPress,
+  style,
+  elevated = false,
+}) => {
+  const scale = useRef(new Animated.Value(1)).current;
+
+  const handlePressIn = () => {
+    Animated.spring(scale, {
+      toValue: 0.98,
+      useNativeDriver: true,
+    }).start();
+  };
+
+  const handlePressOut = () => {
+    Animated.spring(scale, {
+      toValue: 1,
+      useNativeDriver: true,
+    }).start();
+  };
+
+  const cardStyle = [
+    styles.simpleCard,
+    elevated && styles.elevated,
+    style,
+  ];
+
+  if (onPress) {
+    return (
+      <Pressable
+        onPress={onPress}
+        onPressIn={handlePressIn}
+        onPressOut={handlePressOut}
+      >
+        <Animated.View style={[cardStyle, { transform: [{ scale }] }]}>
+          {children}
+        </Animated.View>
+      </Pressable>
+    );
+  }
+
+  return <View style={cardStyle}>{children}</View>;
+};
+
+/**
+ * PTPTrainerCard - Card specifically for trainers
+ */
+interface PTPTrainerCardProps {
+  name: string;
+  team: string;
+  position: string;
+  specialties: string[];
+  hourlyRate: number;
+  rating?: number;
+  totalSessions?: number;
+  imageUrl?: string;
+  verified?: boolean;
+  onPress?: () => void;
+  style?: ViewStyle;
+}
+
+export const PTPTrainerCard: React.FC<PTPTrainerCardProps> = ({
+  name,
+  team,
+  position,
+  specialties,
+  hourlyRate,
+  rating,
+  totalSessions,
+  imageUrl,
+  verified = false,
+  onPress,
+  style,
+}) => {
+  return (
+    <PTPCard
+      onPress={onPress}
+      style={style}
+    >
+      <View style={styles.trainerContent}>
+        {imageUrl && (
+          <Image
+            source={{ uri: imageUrl }}
+            style={styles.trainerImage}
+            resizeMode="cover"
+          />
+        )}
+        <View style={styles.trainerInfo}>
+          <View style={styles.trainerHeader}>
+            <PTPText variant="cardTitle">{name}</PTPText>
+            {verified && <PTPTag label="VERIFIED" variant="success" size="small" />}
+          </View>
+          <PTPText variant="bodySmall" color="gray300">
+            {position} • {team}
+          </PTPText>
+          <View style={styles.trainerSpecialties}>
+            {specialties.slice(0, 3).map((specialty, index) => (
+              <PTPTag key={index} label={specialty} size="small" />
+            ))}
+          </View>
+          <View style={styles.trainerFooter}>
+            <View style={styles.trainerStats}>
+              {rating && (
+                <PTPText variant="bodySmall" color="primary">
+                  ★ {rating.toFixed(1)}
+                </PTPText>
+              )}
+              {totalSessions && (
+                <PTPText variant="bodySmall" color="gray500">
+                  {totalSessions} sessions
+                </PTPText>
+              )}
+            </View>
+            <PTPText variant="priceSmall" color="primary">
+              ${hourlyRate}/hr
+            </PTPText>
+          </View>
+        </View>
+      </View>
+    </PTPCard>
   );
 };
 
 /**
- * PTPProgramCard - Card specifically for camps/clinics
+ * PTPProgramCard - Card for camps/clinics
  */
 interface PTPProgramCardProps {
   title: string;
@@ -178,7 +330,9 @@ interface PTPProgramCardProps {
   location: string;
   price: number;
   imageUrl: string;
+  spotsLeft?: number;
   almostFull?: boolean;
+  soldOut?: boolean;
   bestseller?: boolean;
   onPress?: () => void;
   style?: ViewStyle;
@@ -191,76 +345,38 @@ export const PTPProgramCard: React.FC<PTPProgramCardProps> = ({
   location,
   price,
   imageUrl,
+  spotsLeft,
   almostFull,
+  soldOut,
   bestseller,
   onPress,
   style,
 }) => {
   const tags = [];
-  if (bestseller) tags.push({ label: 'Bestseller', variant: 'primary' as const });
-  if (almostFull) tags.push({ label: 'Almost Full', variant: 'warning' as const });
+  if (bestseller) tags.push({ label: 'BESTSELLER', variant: 'primary' as const });
+  if (soldOut) tags.push({ label: 'SOLD OUT', variant: 'danger' as const });
+  else if (almostFull) tags.push({ label: 'ALMOST FULL', variant: 'warning' as const });
 
   return (
     <PTPCard
       title={title}
       subtitle={`${date} • ${time}\n${location}`}
       imageUrl={imageUrl}
+      imageBackground
       tags={tags}
       rightContent={
-        <View style={styles.priceContainer}>
-          <PTPText variant="cardTitle" color="primary">
-            ${price}
-          </PTPText>
-        </View>
-      }
-      onPress={onPress}
-      style={style}
-    />
-  );
-};
-
-/**
- * PTPTrainerCard - Card specifically for trainers
- */
-interface PTPTrainerCardProps {
-  name: string;
-  collegePro: string;
-  specialties: string[];
-  hourlyRate: number;
-  rating?: number;
-  headshotUrl?: string;
-  onPress?: () => void;
-  style?: ViewStyle;
-}
-
-export const PTPTrainerCard: React.FC<PTPTrainerCardProps> = ({
-  name,
-  collegePro,
-  specialties,
-  hourlyRate,
-  rating,
-  headshotUrl,
-  onPress,
-  style,
-}) => {
-  const tagline = `${collegePro} • ${specialties.slice(0, 2).join(', ')}`;
-
-  return (
-    <PTPCard
-      title={name}
-      subtitle={tagline}
-      imageUrl={headshotUrl}
-      rightContent={
-        <View style={styles.trainerRight}>
-          <PTPText variant="cardTitle" color="primary">
-            ${hourlyRate}/hr
-          </PTPText>
-          {rating && (
-            <PTPText variant="caption" color="gray500">
-              {rating.toFixed(1)} ★
+        !soldOut && (
+          <View style={styles.priceContainer}>
+            <PTPText variant="price" color="primary">
+              ${price}
             </PTPText>
-          )}
-        </View>
+            {spotsLeft && spotsLeft < 10 && (
+              <PTPText variant="caption" color="warning">
+                {spotsLeft} spots left
+              </PTPText>
+            )}
+          </View>
+        )
       }
       onPress={onPress}
       style={style}
@@ -270,29 +386,35 @@ export const PTPTrainerCard: React.FC<PTPTrainerCardProps> = ({
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: colors.white,
-    borderRadius: borderRadius.lg,
+    backgroundColor: colors.blackCard,
+    borderRadius: borderRadius.none,
+    borderWidth: borderWidth.base,
+    borderColor: colors.gray700,
     overflow: 'hidden',
   },
-  cardWithShadow: {
+  simpleCard: {
+    backgroundColor: colors.blackCard,
+    borderRadius: borderRadius.none,
+    borderWidth: borderWidth.base,
+    borderColor: colors.gray700,
+    padding: spacing[6],
+  },
+  elevated: {
     ...shadows.md,
   },
   image: {
     width: '100%',
-    height: 160,
-    backgroundColor: colors.gray100,
+    backgroundColor: colors.blackLight,
   },
   backgroundImage: {
-    height: 200,
     justifyContent: 'flex-end',
   },
   backgroundImageStyle: {
-    borderRadius: borderRadius.lg,
+    borderRadius: borderRadius.none,
   },
   overlay: {
     ...StyleSheet.absoluteFillObject,
     backgroundColor: colors.overlayDark,
-    borderRadius: borderRadius.lg,
     justifyContent: 'flex-end',
   },
   backgroundContent: {
@@ -326,13 +448,45 @@ const styles = StyleSheet.create({
     marginTop: spacing[3],
     paddingTop: spacing[3],
     borderTopWidth: 1,
-    borderTopColor: colors.gray100,
+    borderTopColor: colors.gray700,
   },
   priceContainer: {
     alignItems: 'flex-end',
   },
-  trainerRight: {
-    alignItems: 'flex-end',
+  // Trainer Card Styles
+  trainerContent: {
+    flexDirection: 'row',
+  },
+  trainerImage: {
+    width: 100,
+    height: 120,
+    backgroundColor: colors.blackLight,
+  },
+  trainerInfo: {
+    flex: 1,
+    padding: spacing[4],
+  },
+  trainerHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: spacing[1],
+  },
+  trainerSpecialties: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: spacing[1],
+    marginTop: spacing[2],
+  },
+  trainerFooter: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: spacing[3],
+  },
+  trainerStats: {
+    flexDirection: 'row',
+    gap: spacing[3],
   },
 });
 

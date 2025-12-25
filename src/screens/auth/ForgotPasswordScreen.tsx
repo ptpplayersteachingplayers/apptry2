@@ -61,9 +61,9 @@ const ForgotPasswordScreen: React.FC = () => {
             <PTPText style={{ fontSize: 48 }}>✉️</PTPText>
           </View>
           <PTPText variant="sectionTitle" center style={styles.successTitle}>
-            Check Your Email
+            CHECK YOUR EMAIL
           </PTPText>
-          <PTPText variant="body" color="gray500" center style={styles.successText}>
+          <PTPText variant="body" color="gray300" center style={styles.successText}>
             We've sent password reset instructions to {email}
           </PTPText>
           <PTPButton
@@ -85,7 +85,7 @@ const ForgotPasswordScreen: React.FC = () => {
         style={styles.keyboardView}
       >
         <View style={styles.content}>
-          <PTPText variant="body" color="gray500" style={styles.description}>
+          <PTPText variant="body" color="gray300" style={styles.description}>
             Enter your email address and we'll send you instructions to reset your password.
           </PTPText>
 
@@ -121,7 +121,7 @@ const ForgotPasswordScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.offWhite,
+    backgroundColor: colors.black,
   },
   keyboardView: {
     flex: 1,

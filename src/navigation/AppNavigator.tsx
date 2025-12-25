@@ -1,20 +1,18 @@
 /**
  * App Navigator
  *
- * Root navigator that handles:
- * - Auth state routing (logged in vs logged out)
- * - Role-based routing (parent vs trainer)
- * - Deep linking configuration
+ * Root navigator with dark theme styling.
+ * Uses Zustand for auth state management.
  */
 
 import React from 'react';
-import { NavigationContainer, LinkingOptions } from '@react-navigation/native';
+import { NavigationContainer, LinkingOptions, DefaultTheme } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import * as Linking from 'expo-linking';
 import { RootStackParamList } from '../types/navigation';
 import { colors } from '../theme/colors';
 import { fontFamily } from '../theme/typography';
-import { useAuth } from '../hooks/useAuth';
+import { useAuthStore } from '../stores';
 import { PTPLoading } from '../components/PTPLoading';
 import { navigationRef } from '../services/navigation';
 
@@ -23,7 +21,7 @@ import AuthNavigator from './AuthNavigator';
 import ParentTabNavigator from './ParentTabNavigator';
 import TrainerTabNavigator from './TrainerTabNavigator';
 
-// Modal/Detail Screens (shared across tabs)
+// Modal/Detail Screens (shared)
 import ProgramDetailScreen from '../screens/parent/ProgramDetailScreen';
 import TrainerDetailScreen from '../screens/parent/TrainerDetailScreen';
 import CheckoutScreen from '../screens/parent/CheckoutScreen';
@@ -44,6 +42,21 @@ import EarningsDetailScreen from '../screens/trainer/EarningsDetailScreen';
 
 const Stack = createNativeStackNavigator();
 
+// Dark theme for navigation
+const PTPDarkTheme = {
+  ...DefaultTheme,
+  dark: true,
+  colors: {
+    ...DefaultTheme.colors,
+    primary: colors.primary,
+    background: colors.black,
+    card: colors.blackCard,
+    text: colors.white,
+    border: colors.gray700,
+    notification: colors.primary,
+  },
+};
+
 // Deep linking configuration
 const prefix = Linking.createURL('/');
 
@@ -63,10 +76,10 @@ const linking: LinkingOptions<RootStackParamList> = {
           ParentTabs: {
             screens: {
               Home: 'home',
-              CampsClinics: 'camps',
-              PrivateTraining: 'training',
-              Schedule: 'schedule',
-              Account: 'account',
+              Trainers: 'trainers',
+              Camps: 'camps',
+              Bookings: 'bookings',
+              Profile: 'profile',
             },
           },
           ProgramDetail: 'program/:programId',
@@ -78,11 +91,11 @@ const linking: LinkingOptions<RootStackParamList> = {
         screens: {
           TrainerTabs: {
             screens: {
-              TrainerDashboard: 'dashboard',
-              TrainerSchedule: 'trainer-schedule',
-              TrainerStudents: 'students',
-              TrainerMessages: 'trainer-messages',
-              TrainerProfile: 'profile',
+              Dashboard: 'dashboard',
+              Schedule: 'trainer-schedule',
+              Bookings: 'trainer-bookings',
+              Earnings: 'earnings',
+              Profile: 'trainer-profile',
             },
           },
         },
@@ -91,137 +104,109 @@ const linking: LinkingOptions<RootStackParamList> = {
   },
 };
 
+// Default screen options with dark theme
+const defaultScreenOptions = {
+  headerShown: false,
+  contentStyle: { backgroundColor: colors.black },
+  gestureEnabled: true,
+};
+
+const modalScreenOptions = {
+  headerShown: true,
+  headerTintColor: colors.white,
+  headerStyle: { backgroundColor: colors.blackCard },
+  headerTitleStyle: { fontFamily: fontFamily.heading, color: colors.white },
+  headerBackTitle: 'Back',
+};
+
 /**
- * ParentStackNavigator - Stack for parent users with nested tabs
+ * ParentStackNavigator - Stack for parent users
  */
 const ParentStackNavigator: React.FC = () => {
   return (
-    <Stack.Navigator
-      screenOptions={{
-        headerShown: false,
-        contentStyle: { backgroundColor: colors.offWhite },
-        gestureEnabled: true,
-        fullScreenGestureEnabled: false,
-      }}
-    >
+    <Stack.Navigator screenOptions={defaultScreenOptions}>
       <Stack.Screen name="ParentTabs" component={ParentTabNavigator} />
       <Stack.Screen
         name="ProgramDetail"
         component={ProgramDetailScreen}
         options={{
-          presentation: 'card',
-          headerShown: true,
+          ...modalScreenOptions,
           headerTitle: '',
           headerTransparent: true,
-          headerTintColor: colors.white,
-          headerBackTitle: 'Back',
         }}
       />
       <Stack.Screen
         name="TrainerDetail"
         component={TrainerDetailScreen}
         options={{
-          presentation: 'card',
-          headerShown: true,
+          ...modalScreenOptions,
           headerTitle: '',
           headerTransparent: true,
-          headerTintColor: colors.white,
-          headerBackTitle: 'Back',
         }}
       />
       <Stack.Screen
         name="Checkout"
         component={CheckoutScreen}
         options={{
+          ...modalScreenOptions,
           presentation: 'modal',
-          headerShown: true,
-          headerTitle: 'Checkout',
-          headerTintColor: colors.inkBlack,
-          headerStyle: { backgroundColor: colors.offWhite },
-          headerTitleStyle: { fontFamily: fontFamily.semiBold },
+          headerTitle: 'CHECKOUT',
         }}
       />
       <Stack.Screen
         name="Messages"
         component={MessagesScreen}
         options={{
-          headerShown: true,
-          headerTitle: 'Messages',
-          headerTintColor: colors.inkBlack,
-          headerStyle: { backgroundColor: colors.offWhite },
-          headerTitleStyle: { fontFamily: fontFamily.semiBold },
+          ...modalScreenOptions,
+          headerTitle: 'MESSAGES',
         }}
       />
       <Stack.Screen
         name="ConversationDetail"
         component={ConversationDetailScreen}
         options={{
-          headerShown: true,
-          headerTitle: 'Conversation',
-          headerTintColor: colors.inkBlack,
-          headerStyle: { backgroundColor: colors.offWhite },
-          headerTitleStyle: { fontFamily: fontFamily.semiBold },
-          headerBackTitle: 'Back',
+          ...modalScreenOptions,
+          headerTitle: 'CONVERSATION',
         }}
       />
       <Stack.Screen
         name="EditProfile"
         component={EditProfileScreen}
         options={{
-          headerShown: true,
-          headerTitle: 'Edit Profile',
-          headerTintColor: colors.inkBlack,
-          headerStyle: { backgroundColor: colors.offWhite },
-          headerTitleStyle: { fontFamily: fontFamily.semiBold },
-          headerBackTitle: 'Back',
+          ...modalScreenOptions,
+          headerTitle: 'EDIT PROFILE',
         }}
       />
       <Stack.Screen
         name="EditChild"
         component={EditChildScreen}
         options={{
-          headerShown: true,
-          headerTitle: 'Player Profile',
-          headerTintColor: colors.inkBlack,
-          headerStyle: { backgroundColor: colors.offWhite },
-          headerTitleStyle: { fontFamily: fontFamily.semiBold },
-          headerBackTitle: 'Back',
+          ...modalScreenOptions,
+          headerTitle: 'PLAYER PROFILE',
         }}
       />
       <Stack.Screen
         name="PaymentMethods"
         component={PaymentMethodsScreen}
         options={{
-          headerShown: true,
-          headerTitle: 'Payment Methods',
-          headerTintColor: colors.inkBlack,
-          headerStyle: { backgroundColor: colors.offWhite },
-          headerTitleStyle: { fontFamily: fontFamily.semiBold },
-          headerBackTitle: 'Back',
+          ...modalScreenOptions,
+          headerTitle: 'PAYMENT METHODS',
         }}
       />
       <Stack.Screen
         name="NotificationSettings"
         component={NotificationSettingsScreen}
         options={{
-          headerShown: true,
-          headerTitle: 'Notification Settings',
-          headerTintColor: colors.inkBlack,
-          headerStyle: { backgroundColor: colors.offWhite },
-          headerTitleStyle: { fontFamily: fontFamily.semiBold },
-          headerBackTitle: 'Back',
+          ...modalScreenOptions,
+          headerTitle: 'NOTIFICATIONS',
         }}
       />
       <Stack.Screen
         name="NotificationCenter"
         component={NotificationCenterScreen}
         options={{
-          headerShown: true,
-          headerTitle: 'Notifications',
-          headerTintColor: colors.inkBlack,
-          headerStyle: { backgroundColor: colors.offWhite },
-          headerTitleStyle: { fontFamily: fontFamily.semiBold },
-          headerBackTitle: 'Back',
+          ...modalScreenOptions,
+          headerTitle: 'NOTIFICATIONS',
         }}
       />
     </Stack.Navigator>
@@ -229,89 +214,58 @@ const ParentStackNavigator: React.FC = () => {
 };
 
 /**
- * TrainerStackNavigator - Stack for trainer users with nested tabs
+ * TrainerStackNavigator - Stack for trainer users
  */
 const TrainerStackNavigator: React.FC = () => {
   return (
-    <Stack.Navigator
-      screenOptions={{
-        headerShown: false,
-        contentStyle: { backgroundColor: colors.offWhite },
-        gestureEnabled: true,
-        fullScreenGestureEnabled: false,
-      }}
-    >
+    <Stack.Navigator screenOptions={defaultScreenOptions}>
       <Stack.Screen name="TrainerTabs" component={TrainerTabNavigator} />
       <Stack.Screen
         name="ConversationDetail"
         component={ConversationDetailScreen}
         options={{
-          headerShown: true,
-          headerTitle: 'Conversation',
-          headerTintColor: colors.inkBlack,
-          headerStyle: { backgroundColor: colors.offWhite },
-          headerTitleStyle: { fontFamily: fontFamily.semiBold },
-          headerBackTitle: 'Back',
+          ...modalScreenOptions,
+          headerTitle: 'CONVERSATION',
         }}
       />
       <Stack.Screen
         name="SessionDetail"
         component={SessionDetailScreen}
         options={{
-          headerShown: true,
-          headerTitle: 'Session Details',
-          headerTintColor: colors.inkBlack,
-          headerStyle: { backgroundColor: colors.offWhite },
-          headerTitleStyle: { fontFamily: fontFamily.semiBold },
-          headerBackTitle: 'Back',
+          ...modalScreenOptions,
+          headerTitle: 'SESSION DETAILS',
         }}
       />
       <Stack.Screen
         name="StudentDetail"
         component={StudentDetailScreen}
         options={{
-          headerShown: true,
-          headerTitle: 'Student Profile',
-          headerTintColor: colors.inkBlack,
-          headerStyle: { backgroundColor: colors.offWhite },
-          headerTitleStyle: { fontFamily: fontFamily.semiBold },
-          headerBackTitle: 'Back',
+          ...modalScreenOptions,
+          headerTitle: 'STUDENT PROFILE',
         }}
       />
       <Stack.Screen
         name="EditTrainerProfile"
         component={EditTrainerProfileScreen}
         options={{
-          headerShown: true,
-          headerTitle: 'Edit Profile',
-          headerTintColor: colors.inkBlack,
-          headerStyle: { backgroundColor: colors.offWhite },
-          headerTitleStyle: { fontFamily: fontFamily.semiBold },
-          headerBackTitle: 'Back',
+          ...modalScreenOptions,
+          headerTitle: 'EDIT PROFILE',
         }}
       />
       <Stack.Screen
         name="EditAvailability"
         component={EditAvailabilityScreen}
         options={{
-          headerShown: true,
-          headerTitle: 'Availability',
-          headerTintColor: colors.inkBlack,
-          headerStyle: { backgroundColor: colors.offWhite },
-          headerTitleStyle: { fontFamily: fontFamily.semiBold },
-          headerBackTitle: 'Back',
+          ...modalScreenOptions,
+          headerTitle: 'AVAILABILITY',
         }}
       />
       <Stack.Screen
         name="EarningsDetail"
         component={EarningsDetailScreen}
         options={{
-          headerShown: true,
-          headerTitle: 'Earnings',
-          headerTintColor: colors.inkBlack,
-          headerStyle: { backgroundColor: colors.offWhite },
-          headerTitleStyle: { fontFamily: fontFamily.semiBold },
-          headerBackTitle: 'Back',
+          ...modalScreenOptions,
+          headerTitle: 'EARNINGS',
         }}
       />
     </Stack.Navigator>
@@ -322,7 +276,7 @@ const TrainerStackNavigator: React.FC = () => {
  * AppNavigator - Root navigation component
  */
 export const AppNavigator: React.FC = () => {
-  const { isLoading, isAuthenticated, isOnboarded, isGuest, user } = useAuth();
+  const { isLoading, isAuthenticated, user, hasCompletedOnboarding } = useAuthStore();
 
   // Show loading screen while checking auth state
   if (isLoading) {
@@ -330,25 +284,22 @@ export const AppNavigator: React.FC = () => {
   }
 
   // Determine which navigator to show
-  const isTrainer = user?.role === 'ptp_trainer';
+  const isTrainer = user?.role === 'TRAINER';
 
   return (
-    <NavigationContainer ref={navigationRef} linking={linking}>
+    <NavigationContainer ref={navigationRef} linking={linking} theme={PTPDarkTheme}>
       <Stack.Navigator
         screenOptions={{
           headerShown: false,
-          contentStyle: { backgroundColor: colors.offWhite },
+          contentStyle: { backgroundColor: colors.black },
           gestureEnabled: false,
         }}
       >
-        {isGuest ? (
-          // Guest user - can browse but not checkout
-          <Stack.Screen name="Parent" component={ParentStackNavigator} />
-        ) : !isAuthenticated ? (
+        {!isAuthenticated ? (
           // Not logged in - show auth flow
           <Stack.Screen name="Auth" component={AuthNavigator} />
-        ) : !isOnboarded && !isTrainer ? (
-          // Logged in but not onboarded (parents only) - show onboarding
+        ) : !hasCompletedOnboarding && !isTrainer ? (
+          // Logged in but not onboarded (parents only)
           <Stack.Screen name="Auth" component={AuthNavigator} />
         ) : isTrainer ? (
           // Logged in as trainer

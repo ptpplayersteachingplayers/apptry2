@@ -22,7 +22,8 @@ import { AuthStackParamList } from '../../types/navigation';
 import { PTPText } from '../../components';
 import { useAuth } from '../../hooks/useAuth';
 import { colors } from '../../theme/colors';
-import { spacing, borderRadius } from '../../theme/spacing';
+import { spacing } from '../../theme/spacing';
+import { fontFamily } from '../../theme/typography';
 import { LOGO_URL } from '../../assets/logo';
 import { featureImages } from '../../assets/media';
 
@@ -87,8 +88,8 @@ const WelcomeScreen: React.FC = () => {
               onPress={() => navigation.navigate('SignUp')}
               activeOpacity={0.9}
             >
-              <PTPText variant="buttonMedium" color="inkBlack">
-                Get Started
+              <PTPText variant="buttonLarge" color="black" style={styles.buttonText}>
+                GET STARTED
               </PTPText>
             </TouchableOpacity>
 
@@ -97,8 +98,8 @@ const WelcomeScreen: React.FC = () => {
               onPress={() => navigation.navigate('Login')}
               activeOpacity={0.8}
             >
-              <PTPText variant="buttonSmall" color="white">
-                I Already Have an Account
+              <PTPText variant="buttonMedium" color="white" style={styles.buttonText}>
+                I HAVE AN ACCOUNT
               </PTPText>
             </TouchableOpacity>
 
@@ -108,7 +109,7 @@ const WelcomeScreen: React.FC = () => {
               activeOpacity={0.7}
             >
               <PTPText variant="buttonSmall" color="gray300">
-                Browse as Guest
+                BROWSE AS GUEST
               </PTPText>
             </TouchableOpacity>
           </View>
@@ -118,7 +119,7 @@ const WelcomeScreen: React.FC = () => {
   );
 };
 
-const BUTTON_WIDTH = SCREEN_WIDTH * 0.7; // 70% of screen width for smaller buttons
+const BUTTON_WIDTH = SCREEN_WIDTH * 0.85; // 85% of screen width for wide buttons
 
 const styles = StyleSheet.create({
   background: {
@@ -143,18 +144,20 @@ const styles = StyleSheet.create({
     paddingTop: spacing[12],
   },
   logo: {
-    width: 160,
-    height: 64,
+    width: 180,
+    height: 72,
     marginBottom: spacing[5],
   },
   title: {
     textAlign: 'center',
     marginBottom: spacing[2],
-    fontSize: 28,
+    fontSize: 32,
+    textTransform: 'uppercase',
+    letterSpacing: 1,
   },
   subtitle: {
     textAlign: 'center',
-    maxWidth: 260,
+    maxWidth: 280,
     fontSize: 16,
   },
   badges: {
@@ -168,7 +171,9 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255, 255, 255, 0.1)',
     paddingHorizontal: spacing[3],
     paddingVertical: spacing[2],
-    borderRadius: 16,
+    borderRadius: 0,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.2)',
   },
   actions: {
     alignItems: 'center',
@@ -177,34 +182,33 @@ const styles = StyleSheet.create({
   },
   primaryButton: {
     width: BUTTON_WIDTH,
-    backgroundColor: colors.white,
+    backgroundColor: colors.primary,
     paddingVertical: spacing[4],
-    borderRadius: borderRadius.full,
+    borderRadius: 0,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: spacing[3],
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.15,
-    shadowRadius: 4,
-    elevation: 3,
   },
   secondaryButton: {
     width: BUTTON_WIDTH,
-    backgroundColor: 'rgba(255, 255, 255, 0.15)',
-    paddingVertical: spacing[3],
-    borderRadius: borderRadius.full,
+    backgroundColor: 'transparent',
+    paddingVertical: spacing[4],
+    borderRadius: 0,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: spacing[2],
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.3)',
+    borderWidth: 2,
+    borderColor: colors.white,
   },
   ghostButton: {
     width: BUTTON_WIDTH,
     paddingVertical: spacing[3],
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  buttonText: {
+    fontFamily: fontFamily.heading,
+    letterSpacing: 1,
   },
 });
 
