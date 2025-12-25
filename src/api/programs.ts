@@ -150,11 +150,11 @@ export const getPrograms = async (
   if (filters?.dateFrom) params.append('date_from', filters.dateFrom);
   if (filters?.dateTo) params.append('date_to', filters.dateTo);
 
-  // v2 API uses /camps endpoint
-  const response = await apiClient.get(`/camps?${params.toString()}`);
+  // v1 API uses /programs endpoint
+  const response = await apiClient.get(`/programs?${params.toString()}`);
 
-  // Map v2 response format to app format
-  const { camps, pagination } = response.data;
+  // Map v1 response format to app format
+  const { programs: camps, pagination } = response.data;
   return {
     programs: camps.map(mapCampToProgram),
     total: pagination?.total || camps.length,
@@ -176,8 +176,8 @@ export const getProgram = async (programId: number): Promise<Program> => {
     return program;
   }
 
-  // v2 API uses /camps endpoint
-  const response = await apiClient.get(`/camps/${programId}`);
+  // v1 API uses /programs endpoint
+  const response = await apiClient.get(`/programs/${programId}`);
   return mapCampToProgram(response.data);
 };
 
@@ -205,8 +205,8 @@ export const getFeaturedPrograms = async (): Promise<Program[]> => {
     return mockPrograms.filter((p) => p.bestseller).slice(0, 3);
   }
 
-  // v2 API uses /camps/featured endpoint
-  const response = await apiClient.get('/camps/featured');
+  // v1 API uses /programs/featured endpoint
+  const response = await apiClient.get('/programs/featured');
   return (response.data || []).map(mapCampToProgram);
 };
 

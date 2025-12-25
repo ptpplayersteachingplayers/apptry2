@@ -104,7 +104,7 @@ export default ({ config }) => {
     extra: {
       // API Configuration
       API_BASE_URL: process.env.API_BASE_URL || 'https://ptpsummercamps.com',
-      MOBILE_API_NAMESPACE: process.env.MOBILE_API_NAMESPACE || '/wp-json/ptp/v2',
+      MOBILE_API_NAMESPACE: process.env.MOBILE_API_NAMESPACE || '/wp-json/ptp/v1',
       DEMO_MODE: process.env.DEMO_MODE || 'false',
       // Stripe Configuration
       STRIPE_PUBLISHABLE_KEY:

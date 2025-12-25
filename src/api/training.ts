@@ -275,9 +275,9 @@ export const getMySessions = async (status?: 'all' | 'upcoming' | 'past' | 'pend
     return mockSessions;
   }
 
-  // v2 API uses /bookings endpoint
+  // v1 API uses /training/my-sessions endpoint
   const params = status ? `?status=${status}` : '';
-  const response = await apiClient.get(`/bookings${params}`);
+  const response = await apiClient.get(`/training/my-sessions${params}`);
 
   return (response.data.bookings || response.data || []).map(mapWordPressSession);
 };
@@ -294,8 +294,8 @@ export const getSession = async (sessionId: number): Promise<TrainingSession> =>
     return session;
   }
 
-  // v2 API uses /bookings endpoint
-  const response = await apiClient.get(`/bookings/${sessionId}`);
+  // v1 API uses /training/sessions endpoint
+  const response = await apiClient.get(`/training/sessions/${sessionId}`);
   return mapWordPressSession(response.data);
 };
 
@@ -310,8 +310,8 @@ export const cancelSession = async (sessionId: number, reason?: string): Promise
     return { success: true, message: 'Session cancelled' };
   }
 
-  // v2 API uses /bookings endpoint
-  const response = await apiClient.post(`/bookings/${sessionId}/cancel`, { reason });
+  // v1 API uses /training/sessions endpoint
+  const response = await apiClient.post(`/training/sessions/${sessionId}/cancel`, { reason });
   return response.data;
 };
 
@@ -393,7 +393,7 @@ export const getTrainerDashboard = async (): Promise<{
   // Fetch data from multiple endpoints
   const [statsRes, bookingsRes, earningsRes] = await Promise.all([
     apiClient.get('/trainer/stats'),
-    apiClient.get('/trainer/bookings'),
+    apiClient.get('/trainer/sessions'),
     apiClient.get('/trainer/earnings'),
   ]);
 
@@ -440,8 +440,8 @@ export const getTrainerSessions = async (
   if (date) params.append('date', date);
 
   const queryString = params.toString();
-  const response = await apiClient.get(`/trainer/bookings${queryString ? '?' + queryString : ''}`);
-  return (response.data.bookings || []).map(mapWordPressSession);
+  const response = await apiClient.get(`/trainer/sessions${queryString ? '?' + queryString : ''}`);
+  return (response.data.sessions || response.data.bookings || []).map(mapWordPressSession);
 };
 
 /**
@@ -468,7 +468,7 @@ export const respondToSessionRequest = async (
   }
 
   const endpoint = action === 'accept' ? 'confirm' : 'cancel';
-  const response = await apiClient.post(`/bookings/${sessionId}/${endpoint}`, {
+  const response = await apiClient.post(`/training/sessions/${sessionId}/${endpoint}`, {
     message,
   });
   return response.data;
@@ -492,7 +492,7 @@ export const completeSession = async (
     return { success: true, message: 'Session marked as completed' };
   }
 
-  const response = await apiClient.post(`/bookings/${sessionId}/complete`, { notes });
+  const response = await apiClient.post(`/training/sessions/${sessionId}/complete`, { notes });
   return response.data;
 };
 
@@ -706,7 +706,7 @@ export const addSessionNotes = async (
     return { success: true, message: 'Session notes saved' };
   }
 
-  const response = await apiClient.post(`/bookings/${sessionId}/notes`, {
+  const response = await apiClient.post(`/training/sessions/${sessionId}/notes`, {
     skills_worked: notes.skillsWorked.join(', '),
     progress_notes: notes.progressNotes,
     homework: notes.homework,
@@ -731,7 +731,7 @@ export const submitSessionReview = async (
     return { success: true, message: 'Review submitted. Thank you!' };
   }
 
-  const response = await apiClient.post(`/bookings/${sessionId}/review`, {
+  const response = await apiClient.post(`/training/sessions/${sessionId}/review`, {
     rating,
     comment,
   });
