@@ -14,7 +14,7 @@ import { getTrainerSessions, getTrainerStats, getTrainerEarnings } from '../../a
 import { TrainingSession, TrainerStats, TrainerEarnings } from '../../types';
 import { PTPText, PTPButton, PTPTag, PTPListSkeleton } from '../../components';
 import { colors } from '../../theme/colors';
-import { spacing, borderRadius, shadows } from '../../theme/spacing';
+import { spacing } from '../../theme/spacing';
 
 const TrainerDashboardScreen: React.FC = () => {
   const navigation = useNavigation();
@@ -71,41 +71,41 @@ const TrainerDashboardScreen: React.FC = () => {
       >
         {/* Header */}
         <View style={styles.header}>
-          <PTPText variant="heroTitle">Hey {trainerUser?.firstName}!</PTPText>
-          <PTPText variant="body" color="gray500">Here's your day at a glance.</PTPText>
+          <PTPText variant="heroTitle">HEY {trainerUser?.firstName?.toUpperCase()}!</PTPText>
+          <PTPText variant="body" color="gray300">Here's your day at a glance.</PTPText>
         </View>
 
         {/* Stats Cards */}
         <View style={styles.statsRow}>
           <View style={styles.statCard}>
             <PTPText variant="heroTitle" color="primary">{stats?.thisWeekSessions || 0}</PTPText>
-            <PTPText variant="caption" color="gray500">This Week</PTPText>
+            <PTPText variant="caption" color="gray300">THIS WEEK</PTPText>
           </View>
           <View style={styles.statCard}>
             <PTPText variant="heroTitle" color="primary">{stats?.thisMonthSessions || 0}</PTPText>
-            <PTPText variant="caption" color="gray500">This Month</PTPText>
+            <PTPText variant="caption" color="gray300">THIS MONTH</PTPText>
           </View>
           <View style={styles.statCard}>
             <PTPText variant="heroTitle" color="primary">{stats?.averageRating?.toFixed(1) || '-'}</PTPText>
-            <PTPText variant="caption" color="gray500">Rating</PTPText>
+            <PTPText variant="caption" color="gray300">RATING</PTPText>
           </View>
         </View>
 
         {/* Earnings Card */}
         <View style={styles.earningsCard}>
           <View style={styles.earningsHeader}>
-            <PTPText variant="sectionTitle">Earnings</PTPText>
+            <PTPText variant="sectionTitle">EARNINGS</PTPText>
             <TouchableOpacity>
-              <PTPText variant="label" color="primary">View Details →</PTPText>
+              <PTPText variant="label" color="primary">VIEW DETAILS →</PTPText>
             </TouchableOpacity>
           </View>
           <View style={styles.earningsRow}>
             <View>
-              <PTPText variant="caption" color="gray500">This Month</PTPText>
+              <PTPText variant="caption" color="gray300">This Month</PTPText>
               <PTPText variant="heroTitle" color="success">${earnings?.thisMonth || 0}</PTPText>
             </View>
             <View>
-              <PTPText variant="caption" color="gray500">Pending</PTPText>
+              <PTPText variant="caption" color="gray300">Pending</PTPText>
               <PTPText variant="sectionTitle">${earnings?.pendingPayout || 0}</PTPText>
             </View>
           </View>
@@ -113,21 +113,21 @@ const TrainerDashboardScreen: React.FC = () => {
 
         {/* Today's Sessions */}
         <View style={styles.section}>
-          <PTPText variant="sectionTitle" style={styles.sectionTitle}>Today's Sessions</PTPText>
+          <PTPText variant="sectionTitle" style={styles.sectionTitle}>TODAY'S SESSIONS</PTPText>
           {todaySessions.length === 0 ? (
             <View style={styles.emptyCard}>
-              <PTPText variant="body" color="gray500" center>No sessions scheduled for today.</PTPText>
+              <PTPText variant="body" color="gray300" center>No sessions scheduled for today.</PTPText>
             </View>
           ) : (
             todaySessions.map((session) => (
               <View key={session.id} style={styles.sessionCard}>
                 <View style={styles.sessionTime}>
                   <PTPText variant="label" color="primary">{session.startTime}</PTPText>
-                  <PTPText variant="caption" color="gray400">{session.endTime}</PTPText>
+                  <PTPText variant="caption" color="gray500">{session.endTime}</PTPText>
                 </View>
                 <View style={styles.sessionInfo}>
-                  <PTPText variant="buttonMedium">{session.child?.firstName || 'Player'}</PTPText>
-                  <PTPText variant="bodySmall" color="gray500">{session.location}</PTPText>
+                  <PTPText variant="buttonMedium">{session.child?.firstName?.toUpperCase() || 'PLAYER'}</PTPText>
+                  <PTPText variant="bodySmall" color="gray300">{session.location}</PTPText>
                   <View style={styles.sessionTags}>
                     {session.focus.slice(0, 2).map(f => (
                       <PTPTag key={f} label={f} size="small" />
@@ -143,16 +143,16 @@ const TrainerDashboardScreen: React.FC = () => {
         {/* Quick Actions */}
         <View style={styles.actionsRow}>
           <TouchableOpacity style={styles.actionButton} onPress={() => navigation.navigate('TrainerSchedule' as never)}>
-            <Ionicons name="calendar-outline" size={24} color={colors.inkBlack} />
-            <PTPText variant="label">Schedule</PTPText>
+            <Ionicons name="calendar-outline" size={24} color={colors.black} />
+            <PTPText variant="label">SCHEDULE</PTPText>
           </TouchableOpacity>
           <TouchableOpacity style={styles.actionButton} onPress={() => navigation.navigate('TrainerMessages' as never)}>
-            <Ionicons name="chatbubbles-outline" size={24} color={colors.inkBlack} />
-            <PTPText variant="label">Messages</PTPText>
+            <Ionicons name="chatbubbles-outline" size={24} color={colors.black} />
+            <PTPText variant="label">MESSAGES</PTPText>
           </TouchableOpacity>
           <TouchableOpacity style={styles.actionButton} onPress={() => navigation.navigate('TrainerStudents' as never)}>
-            <Ionicons name="people-outline" size={24} color={colors.inkBlack} />
-            <PTPText variant="label">Students</PTPText>
+            <Ionicons name="people-outline" size={24} color={colors.black} />
+            <PTPText variant="label">STUDENTS</PTPText>
           </TouchableOpacity>
         </View>
       </ScrollView>
@@ -161,24 +161,24 @@ const TrainerDashboardScreen: React.FC = () => {
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.offWhite },
+  container: { flex: 1, backgroundColor: colors.black },
   scrollView: { flex: 1 },
   scrollContent: { paddingBottom: spacing[8] },
   header: { padding: spacing[4], paddingBottom: spacing[2] },
   statsRow: { flexDirection: 'row', paddingHorizontal: spacing[4], gap: spacing[3], marginTop: spacing[4] },
-  statCard: { flex: 1, backgroundColor: colors.white, borderRadius: borderRadius.lg, padding: spacing[4], alignItems: 'center', ...shadows.sm },
-  earningsCard: { margin: spacing[4], backgroundColor: colors.white, borderRadius: borderRadius.lg, padding: spacing[4], ...shadows.sm },
+  statCard: { flex: 1, backgroundColor: colors.blackCard, borderRadius: 0, borderWidth: 2, borderColor: colors.gray700, padding: spacing[4], alignItems: 'center' },
+  earningsCard: { margin: spacing[4], backgroundColor: colors.blackCard, borderRadius: 0, borderWidth: 2, borderColor: colors.gray700, padding: spacing[4] },
   earningsHeader: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: spacing[3] },
   earningsRow: { flexDirection: 'row', justifyContent: 'space-between' },
   section: { paddingHorizontal: spacing[4], marginTop: spacing[4] },
   sectionTitle: { marginBottom: spacing[3] },
-  emptyCard: { backgroundColor: colors.white, borderRadius: borderRadius.lg, padding: spacing[6], ...shadows.sm },
-  sessionCard: { flexDirection: 'row', alignItems: 'center', backgroundColor: colors.white, borderRadius: borderRadius.lg, padding: spacing[4], marginBottom: spacing[3], ...shadows.sm },
+  emptyCard: { backgroundColor: colors.blackCard, borderRadius: 0, borderWidth: 2, borderColor: colors.gray700, padding: spacing[6] },
+  sessionCard: { flexDirection: 'row', alignItems: 'center', backgroundColor: colors.blackCard, borderRadius: 0, borderWidth: 2, borderColor: colors.gray700, padding: spacing[4], marginBottom: spacing[3] },
   sessionTime: { marginRight: spacing[4], alignItems: 'center' },
   sessionInfo: { flex: 1 },
   sessionTags: { flexDirection: 'row', gap: spacing[1], marginTop: spacing[2] },
   actionsRow: { flexDirection: 'row', justifyContent: 'space-around', paddingHorizontal: spacing[4], marginTop: spacing[6] },
-  actionButton: { alignItems: 'center', backgroundColor: colors.white, borderRadius: borderRadius.lg, padding: spacing[4], width: 100, ...shadows.sm },
+  actionButton: { alignItems: 'center', backgroundColor: colors.primary, borderRadius: 0, padding: spacing[4], width: 100 },
 });
 
 export default TrainerDashboardScreen;
