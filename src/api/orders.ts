@@ -7,7 +7,6 @@
 
 import { apiClient } from './client';
 import { apiConfig, buildCheckoutUrl } from './config';
-import { getStoredToken } from './client';
 import {
   Order,
   OrdersResponse,
@@ -51,8 +50,7 @@ export const getOrder = async (orderId: number): Promise<Order> => {
  * Opens WooCommerce checkout in WebView
  */
 export const getCheckoutUrl = async (productId: number): Promise<string> => {
-  const token = await getStoredToken();
-  return buildCheckoutUrl(productId, token || undefined);
+  return buildCheckoutUrl(productId);
 };
 
 /**

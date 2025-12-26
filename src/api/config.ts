@@ -57,17 +57,12 @@ export const buildAuthUrl = (): string => {
 /**
  * Build WooCommerce checkout URL for a product
  */
-export const buildCheckoutUrl = (productId: number, token?: string): string => {
+export const buildCheckoutUrl = (productId: number): string => {
   const base = apiConfig.baseUrl.replace(/\/$/, '');
   let url = `${base}/checkout/?add-to-cart=${productId}`;
 
   // Add mobile app identifier for styling
   url += '&ptp_mobile=1';
-
-  // Add token for auto-login if available
-  if (token) {
-    url += `&ptp_token=${encodeURIComponent(token)}`;
-  }
 
   return url;
 };

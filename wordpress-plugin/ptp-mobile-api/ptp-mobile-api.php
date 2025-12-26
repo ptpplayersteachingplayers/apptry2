@@ -120,6 +120,7 @@ class PTP_Mobile_API {
         require_once PTP_MOBILE_API_PLUGIN_DIR . 'includes/class-ptp-events-controller.php';
         require_once PTP_MOBILE_API_PLUGIN_DIR . 'includes/class-ptp-trainer-controller.php';
         require_once PTP_MOBILE_API_PLUGIN_DIR . 'includes/class-ptp-push-controller.php';
+        require_once PTP_MOBILE_API_PLUGIN_DIR . 'includes/class-ptp-webhook-controller.php';
     }
 
     /**
@@ -164,6 +165,10 @@ class PTP_Mobile_API {
         // Push notification routes
         $push_controller = new PTP_Push_Controller();
         $push_controller->register_routes();
+
+        // Webhooks (Stripe, etc.)
+        $webhook_controller = new PTP_Webhook_Controller();
+        $webhook_controller->register_routes();
     }
 
     /**
@@ -195,6 +200,9 @@ class PTP_Mobile_API {
                 'exp://127.0.0.1:8081',
             );
 
+            // Use site URL as default allowed origin when requests come from native apps (no Origin header)
+            $site_origin = untrailingslashit(get_option('home'));
+
             // Allow localhost for development (configurable)
             if (defined('WP_DEBUG') && WP_DEBUG) {
                 $allowed_origins[] = 'http://localhost:8081';
@@ -204,16 +212,18 @@ class PTP_Mobile_API {
 
             $origin = isset($_SERVER['HTTP_ORIGIN']) ? $_SERVER['HTTP_ORIGIN'] : '';
 
-            if (in_array($origin, $allowed_origins)) {
+            if ($origin && in_array($origin, $allowed_origins, true)) {
                 header('Access-Control-Allow-Origin: ' . $origin);
                 header('Access-Control-Allow-Credentials: true');
-            } elseif (empty($origin)) {
-                // Mobile apps don't send Origin header - allow for API requests
-                header('Access-Control-Allow-Origin: *');
+            } elseif (empty($origin) && !empty($site_origin)) {
+                // Native mobile requests typically omit Origin; default to first-party domain
+                header('Access-Control-Allow-Origin: ' . $site_origin);
+                header('Access-Control-Allow-Credentials: true');
             }
 
             header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
             header('Access-Control-Allow-Headers: Authorization, Content-Type, X-Requested-With');
+            header('Vary: Origin');
             header('Access-Control-Max-Age: 86400'); // Cache preflight for 24 hours
 
             return $value;
