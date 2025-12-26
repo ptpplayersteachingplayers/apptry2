@@ -105,7 +105,8 @@ export default ({ config }) => {
       // API Configuration
       API_BASE_URL: process.env.API_BASE_URL || 'https://ptpsummercamps.com',
       MOBILE_API_NAMESPACE: process.env.MOBILE_API_NAMESPACE || '/wp-json/ptp/v1',
-      DEMO_MODE: process.env.DEMO_MODE || 'false',
+      // Demo mode uses mock data - defaults to 'true' so app works without backend
+      DEMO_MODE: process.env.DEMO_MODE || 'true',
             // Legal URLs for App Store compliance
             PRIVACY_POLICY_URL: 'https://ptpsummercamps.com/privacy-policy',
             TERMS_OF_SERVICE_URL: 'https://ptpsummercamps.com/terms-of-service',
