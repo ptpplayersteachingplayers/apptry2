@@ -12,15 +12,15 @@ import {
   StyleSheet,
   ImageBackground,
   Image,
-  SafeAreaView,
   Dimensions,
   TouchableOpacity,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { AuthStackParamList } from '../../types/navigation';
 import { PTPText } from '../../components';
-import { useAuth } from '../../hooks/useAuth';
+import { useAuthStore } from '../../stores';
 import { colors } from '../../theme/colors';
 import { spacing } from '../../theme/spacing';
 import { fontFamily } from '../../theme/typography';
@@ -37,7 +37,7 @@ const { width: SCREEN_WIDTH } = Dimensions.get('window');
  */
 const WelcomeScreen: React.FC = () => {
   const navigation = useNavigation<WelcomeScreenNavigationProp>();
-  const { continueAsGuest } = useAuth();
+  const continueAsGuest = useAuthStore((state) => state.continueAsGuest);
 
   return (
     <ImageBackground

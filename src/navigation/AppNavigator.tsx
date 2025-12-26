@@ -276,7 +276,7 @@ const TrainerStackNavigator: React.FC = () => {
  * AppNavigator - Root navigation component
  */
 export const AppNavigator: React.FC = () => {
-  const { isLoading, isAuthenticated, user, hasCompletedOnboarding } = useAuthStore();
+  const { isLoading, isAuthenticated, isGuest, user, hasCompletedOnboarding } = useAuthStore();
 
   // Show loading screen while checking auth state
   if (isLoading) {
@@ -295,7 +295,10 @@ export const AppNavigator: React.FC = () => {
           gestureEnabled: false,
         }}
       >
-        {!isAuthenticated ? (
+        {isGuest ? (
+          // Guest user - show parent flow (browsing only)
+          <Stack.Screen name="Parent" component={ParentStackNavigator} />
+        ) : !isAuthenticated ? (
           // Not logged in - show auth flow
           <Stack.Screen name="Auth" component={AuthNavigator} />
         ) : !hasCompletedOnboarding && !isTrainer ? (
