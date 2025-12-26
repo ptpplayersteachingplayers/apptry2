@@ -142,7 +142,12 @@ const mapWordPressTrainer = (wpTrainer: any): TrainerUser => {
     position: wpTrainer.position || 'midfielder',
     bio: wpTrainer.bio || wpTrainer.headline || '',
     teachingStyle: '',
-    specialties: wpTrainer.specialties || [],
+    // Handle specialties as string (comma-separated) or array
+    specialties: Array.isArray(wpTrainer.specialties)
+      ? wpTrainer.specialties
+      : (typeof wpTrainer.specialties === 'string'
+          ? wpTrainer.specialties.split(',').map((s: string) => s.trim()).filter(Boolean)
+          : []),
     hourlyRate: wpTrainer.hourly_rate || 80,
     serviceLocations: wpTrainer.training_locations?.map((loc: any, idx: number) => ({
       id: idx + 1,
