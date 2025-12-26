@@ -93,10 +93,10 @@ export const buildCheckoutUrl = (productId: number, token?: string): string => {
   // Add mobile app identifier for styling
   url += '&ptp_mobile=1';
 
-  // Add token for auto-login if available
-  if (token) {
-    url += `&ptp_token=${encodeURIComponent(token)}`;
-  }
+
+    // SECURITY: Do not pass JWT token in URL as it can be logged in server logs,
+    // browser history, and proxy logs. Use session-based auth for WebView checkout.
+    // The WebView will use WooCommerce's session cookies for authentication.
 
   return url;
 };
