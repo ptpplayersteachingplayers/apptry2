@@ -12,24 +12,24 @@ export const colors = {
   primaryLight: 'rgba(252, 185, 0, 0.1)',
   primaryGlow: 'rgba(252, 185, 0, 0.3)',
 
-  // Backgrounds - Dark Mode First
-  black: '#0A0A0A',
-  blackLight: '#111111',
-  blackCard: '#1A1A1A',
-  blackElevated: '#222222',
+  // Backgrounds - Dark Mode (Lighter for visibility)
+  black: '#121218',
+  blackLight: '#1A1A22',
+  blackCard: '#242430',
+  blackElevated: '#2E2E3A',
 
-  // Text Colors
+  // Text Colors (Brighter for better visibility)
   white: '#FFFFFF',
-  offWhite: '#FAFAFA',
-  gray50: '#F9F9F9',
-  gray100: '#F5F5F5',
-  gray200: '#E5E5E5',
-  gray300: '#A0A0A0',
-  gray400: '#8A8A8A',
-  gray500: '#6B6B6B',
-  gray600: '#525252',
-  gray700: '#333333',
-  inkBlack: '#1C1C1C',
+  offWhite: '#F8F8FC',
+  gray50: '#F5F5FA',
+  gray100: '#EBEBF0',
+  gray200: '#D8D8E0',
+  gray300: '#B8B8C8',
+  gray400: '#9898A8',
+  gray500: '#787888',
+  gray600: '#585868',
+  gray700: '#404050',
+  inkBlack: '#1C1C28',
 
   // Status Colors
   success: '#22C55E',
@@ -118,18 +118,18 @@ export const cssColors = `
   --ptp-gold-light: rgba(252, 185, 0, 0.1);
   --ptp-gold-glow: rgba(252, 185, 0, 0.3);
 
-  /* Backgrounds */
-  --ptp-black: #0A0A0A;
-  --ptp-black-light: #111111;
-  --ptp-black-card: #1A1A1A;
-  --ptp-black-elevated: #222222;
+  /* Backgrounds - Lighter for visibility */
+  --ptp-black: #121218;
+  --ptp-black-light: #1A1A22;
+  --ptp-black-card: #242430;
+  --ptp-black-elevated: #2E2E3A;
 
-  /* Text */
+  /* Text - Brighter for visibility */
   --ptp-white: #FFFFFF;
-  --ptp-gray-100: #F5F5F5;
-  --ptp-gray-300: #A0A0A0;
-  --ptp-gray-500: #6B6B6B;
-  --ptp-gray-700: #333333;
+  --ptp-gray-100: #EBEBF0;
+  --ptp-gray-300: #B8B8C8;
+  --ptp-gray-500: #787888;
+  --ptp-gray-700: #404050;
 
   /* Status */
   --ptp-success: #22C55E;

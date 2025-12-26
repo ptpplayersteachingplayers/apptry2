@@ -41,7 +41,7 @@ export default ({ config }) => {
     splash: {
       image: './assets/splash.png',
       resizeMode: 'contain',
-      backgroundColor: '#0E0F11',
+      backgroundColor: '#121218',
     },
     assetBundlePatterns: ['**/*'],
     ios: {
@@ -64,7 +64,7 @@ export default ({ config }) => {
     android: {
       adaptiveIcon: {
         foregroundImage: './assets/adaptive-icon.png',
-        backgroundColor: '#0E0F11',
+        backgroundColor: '#121218',
       },
       package: getBundleIdentifier(),
       permissions: [
@@ -76,7 +76,8 @@ export default ({ config }) => {
         'VIBRATE',
         'WAKE_LOCK',
       ],
-      googleServicesFile: process.env.GOOGLE_SERVICES_JSON || './google-services.json',
+      // Only include googleServicesFile if it exists (for Firebase/FCM)
+      ...(process.env.GOOGLE_SERVICES_JSON ? { googleServicesFile: process.env.GOOGLE_SERVICES_JSON } : {}),
     },
     web: {
       favicon: './assets/favicon.png',
@@ -105,8 +106,8 @@ export default ({ config }) => {
       // API Configuration
       API_BASE_URL: process.env.API_BASE_URL || 'https://ptpsummercamps.com',
       MOBILE_API_NAMESPACE: process.env.MOBILE_API_NAMESPACE || '/wp-json/ptp/v1',
-      // Demo mode uses mock data - set to 'false' to use real WordPress API
-      DEMO_MODE: process.env.DEMO_MODE || 'false',
+      // Demo mode uses mock data until WordPress API signature is configured
+      DEMO_MODE: process.env.DEMO_MODE || 'true',
             // Legal URLs for App Store compliance
             PRIVACY_POLICY_URL: 'https://ptpsummercamps.com/privacy-policy',
             TERMS_OF_SERVICE_URL: 'https://ptpsummercamps.com/terms-of-service',
