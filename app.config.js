@@ -108,6 +108,10 @@ export default ({ config }) => {
       API_BASE_URL: process.env.API_BASE_URL || 'https://ptpsummercamps.com',
       MOBILE_API_NAMESPACE: process.env.MOBILE_API_NAMESPACE || '/wp-json/ptp/v1',
       DEMO_MODE: process.env.DEMO_MODE || 'false',
+      PRIVACY_POLICY_URL:
+        process.env.PRIVACY_POLICY_URL || 'https://ptpsummercamps.com/privacy-policy',
+      TERMS_URL:
+        process.env.TERMS_URL || 'https://ptpsummercamps.com/terms-of-service',
       // EAS Configuration
       eas: {
         projectId: easProjectId,
