@@ -25,10 +25,10 @@ export type AuthStackParamList = {
  */
 export type ParentTabParamList = {
   Home: undefined;
-  CampsClinics: { filter?: string } | undefined;
-  PrivateTraining: { trainerId?: number; market?: string } | undefined;
-  Schedule: { date?: string } | undefined;
-  Account: undefined;
+  Trainers: { trainerId?: number; market?: string } | undefined;
+  Camps: { filter?: string } | undefined;
+  Bookings: { date?: string } | undefined;
+  Profile: undefined;
 };
 
 /**

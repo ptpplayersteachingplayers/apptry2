@@ -81,8 +81,8 @@ export const PTPInput: React.FC<PTPInputProps> = ({
         <TextInput
           style={[
             styles.input,
-            leftIcon && styles.inputWithLeftIcon,
-            rightIcon && styles.inputWithRightIcon,
+            leftIcon ? styles.inputWithLeftIcon : undefined,
+            rightIcon ? styles.inputWithRightIcon : undefined,
             style,
           ]}
           placeholderTextColor={colors.gray500}

@@ -133,7 +133,7 @@ const HomeScreen: React.FC = memo(() => {
                 style={styles.quickAction}
                 onPress={() => {
                   selection();
-                  navigation.navigate('ParentTabs', { screen: 'CampsClinics' });
+                  navigation.navigate('ParentTabs', { screen: 'Camps' });
                 }}
               >
                 <View style={styles.quickActionIcon}>
@@ -146,7 +146,7 @@ const HomeScreen: React.FC = memo(() => {
                 style={styles.quickAction}
                 onPress={() => {
                   selection();
-                  navigation.navigate('ParentTabs', { screen: 'PrivateTraining' });
+                  navigation.navigate('ParentTabs', { screen: 'Trainers' });
                 }}
               >
                 <View style={styles.quickActionIcon}>
@@ -159,7 +159,7 @@ const HomeScreen: React.FC = memo(() => {
                 style={styles.quickAction}
                 onPress={() => {
                   selection();
-                  navigation.navigate('ParentTabs', { screen: 'Schedule' });
+                  navigation.navigate('ParentTabs', { screen: 'Bookings' });
                 }}
               >
                 <View style={styles.quickActionIcon}>
@@ -178,7 +178,7 @@ const HomeScreen: React.FC = memo(() => {
               title="Winter Clinics"
               subtitle="Beat the off-season"
               actionText="See All"
-              onAction={() => navigation.navigate('ParentTabs', { screen: 'CampsClinics', params: { filter: 'clinic' } })}
+              onAction={() => navigation.navigate('ParentTabs', { screen: 'Camps', params: { filter: 'clinic' } })}
             />
             <ScrollView
               horizontal
@@ -212,7 +212,7 @@ const HomeScreen: React.FC = memo(() => {
               title="PTP Summer Soccer Camp"
               subtitle="Full week of training, games, and fun"
               height={180}
-              onPress={() => navigation.navigate('ParentTabs', { screen: 'CampsClinics', params: { filter: 'camp' } })}
+              onPress={() => navigation.navigate('ParentTabs', { screen: 'Camps', params: { filter: 'camp' } })}
             />
           </View>
         </FadeInView>
@@ -226,7 +226,7 @@ const HomeScreen: React.FC = memo(() => {
             />
             <AnimatedPressable
               style={styles.trainingPromo}
-              onPress={() => navigation.navigate('ParentTabs', { screen: 'PrivateTraining' })}
+              onPress={() => navigation.navigate('ParentTabs', { screen: 'Trainers' })}
             >
               <View style={styles.trainingPromoContent}>
                 <PTPText variant="sectionTitle">PERSONALIZED TRAINING</PTPText>
@@ -251,7 +251,7 @@ const HomeScreen: React.FC = memo(() => {
                   title="FIND A TRAINER"
                   variant="primary"
                   size="medium"
-                  onPress={() => navigation.navigate('ParentTabs', { screen: 'PrivateTraining' })}
+                  onPress={() => navigation.navigate('ParentTabs', { screen: 'Trainers' })}
                   style={styles.trainingButton}
                 />
               </View>

@@ -66,7 +66,7 @@ const TrainerStudentsScreen: React.FC = () => {
         data={filteredStudents}
         keyExtractor={(item) => item.id.toString()}
         renderItem={renderStudent}
-        ListEmptyComponent={<PTPEmptyState icon="👥" title="No students yet" description="Students you train will appear here." />}
+        ListEmptyComponent={<PTPEmptyState iconName="people-outline" title="No students yet" description="Students you train will appear here." />}
         contentContainerStyle={styles.listContent}
       />
     </SafeAreaView>

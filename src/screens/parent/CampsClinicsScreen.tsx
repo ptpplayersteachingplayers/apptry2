@@ -34,7 +34,7 @@ import { featureImages } from '../../assets/media';
 import { formatDateShort, formatTime, formatLocation } from '../../lib/formatting';
 
 type CampsClinicsNavigationProp = NativeStackNavigationProp<ParentStackParamList>;
-type CampsClinicsRouteProp = RouteProp<ParentTabParamList, 'CampsClinics'>;
+type CampsClinicsRouteProp = RouteProp<ParentTabParamList, 'Camps'>;
 
 type FilterType = 'all' | 'clinic' | 'camp';
 
