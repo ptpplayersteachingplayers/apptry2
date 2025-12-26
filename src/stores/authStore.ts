@@ -91,6 +91,7 @@ interface AuthState {
   refreshToken: string | null;
   isLoading: boolean;
   isAuthenticated: boolean;
+  isGuest: boolean;
   hasCompletedOnboarding: boolean;
 
   // Actions
@@ -105,6 +106,7 @@ interface AuthState {
   setLoading: (loading: boolean) => void;
   setOnboardingComplete: (complete: boolean) => void;
   login: (user: User, accessToken: string, refreshToken: string, profile?: ParentProfile | TrainerProfile) => void;
+  continueAsGuest: () => void;
   logout: () => void;
   reset: () => void;
 }
@@ -144,6 +146,7 @@ const initialState = {
   refreshToken: null,
   isLoading: true,
   isAuthenticated: false,
+  isGuest: false,
   hasCompletedOnboarding: false,
 };
 
@@ -200,9 +203,19 @@ export const useAuthStore = create<AuthState>()(
         set(updates);
       },
 
+      continueAsGuest: () => {
+        set({
+          user: null,
+          isLoading: false,
+          isAuthenticated: false,
+          isGuest: true,
+          hasCompletedOnboarding: true,
+        });
+      },
+
       logout: () => {
         set(initialState);
-        set({ isLoading: false });
+        set({ isLoading: false, isGuest: false });
       },
 
       reset: () => set(initialState),
