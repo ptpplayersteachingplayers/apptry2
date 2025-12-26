@@ -1,0 +1,85 @@
+import * as Sentry from '@sentry/react-native';
+import Constants from 'expo-constants';
+
+/**
+ * Sentry crash reporting initialization
+ * Configure with your Sentry DSN in app.config.js extra.sentryDsn
+ */
+export function initSentry(): void {
+    const dsn = Constants.expoConfig?.extra?.sentryDsn;
+
+  if (!dsn) {
+        console.warn('Sentry DSN not configured. Crash reporting disabled.');
+        return;
+  }
+
+  Sentry.init({
+        dsn,
+        // Set environment based on release channel
+        environment: __DEV__ ? 'development' : 'production',
+        // Enable automatic breadcrumbs
+        enableAutoSessionTracking: true,
+        // Session tracking interval in ms
+        sessionTrackingIntervalMillis: 30000,
+        // Debug mode for development
+        debug: __DEV__,
+        // Sample rate for performance monitoring (0.0 to 1.0)
+        tracesSampleRate: __DEV__ ? 1.0 : 0.2,
+        // Attach stack traces to all messages
+        attachStacktrace: true,
+        // Maximum breadcrumbs
+        maxBreadcrumbs: 100,
+        // Ignore specific errors (optional)
+        beforeSend(event) {
+                // Filter out network errors in development
+          if (__DEV__ && event.exception?.values?.[0]?.type === 'NetworkError') {
+                    return null;
+          }
+                return event;
+        },
+  });
+}
+
+/**
+ * Set user context for crash reports
+ */
+export function setSentryUser(userId: string, email?: string): void {
+    Sentry.setUser({
+          id: userId,
+          email,
+    });
+}
+
+/**
+ * Clear user context (on logout)
+ */
+export function clearSentryUser(): void {
+    Sentry.setUser(null);
+}
+
+/**
+ * Capture a custom error
+ */
+export function captureError(error: Error, context?: Record<string, unknown>): void {
+    if (context) {
+          Sentry.setContext('additional', context);
+    }
+    Sentry.captureException(error);
+}
+
+/**
+ * Add a breadcrumb for tracking user actions
+ */
+export function addBreadcrumb(
+    category: string,
+    message: string,
+    level: Sentry.SeverityLevel = 'info'
+  ): void {
+    Sentry.addBreadcrumb({
+          category,
+          message,
+          level,
+    });
+}
+
+export default Sentry;
