@@ -99,10 +99,20 @@ const createApiClient = (): AxiosInstance => {
   client.interceptors.response.use(
     (response) => response,
     async (error: AxiosError) => {
-      const originalRequest = error.config;
+      const message = extractErrorMessage(error);
+      const status = error.response?.status || 0;
 
-      // Handle 401 Unauthorized
-      if (error.response?.status === 401) {
+      // Handle authentication errors (401, 403 with auth-related messages)
+      const isAuthError = status === 401 ||
+        (status === 403 && (
+          message.toLowerCase().includes('signature') ||
+          message.toLowerCase().includes('token') ||
+          message.toLowerCase().includes('jwt') ||
+          message.toLowerCase().includes('unauthorized') ||
+          message.toLowerCase().includes('authentication')
+        ));
+
+      if (isAuthError) {
         // Clear tokens and redirect to login
         await clearTokens();
 
@@ -121,8 +131,7 @@ const createApiClient = (): AxiosInstance => {
       }
 
       // Handle other errors
-      const message = extractErrorMessage(error);
-      return Promise.reject(new ApiError(message, error.response?.status || 500));
+      return Promise.reject(new ApiError(message, status || 500));
     }
   );
 

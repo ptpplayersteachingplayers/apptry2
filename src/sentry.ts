@@ -3,14 +3,17 @@ import Constants from 'expo-constants';
 
 /**
  * Sentry crash reporting initialization
- * Configure with your Sentry DSN in app.config.js extra.sentryDsn
+ * Configure with your Sentry DSN in app.config.js extra.SENTRY_DSN
  */
 export function initSentry(): void {
-    const dsn = Constants.expoConfig?.extra?.sentryDsn;
+  const dsn = Constants.expoConfig?.extra?.SENTRY_DSN;
 
   if (!dsn) {
-        console.warn('Sentry DSN not configured. Crash reporting disabled.');
-        return;
+    // Only warn in production - expected to be missing in development
+    if (!__DEV__) {
+      console.warn('Sentry DSN not configured. Crash reporting disabled.');
+    }
+    return;
   }
 
   Sentry.init({
