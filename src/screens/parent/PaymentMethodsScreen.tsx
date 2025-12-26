@@ -380,7 +380,7 @@ const PaymentMethodsScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.offWhite,
+    backgroundColor: colors.black,
   },
   listContent: {
     padding: spacing[4],
@@ -390,11 +390,12 @@ const styles = StyleSheet.create({
     marginBottom: spacing[3],
   },
   card: {
-    backgroundColor: colors.white,
-    borderRadius: borderRadius.lg,
+    backgroundColor: colors.blackCard,
+    borderRadius: 0,
     padding: spacing[4],
     marginBottom: spacing[3],
-    ...shadows.sm,
+    borderWidth: 2,
+    borderColor: colors.gray700,
   },
   cardExpired: {
     opacity: 0.7,
@@ -412,13 +413,13 @@ const styles = StyleSheet.create({
   cardIcon: {
     width: 48,
     height: 48,
-    borderRadius: 12,
+    borderRadius: 0,
     backgroundColor: colors.primaryLight,
     justifyContent: 'center',
     alignItems: 'center',
   },
   cardIconExpired: {
-    backgroundColor: colors.gray100,
+    backgroundColor: colors.gray700,
   },
   cardDetails: {
     flexDirection: 'row',
@@ -437,7 +438,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.successLight,
     paddingHorizontal: spacing[2],
     paddingVertical: spacing[1],
-    borderRadius: borderRadius.full,
+    borderRadius: 0,
   },
   cardActions: {
     flexDirection: 'row',
@@ -445,8 +446,8 @@ const styles = StyleSheet.create({
     gap: spacing[4],
     marginTop: spacing[4],
     paddingTop: spacing[3],
-    borderTopWidth: 1,
-    borderTopColor: colors.gray100,
+    borderTopWidth: 2,
+    borderTopColor: colors.gray700,
   },
   actionButton: {
     flexDirection: 'row',
@@ -460,16 +461,17 @@ const styles = StyleSheet.create({
   addButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: colors.white,
-    borderRadius: borderRadius.lg,
+    backgroundColor: colors.blackCard,
+    borderRadius: 0,
     padding: spacing[4],
     marginBottom: spacing[4],
-    ...shadows.sm,
+    borderWidth: 2,
+    borderColor: colors.gray700,
   },
   addButtonIcon: {
     width: 48,
     height: 48,
-    borderRadius: 12,
+    borderRadius: 0,
     backgroundColor: colors.primaryLight,
     justifyContent: 'center',
     alignItems: 'center',
@@ -481,9 +483,9 @@ const styles = StyleSheet.create({
   walletInfo: {
     flexDirection: 'row',
     alignItems: 'flex-start',
-    backgroundColor: colors.gray50,
+    backgroundColor: colors.blackLight,
     padding: spacing[4],
-    borderRadius: borderRadius.lg,
+    borderRadius: 0,
     gap: spacing[3],
     marginBottom: spacing[3],
   },
@@ -499,7 +501,7 @@ const styles = StyleSheet.create({
   // Modal styles
   modalContainer: {
     flex: 1,
-    backgroundColor: colors.white,
+    backgroundColor: colors.blackCard,
   },
   modalHeader: {
     flexDirection: 'row',
@@ -507,8 +509,8 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: spacing[4],
     paddingVertical: spacing[3],
-    borderBottomWidth: 1,
-    borderBottomColor: colors.gray200,
+    borderBottomWidth: 2,
+    borderBottomColor: colors.gray700,
   },
   modalCloseButton: {
     width: 44,
@@ -524,11 +526,11 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: colors.gray50,
-    borderRadius: borderRadius.lg,
+    backgroundColor: colors.blackLight,
+    borderRadius: 0,
     marginBottom: spacing[4],
     borderWidth: 2,
-    borderColor: colors.gray200,
+    borderColor: colors.gray700,
     borderStyle: 'dashed',
   },
   cardFormInfo: {
@@ -543,8 +545,8 @@ const styles = StyleSheet.create({
   },
   modalFooter: {
     padding: spacing[4],
-    borderTopWidth: 1,
-    borderTopColor: colors.gray200,
+    borderTopWidth: 2,
+    borderTopColor: colors.gray700,
   },
 });
 

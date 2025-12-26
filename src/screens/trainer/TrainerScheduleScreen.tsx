@@ -122,17 +122,17 @@ const TrainerScheduleScreen: React.FC = () => {
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.offWhite },
+  container: { flex: 1, backgroundColor: colors.black },
   header: { padding: spacing[4] },
   scrollView: { flex: 1 },
   scrollContent: { padding: spacing[4], paddingTop: 0, paddingBottom: spacing[8] },
   dateGroup: { marginBottom: spacing[4] },
   dateHeader: { marginBottom: spacing[2] },
-  sessionCard: { backgroundColor: colors.white, borderRadius: borderRadius.lg, padding: spacing[4], marginBottom: spacing[3], ...shadows.sm },
+  sessionCard: { backgroundColor: colors.blackCard, borderRadius: 0, borderWidth: 2, borderColor: colors.gray700, padding: spacing[4], marginBottom: spacing[3] },
   sessionHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' },
   location: { marginTop: spacing[2] },
   focusTags: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing[1], marginTop: spacing[2] },
-  notes: { marginTop: spacing[2], padding: spacing[2], backgroundColor: colors.gray50, borderRadius: borderRadius.sm },
+  notes: { marginTop: spacing[2], padding: spacing[2], backgroundColor: colors.blackLight, borderRadius: 0, borderWidth: 1, borderColor: colors.gray700 },
   actions: { flexDirection: 'row', marginTop: spacing[3] },
 });
 

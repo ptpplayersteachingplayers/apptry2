@@ -450,7 +450,7 @@ const ConversationDetailScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.white,
+    backgroundColor: colors.blackCard,
   },
   keyboardView: {
     flex: 1,
@@ -531,9 +531,9 @@ const styles = StyleSheet.create({
     marginLeft: spacing[1],
   },
   inputWrapper: {
-    borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: colors.gray200,
-    backgroundColor: colors.white,
+    borderTopWidth: 2,
+    borderTopColor: colors.gray700,
+    backgroundColor: colors.blackCard,
     paddingHorizontal: spacing[2],
     paddingVertical: spacing[2],
   },
@@ -550,12 +550,12 @@ const styles = StyleSheet.create({
   },
   textInputContainer: {
     flex: 1,
-    backgroundColor: iOSColors.inputBg,
-    borderRadius: 20,
+    backgroundColor: colors.gray700,
+    borderRadius: 0,
     paddingHorizontal: spacing[3],
     paddingVertical: Platform.OS === 'ios' ? spacing[2] : 0,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: colors.gray300,
+    borderWidth: 2,
+    borderColor: colors.gray700,
   },
   input: {
     fontSize: 17,

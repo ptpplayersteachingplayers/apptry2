@@ -196,10 +196,11 @@ const CampsClinicsScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.offWhite,
+    backgroundColor: colors.black,
   },
   filtersContainer: {
     padding: spacing[4],
+    backgroundColor: colors.black,
   },
   searchInput: {
     marginBottom: spacing[3],
@@ -212,11 +213,14 @@ const styles = StyleSheet.create({
   filterTab: {
     paddingHorizontal: spacing[4],
     paddingVertical: spacing[2],
-    borderRadius: borderRadius.full,
-    backgroundColor: colors.gray100,
+    borderRadius: 0,
+    backgroundColor: colors.blackCard,
+    borderWidth: 2,
+    borderColor: colors.gray700,
   },
   filterTabActive: {
     backgroundColor: colors.primary,
+    borderColor: colors.primary,
   },
   resultsCount: {
     marginTop: spacing[1],

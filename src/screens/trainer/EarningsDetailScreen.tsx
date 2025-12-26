@@ -332,7 +332,7 @@ const mockTransactions: Transaction[] = [
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.offWhite,
+    backgroundColor: colors.black,
   },
   scrollView: {
     flex: 1,
@@ -350,12 +350,13 @@ const styles = StyleSheet.create({
     padding: spacing[4],
   },
   summaryCard: {
-    backgroundColor: colors.white,
-    borderRadius: borderRadius.lg,
+    backgroundColor: colors.blackCard,
+    borderRadius: 0,
     padding: spacing[6],
     alignItems: 'center',
     marginBottom: spacing[3],
-    ...shadows.md,
+    borderWidth: 2,
+    borderColor: colors.gray700,
   },
   summaryRow: {
     flexDirection: 'row',
@@ -363,12 +364,13 @@ const styles = StyleSheet.create({
   },
   summaryCardSmall: {
     flex: 1,
-    backgroundColor: colors.white,
-    borderRadius: borderRadius.lg,
+    backgroundColor: colors.blackCard,
+    borderRadius: 0,
     padding: spacing[4],
     flexDirection: 'row',
     alignItems: 'center',
-    ...shadows.sm,
+    borderWidth: 2,
+    borderColor: colors.gray700,
   },
   pendingCard: {},
   summaryCardContent: {
@@ -389,8 +391,8 @@ const styles = StyleSheet.create({
   filterChip: {
     paddingHorizontal: spacing[3],
     paddingVertical: spacing[2],
-    borderRadius: borderRadius.full,
-    backgroundColor: colors.gray100,
+    borderRadius: 0,
+    backgroundColor: colors.gray700,
   },
   filterChipSelected: {
     backgroundColor: colors.primary,
@@ -400,10 +402,11 @@ const styles = StyleSheet.create({
     marginTop: spacing[4],
   },
   transactionsCard: {
-    backgroundColor: colors.white,
-    borderRadius: borderRadius.lg,
-    ...shadows.sm,
+    backgroundColor: colors.blackCard,
+    borderRadius: 0,
     overflow: 'hidden',
+    borderWidth: 2,
+    borderColor: colors.gray700,
   },
   transactionItem: {
     flexDirection: 'row',
@@ -412,13 +415,13 @@ const styles = StyleSheet.create({
   },
   transactionItemBorder: {
     borderBottomWidth: 1,
-    borderBottomColor: colors.gray100,
+    borderBottomColor: colors.gray700,
   },
   transactionIcon: {
     width: 40,
     height: 40,
-    borderRadius: 20,
-    backgroundColor: colors.gray100,
+    borderRadius: 0,
+    backgroundColor: colors.gray700,
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: spacing[3],
@@ -434,7 +437,7 @@ const styles = StyleSheet.create({
   statusBadge: {
     paddingHorizontal: spacing[2],
     paddingVertical: 2,
-    borderRadius: borderRadius.sm,
+    borderRadius: 0,
     marginLeft: spacing[2],
   },
   statusText: {
@@ -442,11 +445,12 @@ const styles = StyleSheet.create({
     textTransform: 'capitalize',
   },
   emptyCard: {
-    backgroundColor: colors.white,
-    borderRadius: borderRadius.lg,
+    backgroundColor: colors.blackCard,
+    borderRadius: 0,
     padding: spacing[8],
     alignItems: 'center',
-    ...shadows.sm,
+    borderWidth: 2,
+    borderColor: colors.gray700,
   },
   emptyText: {
     marginTop: spacing[3],
@@ -458,9 +462,9 @@ const styles = StyleSheet.create({
   infoCard: {
     flexDirection: 'row',
     alignItems: 'flex-start',
-    backgroundColor: colors.gray100,
+    backgroundColor: colors.gray700,
     padding: spacing[4],
-    borderRadius: borderRadius.md,
+    borderRadius: 0,
   },
   infoText: {
     flex: 1,
