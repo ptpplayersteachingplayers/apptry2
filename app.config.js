@@ -109,7 +109,9 @@ export default ({ config }) => {
             // Legal URLs for App Store compliance
             PRIVACY_POLICY_URL: 'https://ptpsummercamps.com/privacy-policy',
             TERMS_OF_SERVICE_URL: 'https://ptpsummercamps.com/terms-of-service',
-            SUPPORT_EMAIL: 'support@ptpsummercamps.com',
+            SUPPORT_EMAIL: 'luke@ptpsummercamps.com',
+            // Sentry crash reporting - get DSN from https://sentry.io
+            SENTRY_DSN: process.env.SENTRY_DSN || '',
       // Stripe Configuration
       STRIPE_PUBLISHABLE_KEY:
         process.env.EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY ||
