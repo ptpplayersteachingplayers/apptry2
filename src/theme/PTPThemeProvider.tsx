@@ -87,7 +87,7 @@ export const PTPThemeProvider: React.FC<PTPThemeProviderProps> = ({ children }) 
   if (!fontsLoaded) {
     return (
       <View style={styles.loadingContainer}>
-        <StatusBar barStyle="light-content" backgroundColor={colors.black} />
+        <StatusBar barStyle="dark-content" backgroundColor={colors.black} />
         <ActivityIndicator size="large" color={colors.primary} />
       </View>
     );
@@ -95,7 +95,7 @@ export const PTPThemeProvider: React.FC<PTPThemeProviderProps> = ({ children }) 
 
   return (
     <ThemeContext.Provider value={theme}>
-      <StatusBar barStyle="light-content" backgroundColor={colors.black} />
+      <StatusBar barStyle="dark-content" backgroundColor={colors.black} />
       {children}
     </ThemeContext.Provider>
   );

@@ -71,7 +71,7 @@ export const PTPHero: React.FC<PTPHeroProps> = ({
               />
             )}
             {title && (
-              <PTPText variant="heroTitle" style={styles.title}>
+              <PTPText variant="heroTitle" color="white" style={styles.title}>
                 {title}
               </PTPText>
             )}
@@ -127,7 +127,7 @@ export const PTPHeroCard: React.FC<PTPHeroCardProps> = ({
         style={styles.heroCardGradient}
       >
         <View style={styles.heroCardContent}>
-          <PTPText variant="cardTitle" numberOfLines={2}>
+          <PTPText variant="cardTitle" color="white" numberOfLines={2}>
             {title}
           </PTPText>
           {subtitle && (
@@ -265,7 +265,7 @@ const styles = StyleSheet.create({
     borderRadius: borderRadius.none,
     overflow: 'hidden',
     borderWidth: 2,
-    borderColor: colors.gray700,
+    borderColor: colors.gray200,
   },
   heroCardBackground: {
     flex: 1,

@@ -397,7 +397,7 @@ const styles = StyleSheet.create({
     borderRadius: 0,
     backgroundColor: colors.blackCard,
     borderWidth: 2,
-    borderColor: colors.gray700,
+    borderColor: colors.gray200,
   },
   filterPillActive: {
     backgroundColor: colors.primary,
@@ -418,7 +418,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.blackCard,
     borderRadius: 0,
     borderWidth: 2,
-    borderColor: colors.gray700,
+    borderColor: colors.gray200,
     marginBottom: spacing[3],
   },
   sortOption: {
@@ -428,7 +428,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing[4],
     paddingVertical: spacing[3],
     borderBottomWidth: 1,
-    borderBottomColor: colors.gray700,
+    borderBottomColor: colors.gray200,
   },
   sortOptionActive: {
     backgroundColor: colors.blackLight,
@@ -438,7 +438,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.blackCard,
     borderRadius: 0,
     borderWidth: 2,
-    borderColor: colors.gray700,
+    borderColor: colors.gray200,
     padding: spacing[3],
   },
   infoIcon: {
@@ -471,7 +471,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.blackCard,
     borderRadius: 0,
     borderWidth: 2,
-    borderColor: colors.gray700,
+    borderColor: colors.gray200,
     marginHorizontal: spacing[4],
     marginBottom: spacing[3],
     overflow: 'hidden',

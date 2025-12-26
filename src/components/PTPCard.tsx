@@ -110,7 +110,7 @@ export const PTPCard: React.FC<PTPCardProps> = ({
                 )}
                 <View style={styles.textContent}>
                   {title && (
-                    <PTPText variant="cardTitle" numberOfLines={2}>
+                    <PTPText variant="cardTitle" color="white" numberOfLines={2}>
                       {title}
                     </PTPText>
                   )}
@@ -150,12 +150,12 @@ export const PTPCard: React.FC<PTPCardProps> = ({
           <View style={styles.header}>
             <View style={styles.textContent}>
               {title && (
-                <PTPText variant="cardTitle" numberOfLines={2}>
+                <PTPText variant="cardTitle" color="inkBlack" numberOfLines={2}>
                   {title}
                 </PTPText>
               )}
               {subtitle && (
-                <PTPText variant="cardSubtitle" color="gray300" numberOfLines={2} style={styles.subtitle}>
+                <PTPText variant="cardSubtitle" color="gray600" numberOfLines={2} style={styles.subtitle}>
                   {subtitle}
                 </PTPText>
               )}
@@ -389,14 +389,14 @@ const styles = StyleSheet.create({
     backgroundColor: colors.blackCard,
     borderRadius: borderRadius.none,
     borderWidth: borderWidth.base,
-    borderColor: colors.gray700,
+    borderColor: colors.gray200,
     overflow: 'hidden',
   },
   simpleCard: {
     backgroundColor: colors.blackCard,
     borderRadius: borderRadius.none,
     borderWidth: borderWidth.base,
-    borderColor: colors.gray700,
+    borderColor: colors.gray200,
     padding: spacing[6],
   },
   elevated: {
@@ -448,7 +448,7 @@ const styles = StyleSheet.create({
     marginTop: spacing[3],
     paddingTop: spacing[3],
     borderTopWidth: 1,
-    borderTopColor: colors.gray700,
+    borderTopColor: colors.gray200,
   },
   priceContainer: {
     alignItems: 'flex-end',

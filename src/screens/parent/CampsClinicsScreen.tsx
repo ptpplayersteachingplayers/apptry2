@@ -216,7 +216,7 @@ const styles = StyleSheet.create({
     borderRadius: 0,
     backgroundColor: colors.blackCard,
     borderWidth: 2,
-    borderColor: colors.gray700,
+    borderColor: colors.gray200,
   },
   filterTabActive: {
     backgroundColor: colors.primary,

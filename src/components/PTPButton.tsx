@@ -135,10 +135,10 @@ const getTextColor = (variant: ButtonVariant, disabled: boolean): string => {
 
   switch (variant) {
     case 'primary':
-      return colors.black;
+      return colors.inkBlack;
     case 'secondary':
     case 'outline':
-      return colors.white;
+      return colors.inkBlack;
     case 'ghost':
       return colors.primary;
     case 'danger':
@@ -162,14 +162,14 @@ const styles = StyleSheet.create({
     backgroundColor: colors.primary,
   },
   secondary: {
-    backgroundColor: colors.transparent,
+    backgroundColor: colors.white,
     borderWidth: borderWidth.base,
-    borderColor: colors.primary,
+    borderColor: colors.inkBlack,
   },
   outline: {
     backgroundColor: colors.transparent,
     borderWidth: borderWidth.base,
-    borderColor: colors.gray700,
+    borderColor: colors.gray300,
   },
   ghost: {
     backgroundColor: colors.transparent,
