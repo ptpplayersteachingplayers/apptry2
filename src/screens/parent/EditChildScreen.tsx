@@ -402,7 +402,7 @@ const EditChildScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.offWhite,
+    backgroundColor: colors.black,
   },
   keyboardAvoid: {
     flex: 1,
@@ -422,10 +422,11 @@ const styles = StyleSheet.create({
     marginLeft: spacing[1],
   },
   card: {
-    backgroundColor: colors.white,
-    borderRadius: borderRadius.lg,
+    backgroundColor: colors.blackCard,
+    borderRadius: 0,
     padding: spacing[4],
-    ...shadows.sm,
+    borderWidth: 2,
+    borderColor: colors.gray700,
   },
   inputGroup: {
     marginBottom: spacing[4],
@@ -446,8 +447,8 @@ const styles = StyleSheet.create({
   optionChip: {
     paddingHorizontal: spacing[4],
     paddingVertical: spacing[2],
-    borderRadius: borderRadius.full,
-    backgroundColor: colors.gray100,
+    borderRadius: 0,
+    backgroundColor: colors.gray700,
   },
   optionChipSelected: {
     backgroundColor: colors.primary,
@@ -455,8 +456,8 @@ const styles = StyleSheet.create({
   positionChip: {
     paddingHorizontal: spacing[3],
     paddingVertical: spacing[2],
-    borderRadius: borderRadius.md,
-    backgroundColor: colors.gray100,
+    borderRadius: 0,
+    backgroundColor: colors.gray700,
   },
   skillOption: {
     flexDirection: 'row',
@@ -464,7 +465,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingVertical: spacing[3],
     borderBottomWidth: 1,
-    borderBottomColor: colors.gray100,
+    borderBottomColor: colors.gray700,
   },
   skillOptionSelected: {
     borderBottomColor: colors.primary,
@@ -475,9 +476,9 @@ const styles = StyleSheet.create({
   radioOuter: {
     width: 22,
     height: 22,
-    borderRadius: 11,
+    borderRadius: 0,
     borderWidth: 2,
-    borderColor: colors.gray300,
+    borderColor: colors.gray700,
     alignItems: 'center',
     justifyContent: 'center',
     marginLeft: spacing[3],
@@ -488,7 +489,7 @@ const styles = StyleSheet.create({
   radioInner: {
     width: 12,
     height: 12,
-    borderRadius: 6,
+    borderRadius: 0,
     backgroundColor: colors.primary,
   },
   textArea: {

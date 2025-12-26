@@ -376,7 +376,7 @@ const SessionDetailScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.offWhite,
+    backgroundColor: colors.black,
   },
   scrollView: {
     flex: 1,
@@ -421,10 +421,11 @@ const styles = StyleSheet.create({
     marginLeft: spacing[1],
   },
   card: {
-    backgroundColor: colors.white,
-    borderRadius: borderRadius.lg,
+    backgroundColor: colors.blackCard,
+    borderRadius: 0,
     padding: spacing[4],
-    ...shadows.sm,
+    borderWidth: 2,
+    borderColor: colors.gray700,
   },
   cardRow: {
     flexDirection: 'row',
@@ -437,7 +438,7 @@ const styles = StyleSheet.create({
   playerAvatar: {
     width: 48,
     height: 48,
-    borderRadius: 24,
+    borderRadius: 0,
     backgroundColor: colors.inkBlack,
     justifyContent: 'center',
     alignItems: 'center',
@@ -446,7 +447,7 @@ const styles = StyleSheet.create({
     marginTop: spacing[4],
     paddingTop: spacing[4],
     borderTopWidth: 1,
-    borderTopColor: colors.gray100,
+    borderTopColor: colors.gray700,
   },
   notesText: {
     marginTop: spacing[1],
@@ -460,7 +461,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.primaryLight,
     paddingHorizontal: spacing[3],
     paddingVertical: spacing[1],
-    borderRadius: borderRadius.full,
+    borderRadius: 0,
   },
   earningsRow: {
     flexDirection: 'row',

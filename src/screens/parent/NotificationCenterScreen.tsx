@@ -262,16 +262,16 @@ const NotificationCenterScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.offWhite,
+    backgroundColor: colors.black,
   },
   headerActions: {
     flexDirection: 'row',
     justifyContent: 'flex-end',
     paddingHorizontal: spacing[4],
     paddingVertical: spacing[2],
-    borderBottomWidth: 1,
-    borderBottomColor: colors.gray100,
-    backgroundColor: colors.white,
+    borderBottomWidth: 2,
+    borderBottomColor: colors.gray700,
+    backgroundColor: colors.blackCard,
   },
   listContent: {
     flexGrow: 1,
@@ -281,10 +281,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'flex-start',
     padding: spacing[4],
-    backgroundColor: colors.white,
+    backgroundColor: colors.blackCard,
     marginHorizontal: spacing[4],
-    borderRadius: borderRadius.md,
-    ...shadows.sm,
+    borderRadius: 0,
+    borderWidth: 2,
+    borderColor: colors.gray700,
   },
   unreadNotification: {
     backgroundColor: colors.primaryLight,
@@ -292,8 +293,8 @@ const styles = StyleSheet.create({
   iconContainer: {
     width: 44,
     height: 44,
-    borderRadius: 22,
-    backgroundColor: colors.gray100,
+    borderRadius: 0,
+    backgroundColor: colors.gray700,
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: spacing[3],
@@ -317,7 +318,7 @@ const styles = StyleSheet.create({
   unreadDot: {
     width: 10,
     height: 10,
-    borderRadius: 5,
+    borderRadius: 0,
     backgroundColor: colors.primary,
     marginLeft: spacing[2],
     marginTop: spacing[1],

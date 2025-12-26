@@ -327,7 +327,7 @@ const EditTrainerProfileScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.offWhite,
+    backgroundColor: colors.black,
   },
   keyboardAvoid: {
     flex: 1,
@@ -347,10 +347,11 @@ const styles = StyleSheet.create({
     marginLeft: spacing[1],
   },
   card: {
-    backgroundColor: colors.white,
-    borderRadius: borderRadius.lg,
+    backgroundColor: colors.blackCard,
+    borderRadius: 0,
     padding: spacing[4],
-    ...shadows.sm,
+    borderWidth: 2,
+    borderColor: colors.gray700,
   },
   inputGroup: {
     marginBottom: spacing[4],
@@ -374,8 +375,8 @@ const styles = StyleSheet.create({
   specialtyChip: {
     paddingHorizontal: spacing[3],
     paddingVertical: spacing[2],
-    borderRadius: borderRadius.full,
-    backgroundColor: colors.gray100,
+    borderRadius: 0,
+    backgroundColor: colors.gray700,
   },
   specialtyChipSelected: {
     backgroundColor: colors.primary,

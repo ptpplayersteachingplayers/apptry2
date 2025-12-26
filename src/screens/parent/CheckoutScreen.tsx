@@ -490,12 +490,14 @@ const CheckoutScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.white,
+    backgroundColor: colors.black,
   },
   modeToggle: {
     flexDirection: 'row',
-    backgroundColor: colors.gray100,
-    borderRadius: borderRadius.md,
+    backgroundColor: colors.blackCard,
+    borderRadius: 0,
+    borderWidth: 2,
+    borderColor: colors.gray700,
     padding: 4,
     margin: spacing[3],
   },
@@ -507,18 +509,17 @@ const styles = StyleSheet.create({
     gap: spacing[1],
     paddingVertical: spacing[2],
     paddingHorizontal: spacing[3],
-    borderRadius: borderRadius.sm,
+    borderRadius: 0,
   },
   modeButtonActive: {
-    backgroundColor: colors.white,
-    ...shadows.sm,
+    backgroundColor: colors.primary,
   },
   webview: {
     flex: 1,
   },
   loadingOverlay: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: colors.white,
+    backgroundColor: colors.black,
     justifyContent: 'center',
     alignItems: 'center',
     zIndex: 1,
@@ -539,7 +540,7 @@ const styles = StyleSheet.create({
   // Enhanced Success Screen Styles
   successContainer: {
     flex: 1,
-    backgroundColor: colors.offWhite,
+    backgroundColor: colors.black,
   },
   successScroll: {
     flex: 1,
@@ -555,7 +556,7 @@ const styles = StyleSheet.create({
   successIcon: {
     width: 80,
     height: 80,
-    borderRadius: 40,
+    borderRadius: 0,
     backgroundColor: colors.success,
     justifyContent: 'center',
     alignItems: 'center',
@@ -569,19 +570,20 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   confirmationCard: {
-    backgroundColor: colors.white,
-    borderRadius: borderRadius.lg,
+    backgroundColor: colors.blackCard,
+    borderRadius: 0,
+    borderWidth: 2,
+    borderColor: colors.gray700,
     padding: spacing[5],
     marginBottom: spacing[4],
-    ...shadows.md,
   },
   confirmationHeader: {
     alignItems: 'center',
     marginBottom: spacing[4],
   },
   confirmationDivider: {
-    height: 1,
-    backgroundColor: colors.gray200,
+    height: 2,
+    backgroundColor: colors.gray700,
     marginVertical: spacing[4],
   },
   confirmationSection: {
@@ -601,10 +603,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   nextStepsCard: {
-    backgroundColor: colors.white,
-    borderRadius: borderRadius.lg,
+    backgroundColor: colors.blackCard,
+    borderRadius: 0,
+    borderWidth: 2,
+    borderColor: colors.gray700,
     padding: spacing[5],
-    ...shadows.sm,
   },
   nextStepsTitle: {
     marginBottom: spacing[4],
@@ -618,7 +621,7 @@ const styles = StyleSheet.create({
   nextStepNumber: {
     width: 24,
     height: 24,
-    borderRadius: 12,
+    borderRadius: 0,
     backgroundColor: colors.primary,
     justifyContent: 'center',
     alignItems: 'center',
@@ -628,9 +631,9 @@ const styles = StyleSheet.create({
   },
   successFooter: {
     padding: spacing[4],
-    backgroundColor: colors.white,
-    borderTopWidth: 1,
-    borderTopColor: colors.gray200,
+    backgroundColor: colors.blackCard,
+    borderTopWidth: 2,
+    borderTopColor: colors.gray700,
   },
   secondaryButton: {
     marginTop: spacing[3],
@@ -640,13 +643,15 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     padding: spacing[6],
-    backgroundColor: colors.white,
+    backgroundColor: colors.black,
   },
   guestIcon: {
     width: 80,
     height: 80,
-    borderRadius: 40,
-    backgroundColor: colors.gray100,
+    borderRadius: 0,
+    backgroundColor: colors.blackCard,
+    borderWidth: 2,
+    borderColor: colors.gray700,
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: spacing[6],

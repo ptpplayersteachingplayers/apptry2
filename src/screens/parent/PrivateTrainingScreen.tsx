@@ -378,10 +378,11 @@ const PrivateTrainingScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.offWhite,
+    backgroundColor: colors.black,
   },
   searchContainer: {
     padding: spacing[4],
+    backgroundColor: colors.black,
   },
   searchInput: {
     marginBottom: spacing[3],
@@ -393,11 +394,14 @@ const styles = StyleSheet.create({
   filterPill: {
     paddingHorizontal: spacing[4],
     paddingVertical: spacing[2],
-    borderRadius: borderRadius.full,
-    backgroundColor: colors.gray100,
+    borderRadius: 0,
+    backgroundColor: colors.blackCard,
+    borderWidth: 2,
+    borderColor: colors.gray700,
   },
   filterPillActive: {
     backgroundColor: colors.primary,
+    borderColor: colors.primary,
   },
   sortRow: {
     flexDirection: 'row',
@@ -411,10 +415,11 @@ const styles = StyleSheet.create({
     gap: spacing[1],
   },
   sortDropdown: {
-    backgroundColor: colors.white,
-    borderRadius: borderRadius.md,
+    backgroundColor: colors.blackCard,
+    borderRadius: 0,
+    borderWidth: 2,
+    borderColor: colors.gray700,
     marginBottom: spacing[3],
-    ...shadows.md,
   },
   sortOption: {
     flexDirection: 'row',
@@ -423,15 +428,17 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing[4],
     paddingVertical: spacing[3],
     borderBottomWidth: 1,
-    borderBottomColor: colors.gray100,
+    borderBottomColor: colors.gray700,
   },
   sortOptionActive: {
-    backgroundColor: colors.gray50,
+    backgroundColor: colors.blackLight,
   },
   infoBanner: {
     flexDirection: 'row',
-    backgroundColor: colors.gray100,
-    borderRadius: borderRadius.md,
+    backgroundColor: colors.blackCard,
+    borderRadius: 0,
+    borderWidth: 2,
+    borderColor: colors.gray700,
     padding: spacing[3],
   },
   infoIcon: {
@@ -461,17 +468,18 @@ const styles = StyleSheet.create({
     marginVertical: spacing[4],
   },
   trainerCard: {
-    backgroundColor: colors.white,
-    borderRadius: borderRadius.lg,
+    backgroundColor: colors.blackCard,
+    borderRadius: 0,
+    borderWidth: 2,
+    borderColor: colors.gray700,
     marginHorizontal: spacing[4],
     marginBottom: spacing[3],
     overflow: 'hidden',
-    ...shadows.md,
   },
   trainerImage: {
     width: '100%',
     height: 200,
-    backgroundColor: colors.gray100,
+    backgroundColor: colors.blackLight,
   },
   trainerInfo: {
     padding: spacing[4],

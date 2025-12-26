@@ -255,7 +255,7 @@ const StudentDetailScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.offWhite,
+    backgroundColor: colors.black,
   },
   scrollView: {
     flex: 1,
@@ -273,12 +273,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: spacing[6],
     paddingHorizontal: spacing[4],
-    backgroundColor: colors.white,
+    backgroundColor: colors.blackCard,
+    borderBottomWidth: 2,
+    borderBottomColor: colors.gray700,
   },
   avatar: {
     width: 80,
     height: 80,
-    borderRadius: 40,
+    borderRadius: 0,
     backgroundColor: colors.inkBlack,
     justifyContent: 'center',
     alignItems: 'center',
@@ -291,11 +293,11 @@ const styles = StyleSheet.create({
   },
   statsRow: {
     flexDirection: 'row',
-    backgroundColor: colors.white,
+    backgroundColor: colors.blackCard,
     paddingVertical: spacing[4],
     paddingHorizontal: spacing[4],
     borderTopWidth: 1,
-    borderTopColor: colors.gray100,
+    borderTopColor: colors.gray700,
   },
   statItem: {
     flex: 1,
@@ -303,7 +305,7 @@ const styles = StyleSheet.create({
   },
   statDivider: {
     width: 1,
-    backgroundColor: colors.gray200,
+    backgroundColor: colors.gray700,
   },
   section: {
     paddingHorizontal: spacing[4],
@@ -314,16 +316,18 @@ const styles = StyleSheet.create({
     marginLeft: spacing[1],
   },
   card: {
-    backgroundColor: colors.white,
-    borderRadius: borderRadius.lg,
+    backgroundColor: colors.blackCard,
+    borderRadius: 0,
     padding: spacing[4],
-    ...shadows.sm,
+    borderWidth: 2,
+    borderColor: colors.gray700,
   },
   emptyCard: {
-    backgroundColor: colors.white,
-    borderRadius: borderRadius.lg,
+    backgroundColor: colors.blackCard,
+    borderRadius: 0,
     padding: spacing[6],
-    ...shadows.sm,
+    borderWidth: 2,
+    borderColor: colors.gray700,
   },
   detailRow: {
     flexDirection: 'row',
@@ -335,7 +339,7 @@ const styles = StyleSheet.create({
     paddingTop: spacing[3],
     marginTop: spacing[2],
     borderTopWidth: 1,
-    borderTopColor: colors.gray100,
+    borderTopColor: colors.gray700,
   },
   notesText: {
     marginTop: spacing[1],
@@ -356,7 +360,7 @@ const styles = StyleSheet.create({
   statusDot: {
     width: 8,
     height: 8,
-    borderRadius: 4,
+    borderRadius: 0,
     marginRight: spacing[1],
   },
   statusText: {
@@ -364,7 +368,7 @@ const styles = StyleSheet.create({
   },
   divider: {
     height: 1,
-    backgroundColor: colors.gray100,
+    backgroundColor: colors.gray700,
   },
   actions: {
     paddingHorizontal: spacing[4],

@@ -74,12 +74,12 @@ const TrainerStudentsScreen: React.FC = () => {
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.offWhite },
+  container: { flex: 1, backgroundColor: colors.black },
   header: { padding: spacing[4] },
   searchContainer: { paddingHorizontal: spacing[4], marginBottom: spacing[3] },
   listContent: { padding: spacing[4], paddingTop: 0, flexGrow: 1 },
-  studentCard: { flexDirection: 'row', alignItems: 'center', backgroundColor: colors.white, borderRadius: borderRadius.lg, padding: spacing[4], marginBottom: spacing[3], ...shadows.sm },
-  avatar: { width: 48, height: 48, borderRadius: 24, backgroundColor: colors.inkBlack, justifyContent: 'center', alignItems: 'center', marginRight: spacing[3] },
+  studentCard: { flexDirection: 'row', alignItems: 'center', backgroundColor: colors.blackCard, borderRadius: 0, padding: spacing[4], marginBottom: spacing[3], borderWidth: 2, borderColor: colors.gray700 },
+  avatar: { width: 48, height: 48, borderRadius: 0, backgroundColor: colors.inkBlack, justifyContent: 'center', alignItems: 'center', marginRight: spacing[3] },
   studentInfo: { flex: 1 },
   studentStats: { alignItems: 'flex-end' },
 });

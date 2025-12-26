@@ -255,7 +255,7 @@ const MessagesScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.white,
+    backgroundColor: colors.blackCard,
   },
   header: {
     flexDirection: 'row',
@@ -274,8 +274,8 @@ const styles = StyleSheet.create({
   searchBar: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: colors.gray100,
-    borderRadius: borderRadius.lg,
+    backgroundColor: colors.gray700,
+    borderRadius: 0,
     paddingHorizontal: spacing[3],
     paddingVertical: spacing[2],
     gap: spacing[2],
@@ -294,7 +294,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: spacing[4],
     paddingVertical: spacing[3],
-    backgroundColor: colors.white,
+    backgroundColor: colors.blackCard,
   },
   avatarContainer: {
     position: 'relative',
@@ -313,10 +313,10 @@ const styles = StyleSheet.create({
     right: 2,
     width: 14,
     height: 14,
-    borderRadius: 7,
+    borderRadius: 0,
     backgroundColor: '#34C759', // iOS green
     borderWidth: 2,
-    borderColor: colors.white,
+    borderColor: colors.blackCard,
   },
   avatarText: {
     color: colors.white,
@@ -367,8 +367,8 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   separator: {
-    height: StyleSheet.hairlineWidth,
-    backgroundColor: colors.gray200,
+    height: 2,
+    backgroundColor: colors.gray700,
     marginLeft: 76, // Avatar container width + margin
   },
   emptySearch: {

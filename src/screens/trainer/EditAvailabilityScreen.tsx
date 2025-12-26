@@ -335,7 +335,7 @@ const EditAvailabilityScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.offWhite,
+    backgroundColor: colors.black,
   },
   scrollView: {
     flex: 1,
@@ -347,9 +347,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'flex-start',
     padding: spacing[4],
-    backgroundColor: colors.gray100,
+    backgroundColor: colors.gray700,
     margin: spacing[4],
-    borderRadius: borderRadius.md,
+    borderRadius: 0,
   },
   instructionsText: {
     flex: 1,
@@ -359,11 +359,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing[4],
   },
   dayCard: {
-    backgroundColor: colors.white,
-    borderRadius: borderRadius.lg,
+    backgroundColor: colors.blackCard,
+    borderRadius: 0,
     marginBottom: spacing[3],
-    ...shadows.sm,
     overflow: 'hidden',
+    borderWidth: 2,
+    borderColor: colors.gray700,
   },
   dayHeader: {
     flexDirection: 'row',
@@ -391,7 +392,7 @@ const styles = StyleSheet.create({
     padding: spacing[4],
     paddingTop: 0,
     borderTopWidth: 1,
-    borderTopColor: colors.gray100,
+    borderTopColor: colors.gray700,
   },
   slotRow: {
     flexDirection: 'row',
@@ -419,8 +420,8 @@ const styles = StyleSheet.create({
   timeOption: {
     paddingHorizontal: spacing[2],
     paddingVertical: spacing[1],
-    borderRadius: borderRadius.sm,
-    backgroundColor: colors.gray100,
+    borderRadius: 0,
+    backgroundColor: colors.gray700,
     marginRight: spacing[1],
   },
   timeOptionSelected: {

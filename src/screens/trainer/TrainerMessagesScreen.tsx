@@ -107,14 +107,14 @@ const TrainerMessagesScreen: React.FC = () => {
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.offWhite },
+  container: { flex: 1, backgroundColor: colors.black },
   header: { padding: spacing[4] },
   listContent: { padding: spacing[4], paddingTop: 0, flexGrow: 1 },
-  conversationCard: { flexDirection: 'row', alignItems: 'center', backgroundColor: colors.white, padding: spacing[4], borderRadius: borderRadius.lg, marginBottom: spacing[3], ...shadows.sm },
-  avatar: { width: 48, height: 48, borderRadius: 24, backgroundColor: colors.primary, justifyContent: 'center', alignItems: 'center', marginRight: spacing[3] },
+  conversationCard: { flexDirection: 'row', alignItems: 'center', backgroundColor: colors.blackCard, padding: spacing[4], borderRadius: 0, marginBottom: spacing[3], borderWidth: 2, borderColor: colors.gray700 },
+  avatar: { width: 48, height: 48, borderRadius: 0, backgroundColor: colors.primary, justifyContent: 'center', alignItems: 'center', marginRight: spacing[3] },
   conversationContent: { flex: 1 },
   conversationHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: spacing[1] },
-  unreadBadge: { backgroundColor: colors.inkBlack, borderRadius: 10, minWidth: 20, height: 20, justifyContent: 'center', alignItems: 'center', paddingHorizontal: spacing[1] },
+  unreadBadge: { backgroundColor: colors.inkBlack, borderRadius: 0, minWidth: 20, height: 20, justifyContent: 'center', alignItems: 'center', paddingHorizontal: spacing[1] },
 });
 
 export default TrainerMessagesScreen;

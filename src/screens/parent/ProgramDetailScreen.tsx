@@ -517,7 +517,7 @@ const ProgramDetailScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.offWhite,
+    backgroundColor: colors.black,
   },
   scrollView: {
     flex: 1,
@@ -534,8 +534,10 @@ const styles = StyleSheet.create({
   errorIconContainer: {
     width: 80,
     height: 80,
-    borderRadius: 40,
-    backgroundColor: colors.gray100,
+    borderRadius: 0,
+    backgroundColor: colors.blackCard,
+    borderWidth: 2,
+    borderColor: colors.gray700,
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: spacing[4],
@@ -567,7 +569,7 @@ const styles = StyleSheet.create({
   heroOverlay: {
     padding: spacing[4],
     paddingTop: spacing[8],
-    backgroundColor: colors.overlayLight,
+    backgroundColor: colors.overlayDark,
   },
   heroTags: {
     flexDirection: 'row',
@@ -575,10 +577,8 @@ const styles = StyleSheet.create({
   },
   content: {
     padding: spacing[4],
-    backgroundColor: colors.white,
+    backgroundColor: colors.black,
     marginTop: -spacing[4],
-    borderTopLeftRadius: borderRadius.xl,
-    borderTopRightRadius: borderRadius.xl,
   },
   titleSection: {
     marginBottom: spacing[4],
@@ -594,8 +594,10 @@ const styles = StyleSheet.create({
   },
   infoCard: {
     flex: 1,
-    backgroundColor: colors.gray50,
-    borderRadius: borderRadius.md,
+    backgroundColor: colors.blackCard,
+    borderRadius: 0,
+    borderWidth: 2,
+    borderColor: colors.gray700,
     padding: spacing[3],
     alignItems: 'center',
   },
@@ -605,8 +607,10 @@ const styles = StyleSheet.create({
   },
   locationCard: {
     flexDirection: 'row',
-    backgroundColor: colors.gray50,
-    borderRadius: borderRadius.md,
+    backgroundColor: colors.blackCard,
+    borderRadius: 0,
+    borderWidth: 2,
+    borderColor: colors.gray700,
     padding: spacing[3],
     marginBottom: spacing[4],
   },
@@ -648,8 +652,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-around',
     paddingTop: spacing[4],
-    borderTopWidth: 1,
-    borderTopColor: colors.gray100,
+    borderTopWidth: 2,
+    borderTopColor: colors.gray700,
     marginTop: spacing[4],
   },
   trustBadge: {
@@ -664,10 +668,9 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    backgroundColor: colors.white,
-    borderTopWidth: 1,
-    borderTopColor: colors.gray200,
-    ...shadows.lg,
+    backgroundColor: colors.blackCard,
+    borderTopWidth: 2,
+    borderTopColor: colors.gray700,
   },
   bottomBarContent: {
     flexDirection: 'row',
@@ -684,7 +687,7 @@ const styles = StyleSheet.create({
   // Waitlist Modal Styles
   modalContainer: {
     flex: 1,
-    backgroundColor: colors.white,
+    backgroundColor: colors.black,
   },
   modalHeader: {
     flexDirection: 'row',
@@ -692,8 +695,8 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: spacing[4],
     paddingVertical: spacing[3],
-    borderBottomWidth: 1,
-    borderBottomColor: colors.gray200,
+    borderBottomWidth: 2,
+    borderBottomColor: colors.gray700,
   },
   modalCloseButton: {
     width: 44,
@@ -708,9 +711,11 @@ const styles = StyleSheet.create({
     padding: spacing[4],
   },
   waitlistProgramInfo: {
-    backgroundColor: colors.gray50,
+    backgroundColor: colors.blackCard,
     padding: spacing[4],
-    borderRadius: borderRadius.lg,
+    borderRadius: 0,
+    borderWidth: 2,
+    borderColor: colors.gray700,
     marginBottom: spacing[6],
   },
   waitlistProgramTitle: {
@@ -732,7 +737,7 @@ const styles = StyleSheet.create({
   waitlistBenefitIcon: {
     width: 40,
     height: 40,
-    borderRadius: 20,
+    borderRadius: 0,
     backgroundColor: colors.primaryLight,
     alignItems: 'center',
     justifyContent: 'center',
@@ -744,15 +749,18 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing[2],
-    backgroundColor: colors.gray50,
+    backgroundColor: colors.blackCard,
     padding: spacing[3],
-    borderRadius: borderRadius.md,
+    borderRadius: 0,
+    borderWidth: 2,
+    borderColor: colors.gray700,
   },
   modalFooter: {
     padding: spacing[4],
-    borderTopWidth: 1,
-    borderTopColor: colors.gray200,
+    borderTopWidth: 2,
+    borderTopColor: colors.gray700,
     alignItems: 'center',
+    backgroundColor: colors.blackCard,
   },
   modalCancelButton: {
     marginTop: spacing[4],
