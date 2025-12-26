@@ -23,7 +23,7 @@ export const isNavigationReady = (): boolean => {
  */
 export const navigate = (name: string, params?: object): void => {
   if (navigationRef.isReady()) {
-    // @ts-ignore - dynamic navigation
+    // @ts-expect-error - dynamic navigation
     navigationRef.navigate(name, params);
   } else {
     console.warn('Navigation is not ready yet');

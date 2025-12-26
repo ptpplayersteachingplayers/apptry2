@@ -241,9 +241,9 @@ const PaymentMethodsScreen: React.FC = () => {
         }
         ListEmptyComponent={
           <PTPEmptyState
-            icon="card-outline"
+            iconName="card-outline"
             title="No Payment Methods"
-            message="Add a card to make checkout faster and easier."
+            description="Add a card to make checkout faster and easier."
           />
         }
         ListHeaderComponent={

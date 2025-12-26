@@ -267,7 +267,7 @@ const ScheduleScreen: React.FC = () => {
       >
         {groupedEvents.length === 0 ? (
           <NoSessionsEmptyState
-            onAction={() => navigation.navigate('ParentTabs', { screen: 'CampsClinics' })}
+            onAction={() => navigation.navigate('ParentTabs', { screen: 'Camps' })}
           />
         ) : (
           <>
@@ -309,7 +309,7 @@ const ScheduleScreen: React.FC = () => {
                 variant="outline"
                 size="medium"
                 rightIcon={<Ionicons name="arrow-forward" size={16} color={colors.inkBlack} />}
-                onPress={() => navigation.navigate('ParentTabs', { screen: 'PrivateTraining' })}
+                onPress={() => navigation.navigate('ParentTabs', { screen: 'Trainers' })}
               />
             </View>
           </>

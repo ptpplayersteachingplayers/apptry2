@@ -34,7 +34,7 @@ import { spacing, borderRadius, shadows } from '../../theme/spacing';
 import { featureImages } from '../../assets/media';
 
 type PrivateTrainingNavigationProp = NativeStackNavigationProp<ParentStackParamList>;
-type PrivateTrainingRouteProp = RouteProp<ParentTabParamList, 'PrivateTraining'>;
+type PrivateTrainingRouteProp = RouteProp<ParentTabParamList, 'Trainers'>;
 
 type SortOption = 'rating' | 'price_low' | 'price_high' | 'name';
 

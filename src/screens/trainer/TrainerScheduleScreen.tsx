@@ -77,7 +77,7 @@ const TrainerScheduleScreen: React.FC = () => {
         refreshControl={<RefreshControl refreshing={isRefreshing} onRefresh={handleRefresh} tintColor={colors.primary} />}
       >
         {sessions.length === 0 ? (
-          <PTPEmptyState icon="📅" title="No sessions scheduled" description="When parents request sessions with you, they'll appear here." />
+          <PTPEmptyState iconName="calendar-outline" title="No sessions scheduled" description="When parents request sessions with you, they'll appear here." />
         ) : (
           Object.entries(groupedSessions).sort().map(([date, daySessions]) => (
             <View key={date} style={styles.dateGroup}>

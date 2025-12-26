@@ -173,14 +173,14 @@ const TrainerDetailScreen: React.FC = () => {
       const response = await requestSession({
         trainerId: trainer.id,
         preferredSlots,
-        locationPreference: locationPreference as 'trainer' | 'parent' | 'flexible',
+        locationPreference: locationPreference === 'flexible' ? 'custom' : (locationPreference as 'trainer' | 'custom'),
         focus: selectedFocusAreas,
         notes: notes || undefined,
       });
 
       setShowRequestModal(false);
       Alert.alert('Request Sent!', response.message, [
-        { text: 'View Schedule', onPress: () => navigation.navigate('ParentTabs', { screen: 'Schedule' }) },
+        { text: 'View Schedule', onPress: () => navigation.navigate('ParentTabs', { screen: 'Bookings' }) },
         { text: 'Done', onPress: () => navigation.goBack() },
       ]);
     } catch (error: any) {

@@ -20,10 +20,16 @@ export const colors = {
 
   // Text Colors
   white: '#FFFFFF',
+  offWhite: '#FAFAFA',
+  gray50: '#F9F9F9',
   gray100: '#F5F5F5',
+  gray200: '#E5E5E5',
   gray300: '#A0A0A0',
+  gray400: '#8A8A8A',
   gray500: '#6B6B6B',
+  gray600: '#525252',
   gray700: '#333333',
+  inkBlack: '#1C1C1C',
 
   // Status Colors
   success: '#22C55E',
