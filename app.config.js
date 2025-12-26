@@ -25,7 +25,7 @@ const getBundleIdentifier = () => {
   return 'com.ptpsoccer.app';
 };
 
-export default ({ config }) => {
+module.exports = ({ config }) => {
   // EAS Project ID - hardcoded for build reliability
   const easProjectId = '68d2492c-c447-441d-8bf3-99413f385ed4';
 
