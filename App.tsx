@@ -11,6 +11,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { QueryClientProvider } from '@tanstack/react-query';
 import * as SplashScreen from 'expo-splash-screen';
+import { initSentry } from './src/sentry';
 
 import { PTPThemeProvider } from './src/theme';
 import { AuthProvider } from './src/hooks/useAuth';
@@ -21,6 +22,9 @@ import { queryClient } from './src/lib/queryClient';
 
 // Prevent splash screen from auto-hiding
 SplashScreen.preventAutoHideAsync();
+
+// Initialize Sentry crash reporting
+initSentry();
 
 /**
  * App - Root component
@@ -45,7 +49,6 @@ export default function App() {
 
     hideSplash();
   }, []);
-
   return (
     <GestureHandlerRootView style={{ flex: 1, backgroundColor: '#F4F3F0' }}>
       <SafeAreaProvider>
