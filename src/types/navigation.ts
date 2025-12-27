@@ -49,7 +49,7 @@ export type ParentStackParamList = {
   ParentTabs: NavigatorScreenParams<ParentTabParamList>;
   ProgramDetail: { programId: number | string };
   TrainerDetail: { trainerId: number };
-  Checkout: { productId: number; programName?: string; programDate?: string; programLocation?: string; returnUrl?: string };
+  Checkout: { productId?: number; programName?: string; programDate?: string; programLocation?: string; returnUrl?: string };
   NativeCheckout: { amount: number; productName: string; productDescription?: string; orderId?: number; programId?: number };
   SessionRequest: { trainerId: number };
   Messages: { conversationId?: number };
@@ -60,6 +60,13 @@ export type ParentStackParamList = {
   PaymentMethods: undefined;
   NotificationSettings: undefined;
   NotificationCenter: undefined;
+  // New screens
+  Cart: undefined;
+  Blog: undefined;
+  BlogPost: { slug: string };
+  Contact: undefined;
+  StateLanding: { stateCode: string };
+  CoachApplication: undefined;
 };
 
 /**

@@ -62,3 +62,18 @@ export type {
   AppNotification,
   SkillLevel,
 } from './appStore';
+
+// Cart Store
+export {
+  useCartStore,
+  selectCartItems,
+  selectCartTotals,
+  selectCartItemCount,
+  selectAppliedCoupon,
+  selectIsInCart,
+} from './cartStore';
+export type {
+  CartItem,
+  Coupon,
+  CartTotals,
+} from './cartStore';

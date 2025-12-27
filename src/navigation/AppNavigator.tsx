@@ -33,6 +33,11 @@ import PaymentMethodsScreen from '../screens/parent/PaymentMethodsScreen';
 import NotificationSettingsScreen from '../screens/parent/NotificationSettingsScreen';
 import NotificationCenterScreen from '../screens/parent/NotificationCenterScreen';
 
+// New screens
+import CartScreen from '../screens/parent/CartScreen';
+import BlogScreen from '../screens/parent/BlogScreen';
+import ContactScreen from '../screens/parent/ContactScreen';
+
 // Trainer Detail Screens
 import SessionDetailScreen from '../screens/trainer/SessionDetailScreen';
 import StudentDetailScreen from '../screens/trainer/StudentDetailScreen';
@@ -207,6 +212,30 @@ const ParentStackNavigator: React.FC = () => {
         options={{
           ...modalScreenOptions,
           headerTitle: 'NOTIFICATIONS',
+        }}
+      />
+      <Stack.Screen
+        name="Cart"
+        component={CartScreen}
+        options={{
+          ...modalScreenOptions,
+          headerTitle: 'CART',
+        }}
+      />
+      <Stack.Screen
+        name="Blog"
+        component={BlogScreen}
+        options={{
+          ...modalScreenOptions,
+          headerTitle: 'INSIDE PTP',
+        }}
+      />
+      <Stack.Screen
+        name="Contact"
+        component={ContactScreen}
+        options={{
+          ...modalScreenOptions,
+          headerTitle: 'CONTACT US',
         }}
       />
     </Stack.Navigator>
