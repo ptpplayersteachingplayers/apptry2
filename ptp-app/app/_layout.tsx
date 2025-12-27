@@ -61,6 +61,22 @@ function RootLayoutNav() {
             headerBackTitle: 'Back',
           }}
         />
+        <Stack.Screen
+          name="trainer/[id]"
+          options={{
+            headerShown: true,
+            title: 'Trainer',
+            headerBackTitle: 'Back',
+          }}
+        />
+        <Stack.Screen
+          name="book-session/[id]"
+          options={{
+            headerShown: true,
+            title: 'Book Session',
+            headerBackTitle: 'Back',
+          }}
+        />
       </Stack>
     </>
   );
