@@ -1,0 +1,41 @@
+{
+  "id": 10002,
+  "status": "completed",
+  "currency": "USD",
+  "date_created": "2025-01-27T11:00:00",
+  "date_modified": "2025-01-27T11:00:00",
+  "total": "498.00",
+  "billing": {
+    "first_name": "Michael",
+    "last_name": "Johnson",
+    "email": "michael.johnson@example.com",
+    "phone": "215-555-0198"
+  },
+  "meta_data": [
+    {
+      "id": 1003,
+      "key": "_ptp_child_ids",
+      "value": "[\"550e8400-e29b-41d4-a716-446655440002\", \"550e8400-e29b-41d4-a716-446655440003\", \"550e8400-e29b-41d4-a716-446655440004\"]"
+    },
+    {
+      "id": 1004,
+      "key": "_ptp_app_source",
+      "value": "native_app"
+    }
+  ],
+  "line_items": [
+    {
+      "id": 502,
+      "name": "Summer Soccer Camp - Main Line (Full Week)",
+      "product_id": 202,
+      "quantity": 3,
+      "price": "166.00",
+      "meta_data": [
+        {"key": "_camp_date", "value": "2025-06-16"},
+        {"key": "_camp_time", "value": "9:00 AM"},
+        {"key": "_camp_location", "value": "Main Line"},
+        {"key": "_camp_state", "value": "PA"}
+      ]
+    }
+  ]
+}
