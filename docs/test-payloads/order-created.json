@@ -1,0 +1,144 @@
+{
+  "id": 10001,
+  "parent_id": 0,
+  "status": "processing",
+  "currency": "USD",
+  "version": "8.4.0",
+  "prices_include_tax": false,
+  "date_created": "2025-01-27T10:00:00",
+  "date_modified": "2025-01-27T10:00:00",
+  "discount_total": "0.00",
+  "discount_tax": "0.00",
+  "shipping_total": "0.00",
+  "shipping_tax": "0.00",
+  "cart_tax": "0.00",
+  "total": "149.00",
+  "total_tax": "0.00",
+  "customer_id": 5,
+  "order_key": "wc_order_abc123xyz",
+  "billing": {
+    "first_name": "Jennifer",
+    "last_name": "Martinez",
+    "company": "",
+    "address_1": "123 Soccer Lane",
+    "address_2": "",
+    "city": "Princeton",
+    "state": "NJ",
+    "postcode": "08540",
+    "country": "US",
+    "email": "jennifer.martinez@example.com",
+    "phone": "609-555-0142"
+  },
+  "shipping": {
+    "first_name": "Jennifer",
+    "last_name": "Martinez",
+    "company": "",
+    "address_1": "123 Soccer Lane",
+    "address_2": "",
+    "city": "Princeton",
+    "state": "NJ",
+    "postcode": "08540",
+    "country": "US",
+    "phone": ""
+  },
+  "payment_method": "stripe",
+  "payment_method_title": "Credit Card",
+  "transaction_id": "ch_abc123",
+  "customer_ip_address": "192.168.1.1",
+  "customer_user_agent": "Mozilla/5.0",
+  "created_via": "checkout",
+  "customer_note": "",
+  "date_completed": null,
+  "date_paid": "2025-01-27T10:00:05",
+  "cart_hash": "abc123",
+  "number": "10001",
+  "meta_data": [
+    {
+      "id": 1001,
+      "key": "_ptp_child_ids",
+      "value": "[\"550e8400-e29b-41d4-a716-446655440001\"]"
+    },
+    {
+      "id": 1002,
+      "key": "_ptp_app_source",
+      "value": "native_app"
+    }
+  ],
+  "line_items": [
+    {
+      "id": 501,
+      "name": "Winter Soccer Clinic - Princeton",
+      "product_id": 201,
+      "variation_id": 0,
+      "quantity": 1,
+      "tax_class": "",
+      "subtotal": "149.00",
+      "subtotal_tax": "0.00",
+      "total": "149.00",
+      "total_tax": "0.00",
+      "taxes": [],
+      "meta_data": [
+        {
+          "id": 2001,
+          "key": "_camp_date",
+          "value": "2025-02-15",
+          "display_key": "Camp Date",
+          "display_value": "2025-02-15"
+        },
+        {
+          "id": 2002,
+          "key": "_camp_time",
+          "value": "6:00 PM",
+          "display_key": "Camp Time",
+          "display_value": "6:00 PM"
+        },
+        {
+          "id": 2003,
+          "key": "_camp_location",
+          "value": "Princeton",
+          "display_key": "Location",
+          "display_value": "Princeton"
+        },
+        {
+          "id": 2004,
+          "key": "_camp_state",
+          "value": "NJ",
+          "display_key": "State",
+          "display_value": "NJ"
+        },
+        {
+          "id": 2005,
+          "key": "_bestseller",
+          "value": "yes",
+          "display_key": "Bestseller",
+          "display_value": "yes"
+        }
+      ],
+      "sku": "WC-PRINC-2025-02",
+      "price": 149,
+      "image": {
+        "id": 0,
+        "src": ""
+      },
+      "parent_name": null
+    }
+  ],
+  "tax_lines": [],
+  "shipping_lines": [],
+  "fee_lines": [],
+  "coupon_lines": [],
+  "refunds": [],
+  "payment_url": "https://ptpcamp.com/checkout/order-pay/10001/?key=wc_order_abc123xyz",
+  "is_editable": false,
+  "needs_payment": false,
+  "needs_processing": true,
+  "date_created_gmt": "2025-01-27T15:00:00",
+  "date_modified_gmt": "2025-01-27T15:00:00",
+  "date_completed_gmt": null,
+  "date_paid_gmt": "2025-01-27T15:00:05",
+  "currency_symbol": "$",
+  "_links": {
+    "self": [{"href": "https://ptpcamp.com/wp-json/wc/v3/orders/10001"}],
+    "collection": [{"href": "https://ptpcamp.com/wp-json/wc/v3/orders"}]
+  }
+}
