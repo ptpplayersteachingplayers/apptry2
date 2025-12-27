@@ -6,7 +6,7 @@ import { Platform } from 'react-native';
 // Environment configuration
 // In production, use environment variables or a config service
 const SUPABASE_URL = process.env.EXPO_PUBLIC_SUPABASE_URL || 'https://frwpdivtbwmeawpdfygr.supabase.co';
-const SUPABASE_ANON_KEY = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY || 'YOUR_ANON_KEY_HERE';
+const SUPABASE_ANON_KEY = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZyd3BkaXZ0YndtZWF3cGRmeWdyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ3NzAxOTQsImV4cCI6MjA4MDM0NjE5NH0.tTOes4ILAFUbcJfdmI9d9_VNQ4Y9f--wEJxD_xXK9Ak';
 
 // Secure storage adapter for Supabase auth
 const ExpoSecureStoreAdapter = {
