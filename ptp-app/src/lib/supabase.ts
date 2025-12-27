@@ -5,8 +5,8 @@ import { Platform } from 'react-native';
 
 // Environment configuration
 // In production, use environment variables or a config service
-const SUPABASE_URL = process.env.EXPO_PUBLIC_SUPABASE_URL || 'https://your-project.supabase.co';
-const SUPABASE_ANON_KEY = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY || 'your-anon-key';
+const SUPABASE_URL = process.env.EXPO_PUBLIC_SUPABASE_URL || 'https://frwpdivtbwmeawpdfygr.supabase.co';
+const SUPABASE_ANON_KEY = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY || 'YOUR_ANON_KEY_HERE';
 
 // Secure storage adapter for Supabase auth
 const ExpoSecureStoreAdapter = {
