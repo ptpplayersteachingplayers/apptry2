@@ -76,7 +76,9 @@ export default ({ config }) => {
         'VIBRATE',
         'WAKE_LOCK',
       ],
-      googleServicesFile: process.env.GOOGLE_SERVICES_JSON || './google-services.json',
+      // Only include googleServicesFile if explicitly set via environment variable
+      // This prevents config errors when the file doesn't exist in development
+      ...(process.env.GOOGLE_SERVICES_JSON && { googleServicesFile: process.env.GOOGLE_SERVICES_JSON }),
     },
     web: {
       favicon: './assets/favicon.png',
