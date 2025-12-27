@@ -1,11 +1,22 @@
-import * as Sentry from '@sentry/react-native';
 import Constants from 'expo-constants';
+import { Platform } from 'react-native';
+
+// Only import Sentry on native platforms (not web)
+let Sentry: typeof import('@sentry/react-native') | null = null;
+if (Platform.OS !== 'web') {
+  Sentry = require('@sentry/react-native');
+}
 
 /**
  * Sentry crash reporting initialization
  * Configure with your Sentry DSN in app.config.js extra.SENTRY_DSN
  */
 export function initSentry(): void {
+  // Skip Sentry on web
+  if (Platform.OS === 'web' || !Sentry) {
+    return;
+  }
+
   const dsn = Constants.expoConfig?.extra?.SENTRY_DSN;
 
   if (!dsn) {
@@ -47,6 +58,7 @@ export function initSentry(): void {
  * Set user context for crash reports
  */
 export function setSentryUser(userId: string, email?: string): void {
+    if (!Sentry) return;
     Sentry.setUser({
           id: userId,
           email,
@@ -57,6 +69,7 @@ export function setSentryUser(userId: string, email?: string): void {
  * Clear user context (on logout)
  */
 export function clearSentryUser(): void {
+    if (!Sentry) return;
     Sentry.setUser(null);
 }
 
@@ -64,6 +77,7 @@ export function clearSentryUser(): void {
  * Capture a custom error
  */
 export function captureError(error: Error, context?: Record<string, unknown>): void {
+    if (!Sentry) return;
     if (context) {
           Sentry.setContext('additional', context);
     }
@@ -76,8 +90,9 @@ export function captureError(error: Error, context?: Record<string, unknown>): v
 export function addBreadcrumb(
     category: string,
     message: string,
-    level: Sentry.SeverityLevel = 'info'
+    level: 'fatal' | 'error' | 'warning' | 'log' | 'info' | 'debug' = 'info'
   ): void {
+    if (!Sentry) return;
     Sentry.addBreadcrumb({
           category,
           message,
@@ -85,4 +100,4 @@ export function addBreadcrumb(
     });
 }
 
-export default Sentry;
+export { Sentry };
