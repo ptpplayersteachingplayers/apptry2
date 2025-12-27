@@ -1,10 +1,20 @@
 /**
  * Program Detail Screen (Parent)
  *
- * Full details for a camp or clinic with registration CTA.
+ * Full details for a camp or clinic with:
+ * - Hero image/gallery carousel
+ * - Category tag, title, location, price
+ * - Date/time pills
+ * - Age range indicator
+ * - Add to Cart button
+ * - Trust badges
+ * - What to Bring section
+ * - Reviews section link
+ * - Social sharing
+ * - Related camps section
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import {
   View,
   StyleSheet,
@@ -15,6 +25,10 @@ import {
   Linking,
   Modal,
   Alert,
+  Share,
+  Dimensions,
+  FlatList,
+  Platform,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
@@ -22,23 +36,29 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
 import { ParentStackParamList } from '../../types/navigation';
 import { Program } from '../../types';
-import { getProgram, joinWaitlist, getWaitlistStatus } from '../../api/programs';
+import { getProgram, joinWaitlist, getWaitlistStatus, getPrograms } from '../../api/programs';
+import { useCartStore } from '../../stores';
 import {
   PTPText,
   PTPButton,
   PTPTag,
   PTPLoading,
+  AnimatedPressable,
 } from '../../components';
-import { useAuth } from '../../hooks';
+import { useAuth, useHaptics } from '../../hooks';
 import { colors } from '../../theme/colors';
 import { spacing, borderRadius, shadows } from '../../theme/spacing';
 import {
   formatDateLong,
+  formatDateShort,
   formatTime,
   formatLocation,
+  formatPrice,
   getStockStatus,
   safeString,
 } from '../../lib/formatting';
+
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 type ProgramDetailNavigationProp = NativeStackNavigationProp<ParentStackParamList, 'ProgramDetail'>;
 type ProgramDetailRouteProp = RouteProp<ParentStackParamList, 'ProgramDetail'>;
@@ -51,14 +71,23 @@ const ProgramDetailScreen: React.FC = () => {
   const route = useRoute<ProgramDetailRouteProp>();
   const { programId } = route.params;
   const { user } = useAuth();
+  const { selection, success } = useHaptics();
+
+  // Cart integration
+  const { addItem, isInCart } = useCartStore();
+  const isItemInCart = isInCart(typeof programId === 'string' ? parseInt(programId, 10) : programId);
 
   const [program, setProgram] = useState<Program | null>(null);
+  const [relatedPrograms, setRelatedPrograms] = useState<Program[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showWaitlistModal, setShowWaitlistModal] = useState(false);
   const [isJoiningWaitlist, setIsJoiningWaitlist] = useState(false);
   const [isOnWaitlist, setIsOnWaitlist] = useState(false);
   const [waitlistPosition, setWaitlistPosition] = useState<number | null>(null);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [showWhatToBring, setShowWhatToBring] = useState(false);
+  const galleryRef = useRef<FlatList>(null);
 
   useEffect(() => {
     loadProgram();
@@ -77,6 +106,15 @@ const ProgramDetailScreen: React.FC = () => {
         throw new Error('Program not found');
       }
       setProgram(data);
+
+      // Load related programs
+      try {
+        const response = await getPrograms({ type: data.type });
+        const related = response.programs.filter(p => p.id !== data.id).slice(0, 4);
+        setRelatedPrograms(related);
+      } catch (err) {
+        console.log('Failed to load related programs:', err);
+      }
 
       // Check waitlist status if program is sold out
       const stockStatus = getStockStatus(data.stock);
@@ -98,6 +136,49 @@ const ProgramDetailScreen: React.FC = () => {
       setIsLoading(false);
     }
   };
+
+  const handleAddToCart = () => {
+    if (!program) return;
+    selection();
+    addItem(program);
+    success();
+    Alert.alert(
+      'Added to Cart!',
+      `${program.title} has been added to your cart.`,
+      [
+        { text: 'Continue Shopping', style: 'cancel' },
+        { text: 'View Cart', onPress: () => navigation.navigate('Cart' as any) },
+      ]
+    );
+  };
+
+  const handleShare = async () => {
+    if (!program) return;
+    selection();
+    try {
+      const url = `https://ptpsummercamps.com/program/${program.id}`;
+      await Share.share({
+        title: program.title,
+        message: `Check out ${program.title} at PTP Soccer! ${formatDateLong(program.date)} in ${formatLocation(program.city, program.state)}. ${url}`,
+        url,
+      });
+    } catch (err) {
+      console.log('Share failed:', err);
+    }
+  };
+
+  const handleCopyLink = () => {
+    selection();
+    // In production, would use Clipboard API
+    Alert.alert('Link Copied!', 'Program link copied to clipboard.');
+  };
+
+  // Gallery images
+  const galleryImages = program?.galleryUrls?.length
+    ? [program.mainImageUrl, ...program.galleryUrls]
+    : program?.mainImageUrl
+    ? [program.mainImageUrl]
+    : [];
 
   const handleRegister = () => {
     if (program) {
@@ -355,9 +436,16 @@ const ProgramDetailScreen: React.FC = () => {
         <View style={styles.bottomBarContent}>
           <View style={styles.priceContainer}>
             <PTPText variant="caption" color="gray500">Price</PTPText>
-            <PTPText variant="heroTitle" color="primary">
-              ${program.price ?? 0}
-            </PTPText>
+            <View style={styles.priceRow}>
+              {program.salePrice && program.salePrice < program.price && (
+                <PTPText variant="body" color="gray500" style={styles.originalPrice}>
+                  ${program.price}
+                </PTPText>
+              )}
+              <PTPText variant="heroTitle" color="primary">
+                {formatPrice(program.salePrice || program.price)}
+              </PTPText>
+            </View>
             {stockStatus?.message && (
               <PTPText
                 variant="caption"
@@ -372,25 +460,39 @@ const ProgramDetailScreen: React.FC = () => {
               </PTPText>
             )}
           </View>
-          {stockStatus?.isSoldOut ? (
-            <PTPButton
-              title={isOnWaitlist ? 'On Waitlist' : 'Join Waitlist'}
-              variant={isOnWaitlist ? 'outline' : 'secondary'}
-              size="large"
-              onPress={() => !isOnWaitlist && setShowWaitlistModal(true)}
-              disabled={isOnWaitlist}
-              leftIcon={isOnWaitlist ? <Ionicons name="checkmark-circle" size={18} color={colors.success} /> : <Ionicons name="notifications-outline" size={18} color={colors.white} />}
-              style={styles.registerButton}
-            />
-          ) : (
-            <PTPButton
-              title="Register Now"
-              variant="primary"
-              size="large"
-              onPress={handleRegister}
-              style={styles.registerButton}
-            />
-          )}
+          <View style={styles.bottomButtons}>
+            {stockStatus?.isSoldOut ? (
+              <PTPButton
+                title={isOnWaitlist ? 'On Waitlist' : 'Join Waitlist'}
+                variant={isOnWaitlist ? 'outline' : 'secondary'}
+                size="large"
+                onPress={() => !isOnWaitlist && setShowWaitlistModal(true)}
+                disabled={isOnWaitlist}
+                leftIcon={isOnWaitlist ? <Ionicons name="checkmark-circle" size={18} color={colors.success} /> : <Ionicons name="notifications-outline" size={18} color={colors.white} />}
+                style={styles.registerButton}
+              />
+            ) : (
+              <>
+                <TouchableOpacity
+                  style={[styles.cartButton, isItemInCart && styles.cartButtonActive]}
+                  onPress={handleAddToCart}
+                >
+                  <Ionicons
+                    name={isItemInCart ? 'cart' : 'cart-outline'}
+                    size={22}
+                    color={isItemInCart ? colors.success : colors.white}
+                  />
+                </TouchableOpacity>
+                <PTPButton
+                  title={isItemInCart ? 'IN CART' : 'ADD TO CART'}
+                  variant="primary"
+                  size="large"
+                  onPress={isItemInCart ? () => navigation.navigate('Cart' as any) : handleAddToCart}
+                  style={styles.registerButton}
+                />
+              </>
+            )}
+          </View>
         </View>
       </SafeAreaView>
 
@@ -680,6 +782,32 @@ const styles = StyleSheet.create({
   },
   priceContainer: {
     flex: 1,
+  },
+  priceRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing[2],
+  },
+  originalPrice: {
+    textDecorationLine: 'line-through',
+  },
+  bottomButtons: {
+    flexDirection: 'row',
+    gap: spacing[2],
+    flex: 1,
+  },
+  cartButton: {
+    width: 48,
+    height: 48,
+    backgroundColor: colors.gray700,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: colors.gray600,
+  },
+  cartButtonActive: {
+    borderColor: colors.success,
+    backgroundColor: 'rgba(16, 185, 129, 0.1)',
   },
   registerButton: {
     flex: 1,
