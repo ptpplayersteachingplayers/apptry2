@@ -36,7 +36,7 @@ export const PTPLoading: React.FC<PTPLoadingProps> = ({
     <View style={[styles.container, style]}>
       <ActivityIndicator size={size} color={colors.primary} />
       {message && (
-        <PTPText variant="body" color="gray300" style={styles.message}>
+        <PTPText variant="body" color="gray600" style={styles.message}>
           {message}
         </PTPText>
       )}
@@ -224,17 +224,17 @@ const styles = StyleSheet.create({
     padding: spacing[6],
     borderRadius: borderRadius.none,
     borderWidth: 2,
-    borderColor: colors.gray700,
+    borderColor: colors.gray200,
     alignItems: 'center',
   },
   skeleton: {
-    backgroundColor: colors.gray700,
+    backgroundColor: colors.gray200,
   },
   cardSkeleton: {
     backgroundColor: colors.blackCard,
     borderRadius: borderRadius.none,
     borderWidth: 2,
-    borderColor: colors.gray700,
+    borderColor: colors.gray200,
     overflow: 'hidden',
   },
   cardSkeletonContent: {
@@ -244,7 +244,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.blackCard,
     borderRadius: borderRadius.none,
     borderWidth: 2,
-    borderColor: colors.gray700,
+    borderColor: colors.gray200,
     flexDirection: 'row',
     overflow: 'hidden',
   },

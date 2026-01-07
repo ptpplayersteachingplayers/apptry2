@@ -118,8 +118,8 @@ export const ParentTabNavigator: React.FC = () => {
 
 const styles = StyleSheet.create({
   tabBar: {
-    backgroundColor: colors.black,
-    borderTopColor: colors.gray700,
+    backgroundColor: colors.blackCard,
+    borderTopColor: colors.gray200,
     borderTopWidth: 1,
     height: layoutSpacing.tabBarHeight,
     paddingTop: spacing[2],

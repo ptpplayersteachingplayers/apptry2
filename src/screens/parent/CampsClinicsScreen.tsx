@@ -649,7 +649,7 @@ const styles = StyleSheet.create({
     paddingVertical: spacing[2],
     backgroundColor: colors.blackCard,
     borderWidth: 2,
-    borderColor: colors.gray700,
+    borderColor: colors.gray200,
   },
   filterTabActive: {
     backgroundColor: colors.primary,

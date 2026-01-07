@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { Text, TextProps, StyleSheet } from 'react-native';
-import { colors } from '../theme/colors';
+import { colors, semanticColors } from '../theme/colors';
 import { fontFamily, textStyles, TextStyleName } from '../theme/typography';
 
 interface PTPTextProps extends TextProps {
@@ -43,7 +43,7 @@ interface PTPTextProps extends TextProps {
  */
 export const PTPText: React.FC<PTPTextProps> = ({
   variant = 'body',
-  color = 'white',
+  color = semanticColors.textPrimary,
   center = false,
   weight,
   style,

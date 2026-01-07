@@ -1,8 +1,8 @@
 /**
  * PTP Soccer Brand Colors
  *
- * Design inspiration: Nike Training Club x Flex Work x Uber-style booking
- * Dark mode first with bold gold accents
+ * Design inspiration: PTP marketing site (clean light canvas with black + gold)
+ * Light-first surfaces that mirror the website, with bold gold accents
  */
 
 export const colors = {
@@ -12,11 +12,11 @@ export const colors = {
   primaryLight: 'rgba(252, 185, 0, 0.1)',
   primaryGlow: 'rgba(252, 185, 0, 0.3)',
 
-  // Backgrounds - Dark Mode First
-  black: '#0A0A0A',
-  blackLight: '#111111',
-  blackCard: '#1A1A1A',
-  blackElevated: '#222222',
+  // Backgrounds - Light-first to match the website
+  black: '#F4F3F0', // Base canvas (light warm white)
+  blackLight: '#ECE8E0', // Muted surface
+  blackCard: '#FFFFFF', // Card/paper
+  blackElevated: '#FFFFFF',
 
   // Text Colors
   white: '#FFFFFF',
@@ -29,7 +29,7 @@ export const colors = {
   gray500: '#6B6B6B',
   gray600: '#525252',
   gray700: '#333333',
-  inkBlack: '#1C1C1C',
+  inkBlack: '#0E0F11',
 
   // Status Colors
   success: '#22C55E',
@@ -57,7 +57,7 @@ export const colors = {
 
 export type ColorName = keyof typeof colors;
 
-// Semantic color mappings for the dark theme
+// Semantic color mappings for the light theme
 export const semanticColors = {
   // Backgrounds
   backgroundPrimary: colors.black,
@@ -66,47 +66,47 @@ export const semanticColors = {
   backgroundElevated: colors.blackElevated,
 
   // Text
-  textPrimary: colors.white,
-  textSecondary: colors.gray300,
+  textPrimary: colors.inkBlack,
+  textSecondary: colors.gray600,
   textMuted: colors.gray500,
   textAccent: colors.primary,
-  textInverse: colors.black,
+  textInverse: colors.white,
 
   // Borders
-  border: colors.gray700,
+  border: colors.gray200,
   borderFocused: colors.primary,
-  borderCard: colors.gray700,
+  borderCard: colors.gray200,
 
   // Buttons
   buttonPrimary: colors.primary,
   buttonPrimaryHover: colors.primaryHover,
-  buttonPrimaryText: colors.black,
-  buttonSecondary: colors.transparent,
-  buttonSecondaryBorder: colors.primary,
-  buttonSecondaryText: colors.white,
-  buttonDisabled: colors.gray700,
+  buttonPrimaryText: colors.inkBlack,
+  buttonSecondary: colors.white,
+  buttonSecondaryBorder: colors.inkBlack,
+  buttonSecondaryText: colors.inkBlack,
+  buttonDisabled: colors.gray200,
   buttonDisabledText: colors.gray500,
 
   // Inputs
-  inputBackground: colors.blackLight,
-  inputBorder: colors.gray700,
+  inputBackground: colors.white,
+  inputBorder: colors.gray200,
   inputBorderFocus: colors.primary,
-  inputText: colors.white,
+  inputText: colors.inkBlack,
   inputPlaceholder: colors.gray500,
 
   // Cards
   cardBackground: colors.blackCard,
-  cardBorder: colors.gray700,
-  cardBorderHover: colors.primary,
+  cardBorder: colors.gray200,
+  cardBorderHover: colors.primaryLight,
 
   // Tab Bar
   tabBarActive: colors.primary,
   tabBarInactive: colors.gray500,
-  tabBarBackground: colors.black,
+  tabBarBackground: colors.white,
 
   // Navigation
-  navBackground: colors.black,
-  navBorder: colors.gray700,
+  navBackground: colors.white,
+  navBorder: colors.gray200,
 } as const;
 
 // CSS-style color tokens for reference
@@ -119,10 +119,10 @@ export const cssColors = `
   --ptp-gold-glow: rgba(252, 185, 0, 0.3);
 
   /* Backgrounds */
-  --ptp-black: #0A0A0A;
-  --ptp-black-light: #111111;
-  --ptp-black-card: #1A1A1A;
-  --ptp-black-elevated: #222222;
+  --ptp-black: #F4F3F0;
+  --ptp-black-light: #ECE8E0;
+  --ptp-black-card: #FFFFFF;
+  --ptp-black-elevated: #FFFFFF;
 
   /* Text */
   --ptp-white: #FFFFFF;
